@@ -1,0 +1,828 @@
+{
+    "dishes": [
+        {
+            "id": "gobi-manchurian",
+            "name": "Gobi Manchurian",
+            "image": "https://t4.ftcdn.net/jpg/08/94/31/25/360_F_894312539_uzYXdCYFFdarOFuNPsonlPWTCpvXWKxe.jpg",
+            "tags": [
+                "appetizer",
+                "indo-chinese",
+                "vegetarian",
+                "starter"
+            ],
+            "ingredients": [
+                "cauliflower",
+                "all-purpose flour (maida)",
+                "cornflour",
+                "ginger",
+                "garlic",
+                "soy sauce",
+                "chilli sauce",
+                "spring onions",
+                "bell peppers"
+            ],
+            "description": "A popular Indo-Chinese dish featuring crispy fried cauliflower florets tossed in a spicy, sweet, and tangy sauce. This fusion appetizer combines Indian and Chinese cooking techniques for a flavorful vegetarian starter",
+            "course": "starter",
+            "diet": "vegetarian",
+            "flavour_profile": [
+                "spicy",
+                "sweet",
+                "tangy",
+                "umami"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true
+        },
+        {
+            "id": "dosa-1",
+            "name": "Masala Dosa",
+            "image": "https://images.unsplash.com/photo-1694849789325-914b71ab4075?q=80&w=3174&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "tags": [
+                "breakfast",
+                "vegetarian"
+            ],
+            "ingredients": [
+                "rice",
+                "lentils",
+                "potato",
+                "spices"
+            ],
+            "description": "Classic South Indian crispy dosa filled with spiced potatoes",
+            "course": "starter",
+            "diet": "veg",
+            "flavour_profile": [
+                "spicy",
+                "tangy"
+            ],
+            "cooking_method": "pan-fried"
+        },
+        {
+            "id": "veg-biryani",
+            "name": "Vegetable Biryani",
+            "image": "https://as1.ftcdn.net/v2/jpg/08/50/30/36/1000_F_850303687_tBAjfDalZlWI3P1tvdZzkgJe8BZpKZYh.jpg",
+            "tags": [
+                "lunch",
+                "dinner",
+                "vegetarian"
+            ],
+            "ingredients": [
+                "basmati rice",
+                "mixed vegetables",
+                "spices"
+            ],
+            "description": "Aromatic rice dish packed with mixed vegetables and Indian spices",
+            "course": "main",
+            "diet": "veg",
+            "flavour_profile": [
+                "spicy",
+                "savoury"
+            ],
+            "cooking_method": "steaming"
+        },
+        {
+            "id": "dal-makhni",
+            "name": "Dal Makhni",
+            "image": "https://as2.ftcdn.net/v2/jpg/10/13/44/09/1000_F_1013440930_owJDQZPsx4Q4rjRvk49JH8mBo60gt0vl.jpg",
+            "tags": [
+                "vegetarian"
+            ],
+            "ingredients": [
+                "lentils",
+                "tomatoes",
+                "whole black gram (urad dal)",
+                "kidney beans (rajma)",
+                "butter"
+            ],
+            "cuisine": {
+                "north_indian": "punjab"
+            },
+            "description": "A rich and creamy black lentil dish simmered in a tomato and butter gravy. It's a popular North Indian dish known for its deep flavour and smooth texture",
+            "course": "main",
+            "diet": "veg",
+            "flavour_profile": [
+                "spicy",
+                "creamy",
+                "buttery"
+            ],
+            "cooking_method": [
+                "pressure-cooked",
+                "simmered"
+            ],
+            "veg": true
+        },
+        {
+            "id": "plain-naan",
+            "name": "Plain Naan",
+            "image": "https://pariwaardelights.s3.us-east-1.amazonaws.com/uploads/all/wsByB6a7qdxpUrRXUlNvmyb0knKGFCoLtsB3qBbq.png",
+            "tags": [
+                "vegetarian",
+                "bread"
+            ],
+            "ingredients": [
+                "wheat flour",
+                "yeast",
+                "ghee (clarified butter)"
+            ],
+            "description": "A type of leavened flatbread, traditionally cooked in a tandoor oven",
+            "course": "main",
+            "diet": "veg",
+            "flavor_profile": [
+                "buttery",
+                "slightly sweet"
+            ],
+            "cooking_method": "baked",
+            "veg": true,
+            "cuisine": {
+                "north_indian": "punjab"
+            }
+        },
+        {
+            "id": "channa-masala",
+            "name": "Channa Masala",
+            "image": "https://as2.ftcdn.net/v2/jpg/04/78/25/55/1000_F_478255553_Ri993VKSFsxRO80JA7zCp2BEflnGWbiB.jpg",
+            "tags": [
+                "vegetarian",
+                "channa",
+                "garbanzo"
+            ],
+            "ingredients": [
+                "chickpeas (garbanzo beans)",
+                "tomatoes",
+                "onion",
+                "ginger",
+                "garlic",
+                "spices (cumin seeds, coriander powder, turmeric powder, red chili powder, garam masala)"
+            ],
+            "description": "A flavorful and spicy chickpea curry, often served with rice or naan",
+            "course": "main",
+            "cuisine": {
+                "north_indian": "punjab"
+            },
+            "diet": "veg",
+            "flavour_profile": [
+                "spicy",
+                "tangy",
+                "herby"
+            ],
+            "cooking_method": "simmered",
+            "veg": true
+        },
+        {
+            "id": "butter-naan",
+            "name": "Butter Naan",
+            "image": "https://as1.ftcdn.net/v2/jpg/07/11/92/84/1000_F_711928491_Am9rJkePY5UaeAZKSZQ9tFkWweUWVfSF.jpg",
+            "tags": [
+                "vegetarian",
+                "butter",
+                "bread"
+            ],
+            "ingredients": [
+                "wheat flour",
+                "yeast",
+                "ghee (clarified butter)",
+                "butter"
+            ],
+            "description": "A type of leavened flatbread, brushed with butter and cooked in a tandoor oven",
+            "course": "main",
+            "diet": "veg",
+            "flavor_profile": [
+                "buttery"
+            ],
+            "cooking_method": "baked",
+            "veg": true,
+            "cuisine": {
+                "north_indian": "punjab"
+            }
+        },
+        {
+            "id": "puliyogare",
+            "name": "Puliyogare",
+            "image": "https://as1.ftcdn.net/v2/jpg/04/97/26/22/1000_F_497262289_LqFH1RIAYzT0ogZYwKOhHl7crIfIWLEP.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "tamarind",
+                "pulihora"
+            ],
+            "ingredients": [
+                "rice",
+                "tamarind",
+                "jaggery",
+                "groundnuts",
+                "spices (cumin seeds, mustard seeds, red chili peppers, curry leaves)"
+            ],
+            "description": "A tangy and spicy rice dish from South India",
+            "course": [
+                "main",
+                "starter"
+            ],
+            "diet": "veg",
+            "flavor_profile": [
+                "tangy",
+                "spicy"
+            ],
+            "cooking_method": "boiled",
+            "veg": true,
+            "cuisine": "south_indian"
+        },
+        {
+            "id": "sweet-pongal",
+            "name": "Sweet Pongal",
+            "image": "https://media.istockphoto.com/id/1601093669/photo/ari-payasam-with-flowers-on-the-background.jpg?s=612x612&w=0&k=20&c=I13LbwayqwmkNgvpfWZcXb3us5p49LyzGUhpe2cPwo4=",
+            "tags": [
+                "vegetarian",
+                "south_indian"
+            ],
+            "ingredients": [
+                "rice",
+                "moong dal",
+                "jaggery",
+                "milk",
+                "ghee",
+                "spices (cardamom, cinnamon, cloves)"
+            ],
+            "description": "A sweet rice and lentil dish from Tamil Nadu",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet",
+                "nutty"
+            ],
+            "cooking_method": "boiled",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "tamil_nadu"
+            }
+        },
+        {
+            "id": "kara-pongal",
+            "name": "Kara Pongal",
+            "image": "https://www.indianhealthyrecipes.com/wp-content/uploads/2022/05/ven-pongal-recipe.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "tamil_nadu"
+            ],
+            "ingredients": [
+                "rice",
+                "moong dal",
+                "peanuts",
+                "cumin seeds",
+                "red chili peppers",
+                "curry leaves",
+                "ghee"
+            ],
+            "description": "A savory rice and lentil dish from Tamil Nadu",
+            "course": "main",
+            "diet": "veg",
+            "flavor_profile": [
+                "savory",
+                "spicy"
+            ],
+            "cooking_method": "boiled",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "tamil_nadu"
+            }
+        },
+        {
+            "id": "chicken-tikka-masala",
+            "name": "Chicken Tikka Masala",
+            "image": "https://www.seriouseats.com/thmb/DbQHUK2yNCALBnZE-H1M2AKLkok=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/chicken-tikka-masala-for-the-grill-recipe-hero-2_1-cb493f49e30140efbffec162d5f2d1d7.JPG",
+            "tags": [
+                "non-vegetarian",
+                "chicken"
+            ],
+            "ingredients": [
+                "chicken",
+                "yogurt",
+                "spices (garam masala, cumin powder, coriander powder, turmeric powder, red chili powder)",
+                "tomatoes",
+                "cream"
+            ],
+            "description": "A creamy and flavorful chicken curry",
+            "course": "main",
+            "diet": "non-veg",
+            "flavor_profile": [
+                "creamy",
+                "spicy"
+            ],
+            "cooking_method": "baked, simmered",
+            "veg": false,
+            "cuisine": {
+                "north_indian": "punjab"
+            }
+        },
+        {
+            "id": "vegetable-pulao",
+            "name": "Vegetable Pulao",
+            "image": "https://www.indianveggiedelight.com/wp-content/uploads/2019/07/veg-pulao-featured.jpg",
+            "tags": [
+                "vegetarian",
+                "pulav",
+                "pilaf",
+                "pulav"
+            ],
+            "ingredients": [
+                "rice",
+                "mixed vegetables",
+                "spices (cumin, cardamom, cinnamon)",
+                "ghee",
+                "fried onions"
+            ],
+            "description": "A fragrant rice dish with mixed vegetables",
+            "course": "main",
+            "diet": "veg",
+            "flavor_profile": [
+                "aromatic",
+                "spicy"
+            ],
+            "cooking_method": "boiled",
+            "veg": true
+        },
+        {
+            "id": "palak-paneer",
+            "name": "Palak Paneer",
+            "image": "https://www.marionskitchen.com/wp-content/uploads/2021/08/Paneer-Curry8279.jpg",
+            "tags": [
+                "vegetarian",
+                "greens",
+                "cheese",
+                "paneer"
+            ],
+            "ingredients": [
+                "paneer",
+                "spinach",
+                "tomatoes",
+                "onion",
+                "ginger",
+                "garlic",
+                "spices (garam masala, cumin powder, coriander powder, turmeric powder, red chili powder)"
+            ],
+            "description": "A creamy and flavorful spinach and paneer dish",
+            "course": "main course",
+            "diet": "veg",
+            "flavor_profile": [
+                "creamy",
+                "spicy"
+            ],
+            "cooking_method": "simmered",
+            "veg": true,
+            "cuisine": "north_indian"
+        },
+        {
+            "id": "chitranna",
+            "name": "Chitranna",
+            "image": "https://as1.ftcdn.net/v2/jpg/01/16/91/86/1000_F_116918648_SPOt57NLCOdtGICQ3oMtmUDLF2jam8w4.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "lemon",
+                "lemon_rice",
+                "lime"
+            ],
+            "ingredients": [
+                "rice",
+                "mustard seeds",
+                "urad dal",
+                "chilies",
+                "curry leaves",
+                "groundnuts",
+                "lemon juice",
+                "asafoetida"
+            ],
+            "description": "A tangy and flavorful rice dish",
+            "course": [
+                "starter",
+                "main"
+            ],
+            "diet": "veg",
+            "flavor_profile": [
+                "tangy",
+                "spicy"
+            ],
+            "cooking_method": "stir-fried",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "karnataka"
+            }
+        },
+        {
+            "id": "poori",
+            "name": "Poori",
+            "image": "https://www.awesomecuisine.com/wp-content/uploads/2020/03/poori-masala-kizhangu.jpg",
+            "tags": [
+                "vegetarian",
+                "puri",
+                "oil",
+                "bread"
+            ],
+            "ingredients": [
+                "wheat flour",
+                "ghee",
+                "salt"
+            ],
+            "description": "Deep-fried puffed bread",
+            "course": "bread",
+            "diet": "veg",
+            "flavor_profile": [
+                "crispy"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true
+        },
+        {
+            "id": "potato-palya",
+            "name": "Potato Palya",
+            "image": "https://www.indianveggiedelight.com/wp-content/uploads/2020/09/potato-sagu-featured.jpg",
+            "tags": [
+                "vegetarian",
+                "bombay saagu",
+                "saagu",
+                "aloo",
+                "gravy"
+            ],
+            "ingredients": [
+                "potatoes",
+                "mustard seeds",
+                "urad dal",
+                "chilies",
+                "curry leaves",
+                "turmeric powder",
+                "asafoetida"
+            ],
+            "description": "A spicy and flavorful potato curry that puri is typically accompanied by",
+            "course": "main",
+            "diet": "veg",
+            "flavor_profile": [
+                "spicy"
+            ],
+            "cooking_method": "sautéed",
+            "veg": true,
+            "cuisine": "south_indian"
+        },
+        {
+            "id": "bonda",
+            "name": "Bonda",
+            "image": "https://i0.wp.com/kalimirchbysmita.com/wp-content/uploads/2016/07/Mysore-Bonda-02.jpg",
+            "tags": [
+                "vegetarian",
+                "bhajia",
+                "bajji",
+                "pakora"
+            ],
+            "ingredients": [
+                "urad dal, spices",
+                "vegetables"
+            ],
+            "description": "Deep-fried savory snack",
+            "course": "snack",
+            "diet": "veg",
+            "flavor_profile": [
+                "spicy"
+            ],
+            "texture": [
+                "soft",
+                "crunchy"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": "south_indian"
+        },
+        {
+            "id": "jalebi",
+            "name": "Jalebi",
+            "image": "https://as1.ftcdn.net/v2/jpg/02/02/49/44/1000_F_202494465_CZbnTcuxHvA4MHMQn9mv6qBiixXnxPCz.jpg",
+            "tags": [
+                "vegetarian",
+                "sweet",
+                "deep-fried batter spirals",
+                "saffron"
+            ],
+            "ingredients": "wheat flour, yogurt, sugar syrup",
+            "description": "A sweet, deep-fried pastry",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "texture": [
+                "crispy",
+                "juicy"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": ""
+        },
+        {
+            "id": "jangiri",
+            "name": "Jangiri",
+            "image": "https://t4.ftcdn.net/jpg/07/20/29/39/360_F_720293958_GhSZ9n1h5ZLVVnmBDiBZcn0we9DZWWdg.jpg",
+            "tags": [
+                "vegetarian",
+                "imarti",
+                "sweet"
+            ],
+            "ingredients": [
+                "rice flour",
+                "urad dal flour, sugar syrup, cardamom"
+            ],
+            "description": "A crispy and sweet snack not to be confused with jalebi",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "texture": "crispy",
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": ""
+        },
+        {
+            "id": "idli",
+            "name": "Idli",
+            "image": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "tags": [
+                "vegetarian",
+                "rice cake"
+            ],
+            "ingredients": "rice, urad dal, salt",
+            "description": "Soft and fluffy steamed cakes",
+            "course": "breakfast",
+            "diet": "veg",
+            "flavor_profile": [
+                "mild",
+                "bland"
+            ],
+            "texture": "soft",
+            "cooking_method": "steamed",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "tamil_nadu"
+            }
+        },
+        {
+            "id": "vada",
+            "name": "Vada",
+            "image": "https://images.unsplash.com/photo-1683533678033-f5d60f0a3437?q=80&w=1588&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "tags": [
+                "vegetarian",
+                "south_indian"
+            ],
+            "ingredients": "urad dal, salt, spices",
+            "description": "Deep-fried savory lentil donuts",
+            "course": "sides",
+            "diet": "veg",
+            "flavor_profile": [
+                "spicy"
+            ],
+            "texture": "crunchy",
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": "south_indian"
+        },
+        {
+            "id": "butter-chicken",
+            "name": "Butter Chicken",
+            "image": "https://t3.ftcdn.net/jpg/06/01/41/66/360_F_601416673_Tn9dqtXuujNiavuJnNNspgcDezsStYpD.jpg",
+            "tags": [
+                "non-vegetarian",
+                "chicken"
+            ],
+            "ingredients": "chicken, tomatoes, cream, butter, spices",
+            "description": "A creamy and buttery chicken curry",
+            "course": "main",
+            "diet": "non-veg",
+            "flavor_profile": [
+                "spicy"
+            ],
+            "texture": "creamy",
+            "cooking_method": "simmered",
+            "veg": false,
+            "cuisine": {
+                "north_indian": "punjab"
+            }
+        },
+        {
+            "id": "malai-kofta",
+            "name": "Malai Kofta",
+            "image": "https://carameltintedlife.com/wp-content/uploads/2020/11/Malai-Kofta-1-of-1-9-480x270.jpg",
+            "tags": [
+                "vegetarian",
+                "north_indian"
+            ],
+            "ingredients": "cottage cheese, potatoes, cream, tomatoes, cashews, spices",
+            "description": "Cottage cheese dumplings in a creamy tomato gravy",
+            "course": "main course",
+            "diet": "veg",
+            "flavor_profile": [
+                "creamy",
+                "spicy"
+            ],
+            "cooking_method": "simmered",
+            "veg": true,
+            "cuisine": {
+                "north_indian": "punjab"
+            }
+        },
+        {
+            "id": "laddu",
+            "name": "Laddu",
+            "image": "https://t4.ftcdn.net/jpg/05/95/86/23/360_F_595862367_Mq2DESdDGSeEyDEvY5swpZsDz8lXQ9DX.jpg",
+            "tags": [
+                "vegetarian",
+                "sweet"
+            ],
+            "ingredients": "Gram flour/semolina, sugar, ghee, cardamom",
+            "description": "A sweet ball-shaped confection",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "karnataka"
+            }
+        },
+        {
+            "id": "kayi-holige",
+            "name": "Kayi Holige",
+            "image": "https://t3.ftcdn.net/jpg/05/72/46/24/360_F_572462400_5OIxkQGfguPhHJPH6heZUoN08npQhWZb.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "sweet",
+                "obbattu",
+                "bobbattu",
+                "coconut"
+            ],
+            "ingredients": "Maida flour, jaggery, coconut, cardamom, ghee",
+            "description": "A sweet flatbread stuffed with a jaggery and coconut mixture",
+            "course": "starter",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "cooking_method": "baked",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "karnataka"
+            }
+        },
+        {
+            "id": "bele-holige",
+            "name": "Bele Holige",
+            "image": "https://farm8.staticflickr.com/7611/16249828853_d8dc8edb8b_o.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "sweet",
+                "obbattu",
+                "bobbattu"
+            ],
+            "ingredients": "Maida flour, lentils, spices, jaggery, ghee",
+            "description": "A savory flatbread stuffed with lentils, spices, and jaggery",
+            "course": "starter",
+            "diet": "veg",
+            "flavor_profile": [
+                "savory",
+                "sweet"
+            ],
+            "cooking_method": "baked",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "karnataka"
+            }
+        },
+        {
+            "id": "curd-rice",
+            "name": "Curd Rice",
+            "image": "https://beingwholesome.wordpress.com/wp-content/uploads/2018/05/img_0691.jpg?w=1000",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "thayir",
+                "mosaranna"
+            ],
+            "ingredients": "Rice, curd, mustard seeds, cumin seeds, green chilies, curry leaves",
+            "description": "A simple dish of cooked rice with curd and spices",
+            "course": "side dish",
+            "diet": "veg",
+            "flavor_profile": [
+                "savoury"
+            ],
+            "texture": "creamy",
+            "cooking_method": "mixed",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "karnataka"
+            }
+        },
+        {
+            "id": "white-rice",
+            "name": "White Rice",
+            "image": "https://t4.ftcdn.net/jpg/00/91/51/91/360_F_91519135_DlbNcDSnqJAbD53UKqkddnFg0LV2gKSj.jpg",
+            "tags": [
+                "vegetarian",
+                "indian",
+                "side dish"
+            ],
+            "ingredients": "Rice, water",
+            "description": "Plain cooked rice",
+            "course": "side dish",
+            "diet": "veg",
+            "flavor_profile": [
+                "mild"
+            ],
+            "cooking_method": "boiled",
+            "veg": true,
+            "cuisine": ""
+        },
+        {
+            "id": "vegetable-sambar",
+            "name": "Vegetable Sambar",
+            "image": "https://t3.ftcdn.net/jpg/05/07/96/54/360_F_507965420_AGUCtnt8VqSBkE0gyJD0LFr2XjIsPQo9.jpg",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "gravy",
+                "curry"
+            ],
+            "ingredients": "Toor dal, vegetables, tamarind, spices",
+            "description": "A lentil-based vegetable stew with a tangy and spicy flavor",
+            "course": "main course",
+            "diet": "veg",
+            "cuisine": "south_indian"
+        },
+        {
+            "id": "gulab-jamun",
+            "name": "Gulab Jamun",
+            "image": "https://www.cadburydessertscorner.com/hubfs/dc-website-2022/articles/soft-gulab-jamun-recipe-for-raksha-bandhan-from-dough-to-syrup-all-you-need-to-know/soft-gulab-jamun-recipe-for-raksha-bandhan-from-dough-to-syrup-all-you-need-to-know.webp",
+            "tags": [
+                "vegetarian",
+                "north_indian",
+                "sweet"
+            ],
+            "ingredients": "Milk powder, maida flour, baking powder, cardamom powder, ghee, sugar syrup",
+            "description": "Deep-fried milk powder balls soaked in sweet syrup",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": {
+                "north_indian": ""
+            }
+        },
+        {
+            "id": "papad",
+            "name": "Papad",
+            "image": "https://media.istockphoto.com/id/666595984/photo/indian-snacks-deep-fried-crackers-or-papad-mung-dal-and-urad-dal-papad-an-indian-fried-dish.jpg?s=612x612&w=0&k=20&c=WNBWP2z6sXYhPSFbfxmVJe1oVkWtQHY-lc7RbWeM84o=",
+            "tags": [
+                "vegetarian",
+                "paapad",
+                "papadam",
+                "happala",
+                "snack"
+            ],
+            "ingredients": "Urad dal flour, spices",
+            "description": "Thin, crispy, and savory lentil wafers",
+            "course": "snack",
+            "diet": "veg",
+            "flavor_profile": [
+                "salty",
+                "spicy"
+            ],
+            "cooking_method": "deep-fried",
+            "veg": true,
+            "cuisine": ""
+        },
+        {
+            "id": "payasam",
+            "name": "Payasam",
+            "image": "https://media.istockphoto.com/id/692446072/photo/most-famous-indian-sweet-pudding-kheer-or-semiya-khir-in-a-bowl-selective-focus.jpg?s=612x612&w=0&k=20&c=EYeuMLOgqpcFRtrDJ8KPGdxPjlUOrBhUwgjzU0Jwt5k=",
+            "tags": [
+                "vegetarian",
+                "south_indian",
+                "sweet",
+                "payasa"
+            ],
+            "ingredients": "Rice, milk, sugar, cardamom, ghee, nuts",
+            "description": "A creamy and sweet rice pudding",
+            "course": "dessert",
+            "diet": "veg",
+            "flavor_profile": [
+                "sweet"
+            ],
+            "cooking_method": "boiled",
+            "veg": true,
+            "cuisine": {
+                "south_indian": "tamil_nadu"
+            }
+        }
+    ]
+}
