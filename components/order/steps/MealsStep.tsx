@@ -57,6 +57,7 @@ function MealCard({
           <input
             type="date"
             value={meal.date}
+            min={new Date().toISOString().split('T')[0]}
             onChange={e => update({ date: e.target.value })}
             className="form-input"
           />
@@ -65,6 +66,7 @@ function MealCard({
           <input
             type="time"
             value={meal.time}
+            step={3600}
             onChange={e => update({ time: e.target.value })}
             className="form-input"
           />
