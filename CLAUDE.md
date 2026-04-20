@@ -100,3 +100,4 @@ User auth, order editing, admin dashboard, per-dish quantities, allergen trackin
 - **Google Maps Places autocomplete** on meal location field — use plain text input for now
 - **Logo** — use text placeholder "M G Prakash Catering" in PDF header and site nav; real logo to be imported from Figma later
 - **Email provider migration** — currently using Gmail SMTP via Nodemailer, which is fine for low order volumes. Once a custom domain is purchased, migrate to Resend (or similar) for better deliverability, higher send limits, and a professional "from" address (e.g. `orders@mgprakashcatering.com`)
+- **Save draft order requests** — allow users to save their in-progress quote request and return to it later (e.g. via a magic link or account-linked draft)

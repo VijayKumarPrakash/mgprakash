@@ -8,8 +8,9 @@ type AnyReactElement = any
 export async function generateOrderPDF(
   order: Order,
   meals: Meal[],
-  dishMap: Record<string, Dish>
+  dishMap: Record<string, Dish>,
+  isDraft = false
 ): Promise<Buffer> {
-  const element = createElement(OrderPDF, { order, meals, dishMap }) as AnyReactElement
+  const element = createElement(OrderPDF, { order, meals, dishMap, isDraft }) as AnyReactElement
   return renderToBuffer(element)
 }

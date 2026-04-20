@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
   Font,
+  Link,
 } from '@react-pdf/renderer'
 import type { Order, Meal, Dish } from '@/types'
 
@@ -20,12 +21,17 @@ const ACCENT = '#C8860A'
 const DARK = '#1a1a1a'
 const MUTED = '#78716c'
 
+const MAPS_URL = 'https://maps.google.com/?q=M+G+Prakash+Catering,+611+10th+Cross+Rd,+Indiranagar+Rajajinagar,+Bengaluru,+Karnataka+560079'
+
 const s = StyleSheet.create({
   page: { fontFamily: 'Inter', fontSize: 10, color: DARK, backgroundColor: '#FAFAF8', paddingVertical: 48, paddingHorizontal: 52 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 20, borderBottomWidth: 2, borderBottomColor: ACCENT, marginBottom: 28 },
   businessName: { fontSize: 16, fontWeight: 600, color: DARK, marginBottom: 4 },
   businessDetail: { fontSize: 8.5, color: MUTED, lineHeight: 1.6 },
+  link: { fontSize: 8.5, color: MUTED, lineHeight: 1.6, textDecoration: 'none' },
   orderRef: { fontSize: 8.5, color: MUTED, textAlign: 'right', lineHeight: 1.8 },
+  draftBadge: { fontSize: 11, fontWeight: 600, color: ACCENT, textAlign: 'right', marginBottom: 4 },
+  draftNote: { fontSize: 8, color: MUTED, textAlign: 'right', lineHeight: 1.6 },
   sectionTitle: { fontSize: 8, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 8 },
   section: { marginBottom: 24 },
   infoGrid: { flexDirection: 'row', gap: 32 },
@@ -48,9 +54,10 @@ interface Props {
   order: Order
   meals: Meal[]
   dishMap: Record<string, Dish>
+  isDraft?: boolean
 }
 
-export function OrderPDF({ order, meals, dishMap }: Props) {
+export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
   const formatDate = (d: string) =>
     new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
       day: 'numeric', month: 'long', year: 'numeric',
@@ -69,17 +76,34 @@ export function OrderPDF({ order, meals, dishMap }: Props) {
         <View style={s.header}>
           <View>
             <Text style={s.businessName}>M G Prakash Catering</Text>
-            <Text style={s.businessDetail}>611, 10th Cross Rd, Indiranagar Rajajinagar</Text>
-            <Text style={s.businessDetail}>Bengaluru, Karnataka 560079</Text>
-            <Text style={s.businessDetail}>+91 98801 93165 · wa.me/919880193165</Text>
+            <Link src={MAPS_URL} style={s.link}>
+              <Text>611, 10th Cross Rd, Indiranagar Rajajinagar{'\n'}Bengaluru, Karnataka 560079</Text>
+            </Link>
+            <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
+              <Link src="tel:+919880193165" style={s.link}><Text>+91 98801 93165</Text></Link>
+              <Text style={s.businessDetail}>·</Text>
+              <Link src="https://wa.me/919880193165" style={s.link}><Text>WhatsApp</Text></Link>
+            </View>
             <Text style={s.businessDetail}>vijaykumar.sb.99@gmail.com</Text>
           </View>
           <View>
-            <Text style={s.orderRef}>Order Confirmation</Text>
-            <Text style={s.orderRef}>#{order.id.slice(0, 8).toUpperCase()}</Text>
-            <Text style={s.orderRef}>
-              {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </Text>
+            {isDraft ? (
+              <>
+                <Text style={s.draftBadge}>Draft Preview</Text>
+                <Text style={s.draftNote}>Not yet submitted</Text>
+                <Text style={s.draftNote}>
+                  {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={s.orderRef}>Order Confirmation</Text>
+                <Text style={s.orderRef}>#{order.id.slice(0, 8).toUpperCase()}</Text>
+                <Text style={s.orderRef}>
+                  {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </Text>
+              </>
+            )}
           </View>
         </View>
 

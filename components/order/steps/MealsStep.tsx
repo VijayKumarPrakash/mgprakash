@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
 import type { MealDraft } from '@/types'
@@ -21,11 +21,8 @@ function MealCard({
 }) {
   const { updateMeal } = useOrder()
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [allVeg, setAllVeg] = useState(false)
 
-  useEffect(() => {
-    if (allVeg) updateMeal(meal.id, { veg_guests: meal.total_guests })
-  }, [allVeg, meal.id, meal.total_guests, updateMeal])
+  const allVeg = !!meal.total_guests && meal.veg_guests === meal.total_guests
 
   function update(payload: Partial<Omit<MealDraft, 'id' | 'dish_ids'>>) {
     updateMeal(meal.id, payload)
@@ -108,8 +105,8 @@ function MealCard({
                 type="checkbox"
                 checked={allVeg}
                 onChange={e => {
-                  setAllVeg(e.target.checked)
                   if (e.target.checked) update({ veg_guests: meal.total_guests })
+                  else update({ veg_guests: '' })
                 }}
                 className="rounded border-stone-300"
               />

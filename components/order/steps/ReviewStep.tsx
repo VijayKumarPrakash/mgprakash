@@ -13,9 +13,33 @@ interface Props {
 export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
   const { draft } = useOrder()
   const [submitting, setSubmitting] = useState(false)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [error, setError] = useState('')
 
   const dishMap = Object.fromEntries(dishes.map(d => [d.id, d]))
+
+  async function handleDownloadDraft() {
+    setDownloadingPdf(true)
+    try {
+      const res = await fetch('/api/orders/draft-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draft, dishes }),
+      })
+      if (!res.ok) throw new Error('Failed to generate PDF')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'quote-draft.pdf'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      setError('Could not generate draft PDF. Please try again.')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -107,15 +131,26 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
       )}
 
-      <div className="flex justify-between pt-2">
+      <div className="flex justify-between pt-2 items-center">
         <button onClick={onBack} disabled={submitting} className="btn-secondary disabled:opacity-50">
           Back
         </button>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting}
-          className="btn-primary disabled:opacity-60 flex items-center gap-2"
-        >
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleDownloadDraft}
+            disabled={downloadingPdf || submitting}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-stone-200 text-sm font-medium text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-colors bg-white disabled:opacity-50"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            {downloadingPdf ? 'Generating…' : 'Download Draft'}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="btn-primary disabled:opacity-60 flex items-center gap-2"
+          >
           {submitting && (
             <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -123,7 +158,8 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
             </svg>
           )}
           {submitting ? 'Submitting…' : 'Submit Order'}
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   )
