@@ -1,7 +1,10 @@
 export type Course = 'starter' | 'main' | 'side' | 'dessert' | 'snack' | 'beverage'
 export type Diet = 'vegetarian' | 'vegan' | 'jain' | 'non-vegetarian'
 export type SpiceLevel = 'mild' | 'medium' | 'hot'
-export type EventType = 'wedding' | 'birthday' | 'corporate' | 'other'
+export type EventType =
+  | 'wedding' | 'engagement' | 'birthday' | 'anniversary'
+  | 'housewarming' | 'baby_shower' | 'namakarana' | 'religious'
+  | 'party' | 'corporate' | 'funeral' | 'other'
 export type OrderStatus = 'submitted'
 
 export interface Dish {

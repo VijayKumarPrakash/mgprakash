@@ -11,10 +11,18 @@ interface Props {
 }
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
-  { value: 'wedding', label: 'Wedding' },
-  { value: 'birthday', label: 'Birthday' },
-  { value: 'corporate', label: 'Corporate' },
-  { value: 'other', label: 'Other' },
+  { value: 'wedding',      label: 'Wedding' },
+  { value: 'engagement',   label: 'Engagement' },
+  { value: 'birthday',     label: 'Birthday' },
+  { value: 'anniversary',  label: 'Anniversary' },
+  { value: 'housewarming', label: 'Gruha Pravesha / Housewarming' },
+  { value: 'baby_shower',  label: 'Seemantha / Baby Shower' },
+  { value: 'namakarana',   label: 'Namakarana' },
+  { value: 'religious',    label: 'Religious / Prasad' },
+  { value: 'party',        label: 'Party' },
+  { value: 'corporate',    label: 'Corporate' },
+  { value: 'funeral',      label: 'Funeral / Condolence' },
+  { value: 'other',        label: 'Other' },
 ]
 
 export function EventStep({ onNext, onBack }: Props) {
