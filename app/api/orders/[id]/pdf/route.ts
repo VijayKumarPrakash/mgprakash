@@ -48,9 +48,15 @@ export async function GET(
       .filter(Boolean) as Dish[],
   }))
 
-  const pdfBuffer = await generateOrderPDF(order as Order, mealsWithDishes, dishMap)
+  let pdfBuffer: Buffer
+  try {
+    pdfBuffer = await generateOrderPDF(order as Order, mealsWithDishes, dishMap)
+  } catch (err) {
+    console.error('[pdf] generation failed:', err)
+    return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 })
+  }
 
-  return new NextResponse(pdfBuffer as unknown as BodyInit, {
+  return new NextResponse(new Uint8Array(pdfBuffer), {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
