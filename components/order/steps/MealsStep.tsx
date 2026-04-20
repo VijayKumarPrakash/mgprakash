@@ -95,6 +95,7 @@ function MealCard({
             min={1}
             value={meal.total_guests}
             onChange={e => update({ total_guests: e.target.value ? parseInt(e.target.value) : '' })}
+            onDoubleClick={e => (e.target as HTMLInputElement).select()}
             placeholder="100"
             className="form-input"
           />
@@ -121,6 +122,7 @@ function MealCard({
             value={meal.veg_guests}
             disabled={allVeg}
             onChange={e => update({ veg_guests: e.target.value ? parseInt(e.target.value) : '' })}
+            onDoubleClick={e => (e.target as HTMLInputElement).select()}
             placeholder="60"
             className={`form-input${allVeg ? ' opacity-60 bg-stone-50 cursor-not-allowed' : ''}`}
           />
