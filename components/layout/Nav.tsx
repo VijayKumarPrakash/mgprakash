@@ -68,14 +68,12 @@ export function Nav() {
         </Link>
 
         <nav className="flex items-center gap-4 sm:gap-6">
-          {!isOrderFlow && (
-            <Link
-              href="/menu"
-              className="text-sm text-stone-600 hover:text-[#1a1a1a] transition-colors hidden sm:block"
-            >
-              Browse Menu
-            </Link>
-          )}
+          <Link
+            href="/menu"
+            className="text-sm text-stone-600 hover:text-[#1a1a1a] transition-colors hidden sm:block"
+          >
+            Browse Menu
+          </Link>
 
           {!loadingUser && user && (
             <Link
@@ -86,13 +84,15 @@ export function Nav() {
             </Link>
           )}
 
-          <Link
-            href="/order/new"
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-white transition-opacity hover:opacity-90"
-            style={{ background: 'var(--color-accent)' }}
-          >
-            Place an Order
-          </Link>
+          {!isOrderFlow && (
+            <Link
+              href="/order/new"
+              className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-white transition-opacity hover:opacity-90"
+              style={{ background: 'var(--color-accent)' }}
+            >
+              Place an Order
+            </Link>
+          )}
 
           {!loadingUser && (
             <>

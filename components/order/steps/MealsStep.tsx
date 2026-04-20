@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
 import type { MealDraft } from '@/types'
@@ -21,6 +21,11 @@ function MealCard({
 }) {
   const { updateMeal } = useOrder()
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [allVeg, setAllVeg] = useState(false)
+
+  useEffect(() => {
+    if (allVeg) updateMeal(meal.id, { veg_guests: meal.total_guests })
+  }, [allVeg, meal.id, meal.total_guests, updateMeal])
 
   function update(payload: Partial<Omit<MealDraft, 'id' | 'dish_ids'>>) {
     updateMeal(meal.id, payload)
@@ -94,16 +99,33 @@ function MealCard({
             className="form-input"
           />
         </FormField>
-        <FormField label="Vegetarian guests" error={errors.veg_guests}>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-[#1a1a1a]">Vegetarian guests</label>
+            <label className="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={allVeg}
+                onChange={e => {
+                  setAllVeg(e.target.checked)
+                  if (e.target.checked) update({ veg_guests: meal.total_guests })
+                }}
+                className="rounded border-stone-300"
+              />
+              All veg
+            </label>
+          </div>
           <input
             type="number"
             min={0}
             value={meal.veg_guests}
+            disabled={allVeg}
             onChange={e => update({ veg_guests: e.target.value ? parseInt(e.target.value) : '' })}
             placeholder="60"
-            className="form-input"
+            className={`form-input${allVeg ? ' opacity-60 bg-stone-50 cursor-not-allowed' : ''}`}
           />
-        </FormField>
+          {errors.veg_guests && <p className="text-xs text-red-600">{errors.veg_guests}</p>}
+        </div>
       </div>
     </div>
   )

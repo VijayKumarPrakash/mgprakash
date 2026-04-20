@@ -14,16 +14,17 @@ type Action =
   | { type: 'ADD_DISH_TO_MEAL'; mealId: string; dishId: string }
   | { type: 'REMOVE_DISH_FROM_MEAL'; mealId: string; dishId: string }
 
-function makeMeal(): MealDraft {
+function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids'>> = {}): MealDraft {
   return {
     id: uuid(),
     name: '',
     date: '',
-    time: '',
+    time: '00:00',
     location: '',
     total_guests: '',
     veg_guests: '',
     dish_ids: [],
+    ...overrides,
   }
 }
 
@@ -44,7 +45,13 @@ function reducer(state: OrderDraft, action: Action): OrderDraft {
     case 'SET_EVENT':
       return { ...state, ...action.payload }
     case 'ADD_MEAL': {
-      const meal = makeMeal()
+      const first = state.meals[0]
+      const meal = makeMeal(first ? {
+        date: first.date,
+        location: first.location,
+        total_guests: first.total_guests,
+        veg_guests: first.veg_guests,
+      } : {})
       return {
         ...state,
         meals: [...state.meals, meal],
