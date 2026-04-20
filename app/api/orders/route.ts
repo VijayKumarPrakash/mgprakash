@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient, createRequestClient } from '@/lib/supabase/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
-import { sendClientConfirmation, sendBusinessNotification } from '@/lib/resend/emails'
+import { sendClientConfirmation, sendBusinessNotification } from '@/lib/email/emails'
 import type { OrderDraft, Dish, Meal, Order } from '@/types'
 
 export async function POST(req: NextRequest) {

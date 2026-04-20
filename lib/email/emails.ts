@@ -1,10 +1,15 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 import type { Order, Meal, Dish } from '@/types'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
-
 const BUSINESS_EMAIL = 'vijaykumar.sb.99@gmail.com'
-const FROM = 'M G Prakash Catering <onboarding@resend.dev>'
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER!,
+    pass: process.env.GMAIL_APP_PASSWORD!,
+  },
+})
 
 function formatDate(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
@@ -40,8 +45,8 @@ export async function sendClientConfirmation(
       </div>`
   }).join('')
 
-  await resend.emails.send({
-    from: FROM,
+  await transporter.sendMail({
+    from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
     to: order.client_email,
     subject: `Order confirmed — ${order.event_name}`,
     html: `
@@ -88,8 +93,8 @@ export async function sendBusinessNotification(
       </div>`
   }).join('')
 
-  await resend.emails.send({
-    from: FROM,
+  await transporter.sendMail({
+    from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
     to: BUSINESS_EMAIL,
     subject: `New order — ${order.event_name} (${order.client_name})`,
     html: `

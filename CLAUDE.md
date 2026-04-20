@@ -78,7 +78,8 @@ Generated server-side on order submission, attached to client confirmation email
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-RESEND_API_KEY=
+GMAIL_USER=
+GMAIL_APP_PASSWORD=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
