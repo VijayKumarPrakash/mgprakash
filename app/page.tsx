@@ -22,7 +22,7 @@ export default function HomePage() {
                 className="inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold text-white transition-opacity hover:opacity-90"
                 style={{ background: 'var(--color-accent)' }}
               >
-                Place an Order
+                Get a Quote
               </Link>
               <Link
                 href="/menu"

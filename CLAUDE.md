@@ -10,7 +10,7 @@ Use **British/Indian English** throughout — in UI copy, emails, PDF content, c
 
 **M G Prakash Catering** — a customer-facing catering order platform where clients browse a dish catalog and place catering orders for events. No admin dashboard or authentication in scope for this iteration.
 
-**Tech stack:** Next.js (App Router), Supabase (PostgreSQL), Resend (email), React-PDF, Tailwind CSS, Fuse.js, Vercel (deployment target).
+**Tech stack:** Next.js (App Router), Supabase (PostgreSQL), Nodemailer + Gmail SMTP (email), React-PDF, Tailwind CSS, Fuse.js, Vercel (deployment target).
 
 ## Development
 
@@ -99,3 +99,4 @@ User auth, order editing, admin dashboard, per-dish quantities, allergen trackin
 
 - **Google Maps Places autocomplete** on meal location field — use plain text input for now
 - **Logo** — use text placeholder "M G Prakash Catering" in PDF header and site nav; real logo to be imported from Figma later
+- **Email provider migration** — currently using Gmail SMTP via Nodemailer, which is fine for low order volumes. Once a custom domain is purchased, migrate to Resend (or similar) for better deliverability, higher send limits, and a professional "from" address (e.g. `orders@mgprakashcatering.com`)

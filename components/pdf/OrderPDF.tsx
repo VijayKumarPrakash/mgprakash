@@ -71,7 +71,8 @@ export function OrderPDF({ order, meals, dishMap }: Props) {
             <Text style={s.businessName}>M G Prakash Catering</Text>
             <Text style={s.businessDetail}>611, 10th Cross Rd, Indiranagar Rajajinagar</Text>
             <Text style={s.businessDetail}>Bengaluru, Karnataka 560079</Text>
-            <Text style={s.businessDetail}>+91 98801 93165 · vijaykumar.sb.99@gmail.com</Text>
+            <Text style={s.businessDetail}>+91 98801 93165 · wa.me/919880193165</Text>
+            <Text style={s.businessDetail}>vijaykumar.sb.99@gmail.com</Text>
           </View>
           <View>
             <Text style={s.orderRef}>Order Confirmation</Text>

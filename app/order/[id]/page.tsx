@@ -59,10 +59,9 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="font-display text-3xl font-bold text-[#1a1a1a]">Order Confirmed</h1>
+        <h1 className="font-display text-3xl font-bold text-[#1a1a1a]">Request Received</h1>
         <p className="text-stone-500">
-          Thank you, <strong>{o.client_name}</strong>. A confirmation email has been sent to{' '}
-          <strong>{o.client_email}</strong> with a PDF summary attached.
+          Thank you, <strong>{o.client_name}</strong>. We've received your catering request and will be in touch shortly to confirm availability and pricing. A summary has been sent to <strong>{o.client_email}</strong>.
         </p>
         <p className="text-xs text-stone-400 font-mono">
           Ref: #{o.id.slice(0, 8).toUpperCase()}

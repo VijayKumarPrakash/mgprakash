@@ -90,7 +90,7 @@ export function Nav() {
               className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ background: 'var(--color-accent)' }}
             >
-              Place an Order
+              Get a Quote
             </Link>
           )}
 

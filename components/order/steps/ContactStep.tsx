@@ -57,7 +57,7 @@ export function ContactStep({ onNext }: Props) {
     <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-[#1a1a1a]">Your contact details</h2>
-        <p className="text-stone-500 mt-1">We'll use these to send your order confirmation.</p>
+        <p className="text-stone-500 mt-1">We'll use these to send your quote summary.</p>
       </div>
 
       <div className="space-y-4">

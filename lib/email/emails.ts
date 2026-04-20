@@ -48,11 +48,11 @@ export async function sendClientConfirmation(
   await transporter.sendMail({
     from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
     to: order.client_email,
-    subject: `Order confirmed — ${order.event_name}`,
+    subject: `Quote request received — ${order.event_name}`,
     html: `
       <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;background:#FAFAF8;padding:32px;">
-        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;">Your order is confirmed</h1>
-        <p style="color:#78716c;margin:0 0 24px;">Thank you, ${order.client_name}. We've received your catering request for <strong>${order.event_name}</strong>.</p>
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;">We've received your request</h1>
+        <p style="color:#78716c;margin:0 0 24px;">Thank you, ${order.client_name}. We'll be in touch shortly to confirm availability and pricing for <strong>${order.event_name}</strong>.</p>
 
         ${mealsHtml}
 
@@ -65,7 +65,9 @@ export async function sendClientConfirmation(
         <hr style="border:none;border-top:1px solid #e7e5e4;margin:28px 0;">
         <p style="font-size:12px;color:#a8a29e;margin:0;">
           M G Prakash Catering · 611, 10th Cross Rd, Indiranagar Rajajinagar, Bengaluru 560079<br>
-          +91 98801 93165 · vijaykumar.sb.99@gmail.com
+          <a href="tel:+919880193165" style="color:#a8a29e;text-decoration:none;">+91 98801 93165</a> ·
+          <a href="https://wa.me/919880193165" style="color:#a8a29e;text-decoration:none;">WhatsApp</a> ·
+          vijaykumar.sb.99@gmail.com
         </p>
       </div>`,
     attachments: [
@@ -96,7 +98,7 @@ export async function sendBusinessNotification(
   await transporter.sendMail({
     from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
     to: BUSINESS_EMAIL,
-    subject: `New order — ${order.event_name} (${order.client_name})`,
+    subject: `New quote request — ${order.event_name} (${order.client_name})`,
     html: `
       <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;padding:24px;">
         <h2 style="margin:0 0 4px;">New catering order received</h2>
