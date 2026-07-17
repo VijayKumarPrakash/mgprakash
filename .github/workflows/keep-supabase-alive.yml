@@ -1,0 +1,19 @@
+name: Prevent Supabase Pausing
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday and Thursday (twice a week is perfect)
+    - cron: '0 0 * * 1,4'
+  workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
+
+jobs:
+  ping-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -I -s -o /dev/null -w "%{http_code}" | grep -q "200\|401\|400\|404"
