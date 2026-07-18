@@ -1,24 +1,35 @@
-steps:
+name: Prevent Supabase Pausing
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday and Thursday
+    - cron: '0 0 * * 1,4'
+  workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
+
+jobs:
+  ping-db:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Ping Supabase REST API and log response
         run: |
           echo "Sending ping to Supabase..."
 
-          # Capture the HTTP status code and the response body separately
+          # Capture the response body
           RESPONSE=$(curl -s -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
 
+          # Capture the HTTP status code
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
 
           echo "HTTP Status Code: $STATUS_CODE"
 
-          # Check if the status code is a success (200) or at least reached the PostgREST server
+          # Check if the status code is a success (200)
           if [ "$STATUS_CODE" -eq 200 ]; then
             echo "✅ Success! Supabase was successfully pinged and returned the DB schema."
-            # Optional: Uncomment the next line if you want to print the actual schema JSON in the log
-            # echo "Response snippet: $(echo $RESPONSE | head -c 200)..."
           else
             echo "⚠️ Warning: Received unexpected status code $STATUS_CODE. Check your credentials or URL."
             exit 1
