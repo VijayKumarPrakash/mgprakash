@@ -2,8 +2,8 @@ name: Prevent Supabase Pausing
 
 on:
   schedule:
-    # Runs at 00:00 UTC every day
-    - cron: '0 0 * * *'
+    # Runs at 00:00 UTC every Monday and Thursday
+    - cron: '0 0 * * 1,4'
   workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
 
 jobs:
@@ -13,24 +13,23 @@ jobs:
     steps:
       - name: Ping Supabase REST API and log response
         run: |
-          echo "Sending ping to Supabase..."
+          echo "Sending keepalive write to Supabase..."
 
-          # Capture the response body
-          RESPONSE=$(curl -s -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/dishes" \
-            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          # Capture the HTTP status code
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/dishes" \
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive?id=eq.1" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"pinged_at\": \"$NOW\"}")
 
           echo "HTTP Status Code: $STATUS_CODE"
 
-          # Check if the status code is a success (200)
-          if [ "$STATUS_CODE" -eq 200 ]; then
-            echo "✅ Success! Supabase was successfully pinged and returned the DB schema."
+          # Check if the status code is a success (204 = updated, no content returned)
+          if [ "$STATUS_CODE" -eq 204 ]; then
+            echo "✅ Success! Keepalive row updated at $NOW."
           else
-            echo "⚠️ Warning: Received unexpected status code $STATUS_CODE. Check your credentials or URL."
+            echo "⚠️ Warning: Received unexpected status code $STATUS_CODE. Check your credentials or RLS policy."
             exit 1
           fi
