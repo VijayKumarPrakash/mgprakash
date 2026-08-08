@@ -1,87 +1,162 @@
 'use client'
 
-import type { Dish } from '@/types'
+import { useState } from 'react'
 import type { CatalogueFilters } from './CatalogueClient'
+import { COURSE_LABELS, OCCASION_LABELS } from '@/lib/taxonomy'
+import type { Course, CuisineGroup, Occasion, SpiceLevel } from '@/lib/taxonomy'
 
 interface Props {
-  dishes: Dish[]
   filters: CatalogueFilters
-  onChange: (next: Partial<CatalogueFilters>) => void
+  onToggle: <K extends keyof CatalogueFilters>(group: K, value: CatalogueFilters[K][number]) => void
+  onClear: () => void
+  activeCount: number
+  courses: readonly Course[]
+  cuisineGroups: readonly CuisineGroup[]
+  occasions: readonly Occasion[]
+  spiceLevels: readonly SpiceLevel[]
 }
 
-type SelectProps = {
-  label: string
-  value: string
-  options: { value: string; label: string }[]
-  onChange: (value: string) => void
-}
+const DIET_OPTIONS = [
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'non-vegetarian', label: 'Non-veg' },
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'jain', label: 'Jain' },
+  { value: 'no-onion-garlic', label: 'No onion or garlic' },
+] as const
 
-function FilterSelect({ label, value, options, onChange }: SelectProps) {
+function Row({
+  label, children, count,
+}: { label: string; children: React.ReactNode; count: number }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="border border-stone-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-stone-400 transition-colors min-w-[130px]"
-      >
-        <option value="">All</option>
-        {options.map(o => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-[.14em] text-[var(--ink-3)]">
+          {label}
+        </span>
+        {count > 0 && (
+          <span className="text-[10px] font-bold tabular-nums rounded-full w-[17px] h-[17px] grid place-items-center bg-[var(--accent)] text-white">
+            {count}
+          </span>
+        )}
+      </div>
+      {/* Horizontal scroll on mobile beats wrapping to five lines. */}
+      <div className="flex gap-2 flex-wrap max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:scrollbar-none max-sm:-mx-4 max-sm:px-4 max-sm:pb-1">
+        {children}
+      </div>
     </div>
   )
 }
 
-export function FilterPanel({ dishes, filters, onChange }: Props) {
-  const cuisines = [...new Set(dishes.map(d => d.cuisine).filter(Boolean) as string[])].sort()
+export function FilterPanel({
+  filters, onToggle, onClear, activeCount,
+  courses, cuisineGroups, occasions, spiceLevels,
+}: Props) {
+  const [showAll, setShowAll] = useState(false)
 
   return (
-    <div className="flex flex-wrap gap-4 items-end">
-      <FilterSelect
-        label="Course"
-        value={filters.course}
-        onChange={v => onChange({ course: v as CatalogueFilters['course'] })}
-        options={[
-          { value: 'starter', label: 'Starter' },
-          { value: 'main', label: 'Main' },
-          { value: 'side', label: 'Side' },
-          { value: 'snack', label: 'Snack' },
-          { value: 'dessert', label: 'Dessert' },
-          { value: 'beverage', label: 'Beverage' },
-        ]}
-      />
+    <div className="flex flex-col gap-5">
+      <Row label="Course" count={filters.course.length}>
+        {courses.map(c => (
+          <button
+            key={c}
+            type="button"
+            className="chip"
+            aria-pressed={filters.course.includes(c)}
+            onClick={() => onToggle('course', c)}
+          >
+            {COURSE_LABELS[c]}
+          </button>
+        ))}
+      </Row>
 
-      <FilterSelect
-        label="Cuisine"
-        value={filters.cuisine}
-        onChange={v => onChange({ cuisine: v })}
-        options={cuisines.map(c => ({ value: c, label: c }))}
-      />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Row label="Cuisine" count={filters.cuisine_group.length}>
+          {cuisineGroups.map(c => (
+            <button
+              key={c}
+              type="button"
+              className="chip"
+              aria-pressed={filters.cuisine_group.includes(c)}
+              onClick={() => onToggle('cuisine_group', c)}
+            >
+              {c}
+            </button>
+          ))}
+        </Row>
 
-      <FilterSelect
-        label="Diet"
-        value={filters.diet}
-        onChange={v => onChange({ diet: v as CatalogueFilters['diet'] })}
-        options={[
-          { value: 'vegetarian', label: 'Vegetarian' },
-          { value: 'vegan', label: 'Vegan' },
-          { value: 'jain', label: 'Jain' },
-          { value: 'non-vegetarian', label: 'Non-Vegetarian' },
-        ]}
-      />
+        <Row label="Diet" count={filters.diet.length}>
+          {DIET_OPTIONS.map(o => (
+            <button
+              key={o.value}
+              type="button"
+              className="chip"
+              aria-pressed={filters.diet.includes(o.value)}
+              onClick={() => onToggle('diet', o.value)}
+            >
+              {o.label}
+            </button>
+          ))}
+        </Row>
+      </div>
 
-      <FilterSelect
-        label="Spice Level"
-        value={filters.spice_level}
-        onChange={v => onChange({ spice_level: v })}
-        options={[
-          { value: 'mild', label: 'Mild' },
-          { value: 'medium', label: 'Medium' },
-          { value: 'hot', label: 'Hot' },
-        ]}
-      />
+      {showAll && (
+        <div className="grid gap-5 sm:grid-cols-[auto_1fr]">
+          <Row label="Spice" count={filters.spice_level.length}>
+            {spiceLevels.map(s => (
+              <button
+                key={s}
+                type="button"
+                className="chip capitalize"
+                aria-pressed={filters.spice_level.includes(s)}
+                onClick={() => onToggle('spice_level', s)}
+              >
+                {s}
+              </button>
+            ))}
+          </Row>
+
+          <Row label="Occasion" count={filters.occasion.length}>
+            {occasions.map(o => (
+              <button
+                key={o}
+                type="button"
+                className="chip"
+                aria-pressed={filters.occasion.includes(o)}
+                onClick={() => onToggle('occasion', o)}
+              >
+                {OCCASION_LABELS[o]}
+              </button>
+            ))}
+          </Row>
+        </div>
+      )}
+
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => setShowAll(v => !v)}
+          className="text-[13px] font-medium text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors inline-flex items-center gap-1.5"
+        >
+          {showAll ? 'Fewer filters' : 'Spice and occasion'}
+          <svg
+            width="11" height="7" viewBox="0 0 11 7" fill="none"
+            className="transition-transform duration-200"
+            style={{ transform: showAll ? 'rotate(180deg)' : 'none' }}
+          >
+            <path d="M1 1L5.5 5.5L10 1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
+
+        {activeCount > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-[13px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+          >
+            Clear all ({activeCount})
+          </button>
+        )}
+      </div>
     </div>
   )
 }

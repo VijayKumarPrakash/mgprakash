@@ -45,8 +45,8 @@ export function EventStep({ onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-[#1a1a1a]">About your event</h2>
-        <p className="text-stone-500 mt-1">Give your event a name and tell us what kind it is.</p>
+        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">About your event</h2>
+        <p className="text-[var(--ink-3)] mt-1">Give your event a name and tell us what kind it is.</p>
       </div>
 
       <div className="space-y-4">
@@ -70,9 +70,9 @@ export function EventStep({ onNext, onBack }: Props) {
                 className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                   draft.event_type === value
                     ? 'border-transparent text-white'
-                    : 'border-stone-200 text-stone-600 hover:border-stone-300 bg-white'
+                    : 'border-[var(--line)] text-[var(--ink-2)] hover:border-[var(--line-strong)] bg-[var(--surface)]'
                 }`}
-                style={draft.event_type === value ? { background: 'var(--color-accent)' } : {}}
+                style={draft.event_type === value ? { background: 'var(--accent)' } : {}}
               >
                 {label}
               </button>

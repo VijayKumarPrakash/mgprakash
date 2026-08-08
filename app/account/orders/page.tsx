@@ -22,13 +22,13 @@ export default async function MyOrdersPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-10">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-2">My Orders</h1>
-        <p className="text-stone-500 text-sm">{user.email}</p>
+        <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[var(--ink)] mb-2">My Orders</h1>
+        <p className="text-[var(--ink-3)] text-sm">{user.email}</p>
       </div>
 
       {rows.length === 0 ? (
         <div className="text-center py-20 space-y-4">
-          <p className="text-stone-400 text-base">You haven't placed any orders yet.</p>
+          <p className="text-[var(--ink-3)] text-base">You haven&rsquo;t placed any orders yet.</p>
           <Link href="/order/new" className="btn-primary inline-flex">
             Place your first order
           </Link>
@@ -39,25 +39,25 @@ export default async function MyOrdersPage() {
             <Link
               key={order.id}
               href={`/order/${order.id}`}
-              className="block bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
+              className="block bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-6 hover:shadow-[var(--shadow-lift)] transition-shadow"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <p className="font-semibold text-[#1a1a1a]">{order.event_name}</p>
-                  <p className="text-sm text-stone-500 capitalize">{order.event_type}</p>
+                  <p className="font-semibold text-[var(--ink)]">{order.event_name}</p>
+                  <p className="text-sm text-[var(--ink-3)] capitalize">{order.event_type}</p>
                 </div>
                 <div className="text-right space-y-1 flex-shrink-0">
                   <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
                     {order.status}
                   </span>
-                  <p className="text-xs text-stone-400">
+                  <p className="text-xs text-[var(--ink-3)]">
                     {new Date(order.created_at).toLocaleDateString('en-GB', {
                       day: 'numeric', month: 'short', year: 'numeric',
                     })}
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-stone-400 mt-3 font-mono">
+              <p className="text-xs text-[var(--ink-3)] mt-3 font-mono">
                 #{order.id.slice(0, 8).toUpperCase()}
               </p>
             </Link>

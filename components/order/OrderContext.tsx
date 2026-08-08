@@ -113,8 +113,23 @@ interface OrderContextValue {
 
 const OrderCtx = createContext<OrderContextValue | null>(null)
 
-export function OrderProvider({ children }: { children: React.ReactNode }) {
-  const [draft, dispatch] = useReducer(reducer, INITIAL)
+export function OrderProvider({
+  children,
+  initialContact,
+}: {
+  children: React.ReactNode
+  /** Pre-fills name and email from the signed-in Google account, when present. */
+  initialContact?: { name?: string; email?: string }
+}) {
+  // Seeded at reducer-init rather than written back in a mount effect. The
+  // effect version rendered the contact step with empty inputs and then
+  // re-rendered with them filled, which reads as a flicker and, worse, meant
+  // any keystroke landing in that window was overwritten.
+  const [draft, dispatch] = useReducer(reducer, INITIAL, init => ({
+    ...init,
+    client_name: initialContact?.name ?? '',
+    client_email: initialContact?.email ?? '',
+  }))
 
   const activeMeal = draft.meals.find(m => m.id === draft.active_meal_id) ?? null
 

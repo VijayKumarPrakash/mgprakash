@@ -30,13 +30,13 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-[#1a1a1a]">Select dishes</h2>
-        <p className="text-stone-500 mt-1">Choose which dishes to include for each meal.</p>
+        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Select dishes</h2>
+        <p className="text-[var(--ink-3)] mt-1">Choose which dishes to include for each meal.</p>
       </div>
 
       {/* Meal switcher */}
-      <div className="bg-white border border-stone-200 rounded-2xl p-4">
-        <p className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-3">Active meal</p>
+      <div className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-4">
+        <p className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide mb-3">Active meal</p>
         <div className="flex flex-wrap gap-2">
           {draft.meals.map(meal => (
             <button
@@ -45,16 +45,16 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                 draft.active_meal_id === meal.id
                   ? 'text-white border-transparent'
-                  : 'text-stone-600 border-stone-200 hover:border-stone-300 bg-white'
+                  : 'text-[var(--ink-2)] border-[var(--line)] hover:border-[var(--line-strong)] bg-[var(--surface)]'
               }`}
-              style={draft.active_meal_id === meal.id ? { background: 'var(--color-accent)' } : {}}
+              style={draft.active_meal_id === meal.id ? { background: 'var(--accent)' } : {}}
             >
               {meal.name || 'Unnamed meal'}
               {meal.dish_ids.length > 0 && (
                 <span className={`ml-2 text-xs rounded-full px-1.5 py-0.5 ${
                   draft.active_meal_id === meal.id
-                    ? 'bg-white/20 text-white'
-                    : 'bg-stone-100 text-stone-500'
+                    ? 'bg-[var(--surface)]/20 text-white'
+                    : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
                 }`}>
                   {meal.dish_ids.length}
                 </span>
@@ -63,8 +63,8 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
           ))}
         </div>
         {activeMeal && (
-          <p className="text-xs text-stone-400 mt-3">
-            Adding dishes to <span className="font-medium text-stone-600">{activeMeal.name || 'this meal'}</span>
+          <p className="text-xs text-[var(--ink-3)] mt-3">
+            Adding dishes to <span className="font-medium text-[var(--ink-2)]">{activeMeal.name || 'this meal'}</span>
             {activeMeal.dish_ids.length > 0 && ` · ${activeMeal.dish_ids.length} selected`}
           </p>
         )}
@@ -73,11 +73,11 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
       {/* Catalogue */}
       <CatalogueClient dishes={dishes} orderContext={orderContext} />
 
-      <div className="flex justify-between items-center pt-2 border-t border-stone-100">
+      <div className="flex justify-between items-center pt-2 border-t border-[var(--line)]">
         <button onClick={onBack} className="btn-secondary">Back</button>
         <div className="flex items-center gap-4">
           {totalDishesSelected > 0 && (
-            <p className="text-sm text-stone-500">
+            <p className="text-sm text-[var(--ink-3)]">
               {totalDishesSelected} dish{totalDishesSelected !== 1 ? 'es' : ''} selected across all meals
             </p>
           )}

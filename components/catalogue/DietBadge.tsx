@@ -1,18 +1,59 @@
-import type { Diet } from '@/types'
+import type { Dish } from '@/types'
 
-const config: Record<string, { label: string; dot: string }> = {
-  vegetarian: { label: 'Veg', dot: '#22c55e' },
-  vegan: { label: 'Vegan', dot: '#16a34a' },
-  jain: { label: 'Jain', dot: '#15803d' },
-  'non-vegetarian': { label: 'Non-Veg', dot: '#ef4444' },
+/**
+ * The Indian veg/non-veg mark — a filled dot inside a square outline — read at
+ * a glance by every customer this site has. Drawn rather than emoji'd so it
+ * renders identically on every platform.
+ */
+function Mark({ colour }: { colour: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative block w-[11px] h-[11px] rounded-[2px] flex-shrink-0"
+      style={{ boxShadow: `inset 0 0 0 1.5px ${colour}` }}
+    >
+      <span
+        className="absolute rounded-full"
+        style={{ inset: '2.5px', background: colour }}
+      />
+    </span>
+  )
 }
 
-export function DietBadge({ diet }: { diet: Diet | string }) {
-  const c = config[diet] ?? { label: diet, dot: '#94a3b8' }
+interface Props {
+  dish: Pick<Dish, 'diet' | 'is_vegan' | 'is_jain'>
+  /** Adds Vegan/Jain pills alongside the base mark. Used in the detail panel. */
+  detailed?: boolean
+  onDark?: boolean
+}
+
+export function DietBadge({ dish, detailed = false, onDark = false }: Props) {
+  const base =
+    dish.diet === 'non-vegetarian'
+      ? { label: 'Non-veg', colour: 'var(--nonveg)' }
+      : dish.diet === 'egg'
+      ? { label: 'Egg', colour: 'var(--egg)' }
+      : { label: 'Veg', colour: 'var(--veg)' }
+
+  const pill = onDark
+    ? 'bg-[rgba(247,241,230,.10)] text-[var(--dark-ink-2)]'
+    : 'bg-[var(--surface-2)] text-[var(--ink-2)]'
+
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-600 bg-stone-100 rounded-full px-2.5 py-1">
-      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.dot }} />
-      {c.label}
+    <span className="inline-flex items-center gap-1.5 flex-wrap">
+      <span
+        className={`inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 ${pill}`}
+      >
+        <Mark colour={base.colour} />
+        {base.label}
+      </span>
+
+      {detailed && dish.is_vegan && (
+        <span className={`text-[11px] font-semibold rounded-full px-2.5 py-1 ${pill}`}>Vegan</span>
+      )}
+      {detailed && dish.is_jain && (
+        <span className={`text-[11px] font-semibold rounded-full px-2.5 py-1 ${pill}`}>Jain</span>
+      )}
     </span>
   )
 }

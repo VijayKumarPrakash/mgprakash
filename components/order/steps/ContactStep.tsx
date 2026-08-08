@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
 
@@ -21,17 +21,17 @@ interface Props {
 export function ContactStep({ onNext }: Props) {
   const { draft, setContact } = useOrder()
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [countryCode, setCountryCode] = useState('+91')
-  const [phoneNumber, setPhoneNumber] = useState('')
-
-  useEffect(() => {
-    if (!draft.client_phone) return
+  // Split the stored "+91 9880193165" back into its two inputs. Done as a lazy
+  // initialiser rather than a mount effect: an effect would render once with
+  // the wrong values and then immediately re-render, which is visible as a
+  // flicker in the country-code select when navigating back to this step.
+  const [countryCode, setCountryCode] = useState(
+    () => COUNTRY_CODES.find(c => draft.client_phone.startsWith(c.code))?.code ?? '+91'
+  )
+  const [phoneNumber, setPhoneNumber] = useState(() => {
     const match = COUNTRY_CODES.find(c => draft.client_phone.startsWith(c.code))
-    if (match) {
-      setCountryCode(match.code)
-      setPhoneNumber(draft.client_phone.slice(match.code.length).trim())
-    }
-  }, []) // mount-only: restore split state if user navigates back
+    return match ? draft.client_phone.slice(match.code.length).trim() : ''
+  })
 
   function syncPhone(code: string, num: string) {
     setContact({ ...draft, client_phone: num ? `${code} ${num}` : '' })
@@ -56,8 +56,8 @@ export function ContactStep({ onNext }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-[#1a1a1a]">Your contact details</h2>
-        <p className="text-stone-500 mt-1">We'll use these to send your quote summary.</p>
+        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Your contact details</h2>
+        <p className="text-[var(--ink-3)] mt-1">We&rsquo;ll use these to send your quote summary.</p>
       </div>
 
       <div className="space-y-4">

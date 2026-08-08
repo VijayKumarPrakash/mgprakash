@@ -1,101 +1,127 @@
 'use client'
 
-import Image from 'next/image'
 import type { Dish } from '@/types'
-import type { CatalogueClient } from './CatalogueClient'
-import { DietBadge } from './DietBadge'
+import type { OrderContextShape } from './CatalogueClient'
 
-type OrderContext = React.ComponentProps<typeof CatalogueClient>['orderContext']
+import { DishImage } from './DishImage'
 
 interface Props {
   dish: Dish
   onViewDetails: () => void
-  orderContext?: OrderContext
+  orderContext?: OrderContextShape
+  priority?: boolean
 }
 
-export function DishCard({ dish, onViewDetails, orderContext }: Props) {
+export function DishCard({ dish, onViewDetails, orderContext, priority }: Props) {
   const isSelected = orderContext?.selectedDishIds.includes(dish.id) ?? false
   const hasActiveMeal = !!orderContext?.activeMealId
 
   return (
-    <div className="group bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-      {/* Image */}
-      <div className="relative aspect-[4/3] bg-stone-100 flex-shrink-0">
-        {dish.image_url ? (
-          <Image
-            src={dish.image_url}
-            alt={dish.name}
-            fill
-            className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+    // The whole card is the details affordance; the add button stops propagation.
+    // `group` drives the hover state so the image and title respond together.
+    <article
+      className="card group relative flex flex-col overflow-hidden cursor-pointer
+                 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)] hover:border-transparent
+                 active:translate-y-0 active:scale-[.995] active:duration-75"
+      onClick={onViewDetails}
+    >
+      <div className="relative aspect-[4/3] flex-shrink-0 overflow-hidden bg-[var(--dark-2)]">
+        <DishImage
+          id={dish.id}
+          name={dish.name}
+          course={dish.course}
+          src={dish.image_url}
+          blurDataUrl={dish.blur_data_url}
+          priority={priority}
+          className="transition-transform duration-[420ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.045]"
+        />
+
+        {isSelected && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ boxShadow: 'inset 0 0 0 3px var(--accent)' }}
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-stone-300">
-            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
         )}
+
+        <div className="absolute top-3 left-3 z-10">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-[rgba(255,253,249,.94)] text-[var(--ink-2)] backdrop-blur-sm shadow-[0_1px_4px_rgba(0,0,0,.12)]">
+            <span
+              aria-hidden="true"
+              className="relative block w-[10px] h-[10px] rounded-[2px]"
+              style={{
+                boxShadow: `inset 0 0 0 1.5px ${
+                  dish.diet === 'non-vegetarian' ? 'var(--nonveg)' : dish.diet === 'egg' ? 'var(--egg)' : 'var(--veg)'
+                }`,
+              }}
+            >
+              <span
+                className="absolute rounded-full"
+                style={{
+                  inset: '2.5px',
+                  background:
+                    dish.diet === 'non-vegetarian' ? 'var(--nonveg)' : dish.diet === 'egg' ? 'var(--egg)' : 'var(--veg)',
+                }}
+              />
+            </span>
+            {dish.diet === 'non-vegetarian' ? 'Non-veg' : dish.diet === 'egg' ? 'Egg' : 'Veg'}
+          </span>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col flex-1 gap-3">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-[#1a1a1a] text-base leading-tight">{dish.name}</h3>
-          <DietBadge diet={dish.diet} />
+      <div className="p-4 pt-4 flex flex-col flex-1 gap-2.5">
+        <div>
+          <h3 className="font-display text-[19px] leading-[1.24] text-[var(--ink)] text-balance">
+            {dish.name}
+          </h3>
+          <p className="text-[11px] font-semibold uppercase tracking-[.13em] text-[var(--ink-3)] mt-1.5">
+            {dish.cuisine}
+          </p>
         </div>
 
-        <p className="text-sm text-stone-500 line-clamp-2 leading-relaxed flex-1">
+        <p className="text-[13.5px] leading-[1.56] text-[var(--ink-3)] line-clamp-2 flex-1">
           {dish.description}
         </p>
 
         {dish.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {dish.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="text-xs text-stone-500 bg-stone-100 rounded-full px-2 py-0.5">
+            {dish.tags.slice(0, 2).map(tag => (
+              <span
+                key={tag}
+                className="text-[11px] font-medium rounded-full px-2.5 py-1 bg-[var(--accent-soft)] text-[color-mix(in_srgb,var(--accent)_82%,black)]"
+              >
                 {tag}
               </span>
             ))}
           </div>
         )}
 
-        <div className="flex gap-2 pt-1">
-          <button
-            onClick={onViewDetails}
-            className="flex-1 px-3 py-2 rounded-full border border-stone-200 text-xs font-medium text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-colors"
-          >
-            View details
-          </button>
-
-          {orderContext && (
+        {orderContext && (
+          <div className="pt-1.5" onClick={e => e.stopPropagation()}>
             <button
+              type="button"
               onClick={() =>
-                isSelected
-                  ? orderContext.onRemoveDish(dish.id)
-                  : orderContext.onAddDish(dish.id)
+                isSelected ? orderContext.onRemoveDish(dish.id) : orderContext.onAddDish(dish.id)
               }
               disabled={!hasActiveMeal}
-              className={`flex-1 px-3 py-2 rounded-full text-xs font-medium transition-colors ${
-                !hasActiveMeal
-                  ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                  : isSelected
-                  ? 'text-white'
-                  : 'text-white hover:opacity-90'
-              }`}
-              style={
-                hasActiveMeal && !isSelected
-                  ? { background: 'var(--color-accent)' }
-                  : hasActiveMeal && isSelected
-                  ? { background: '#1a1a1a' }
-                  : {}
-              }
+              className={`btn btn-sm w-full ${isSelected ? 'btn-secondary' : 'btn-primary'}`}
+              style={isSelected ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : undefined}
             >
-              {isSelected ? '✓ Added' : 'Add to menu'}
+              {isSelected ? (
+                <>
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true">
+                    <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Added
+                </>
+              ) : hasActiveMeal ? (
+                'Add to menu'
+              ) : (
+                'Select a meal first'
+              )}
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </div>
+    </article>
   )
 }
