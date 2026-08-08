@@ -17,7 +17,10 @@ import * as dotenv from 'dotenv'
 import { CUISINE_GROUP_OF } from '../lib/taxonomy'
 import type { Cuisine } from '../lib/taxonomy'
 
-dotenv.config({ path: '.env.local' })
+// quiet: true suppresses dotenv's "injected env (6) from .env.local" banner.
+// It is printed to stdout, so without this it interleaves with the progress
+// counter and makes the seed output harder to read than it needs to be.
+dotenv.config({ path: '.env.local', quiet: true })
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY

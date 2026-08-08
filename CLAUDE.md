@@ -131,16 +131,26 @@ All tokens live in the `:root` block of `app/globals.css`. Nothing downstream ha
   `cubic-bezier(.22,1,.36,1)`
 - No dark mode (the dark bands are a design device, not a theme)
 
-## Environment variables needed
+## Environment variables
+
+`cp .env.example .env.local` and fill it in. `.env.example` is the committed
+reference with notes on where each value comes from; `.env.local` is gitignored.
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=      # secret — bypasses RLS, used by seed + order writes
 GMAIL_USER=
-GMAIL_APP_PASSWORD=
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+GMAIL_APP_PASSWORD=             # Google App Password, not the account password
+NEXT_PUBLIC_SITE_URL=           # absolute base for order links in emails and PDF
 ```
+
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is listed in the original brief but nothing
+reads it — Places autocomplete is still deferred. Add it when that gets built.
+
+Anything prefixed `NEXT_PUBLIC_` is inlined into the client bundle at build time
+and is visible in devtools. `SUPABASE_SERVICE_ROLE_KEY` must never gain that
+prefix.
 
 ## Business details (footer, emails, PDF)
 
