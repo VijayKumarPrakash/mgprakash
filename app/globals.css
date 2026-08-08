@@ -1,49 +1,345 @@
 @import "tailwindcss";
 
+/* ===========================================================================
+   M G Prakash Catering — "Sandalwood & Ink"
+
+   Cream pages, espresso-dark hero and feature bands. Every colour, radius and
+   motion value is a custom property so the whole theme can be retuned from
+   this block alone — nothing downstream hard-codes a hex.
+   =========================================================================== */
+
 :root {
-  --color-accent: #C8860A;
-  --background: #FAFAF8;
-  --foreground: #1a1a1a;
+  /* --- surfaces --------------------------------------------------------- */
+  --paper:       #F6F2EB;  /* page background */
+  --surface:     #FFFDF9;  /* cards, panels */
+  --surface-2:   #EFE9DE;  /* inset wells, skeletons */
+  --surface-3:   #E6DFD1;
+
+  /* --- ink -------------------------------------------------------------- */
+  --ink:         #1C1A17;
+  --ink-2:       #524C43;
+  --ink-3:       #857C6F;
+  --line:        #E3DCCF;
+  --line-strong: #CFC5B3;
+
+  /* --- dark ground (hero, feature bands, footer) ------------------------ */
+  --dark:        #1A1512;
+  --dark-2:      #241F1A;
+  --dark-3:      #322A23;
+  --dark-ink:    #F7F1E6;
+  --dark-ink-2:  #B8AC99;
+  --dark-ink-3:  #8A7F6E;
+  --dark-line:   rgba(247, 241, 230, 0.13);
+
+  /* --- accent ----------------------------------------------------------- */
+  /* Copper. 4.62:1 against white, so it is safe as a button fill with white
+     text — the previous #C8860A only managed 3.2:1 and failed WCAG AA. */
+  --accent:       #A63D17;
+  --accent-hover: #8E3312;
+  --accent-ink:   #FFFFFF;
+  --accent-soft:  #F7EAE1;
+  --accent-line:  #E8CFBE;
+  /* Lifted variant for use on the dark ground, where the deep copper muddies. */
+  --accent-lift:  #D9853F;
+
+  /* --- semantic --------------------------------------------------------- */
+  --veg:      #3F7A1F;
+  --nonveg:   #A32020;
+  --egg:      #B07A12;
+
+  /* --- shape ------------------------------------------------------------ */
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+  --r-pill: 999px;
+
+  --shadow-rest: 0 1px 2px rgba(28, 26, 23, .05);
+  --shadow-lift: 0 14px 40px -10px rgba(35, 25, 15, .28), 0 2px 8px rgba(28, 26, 23, .06);
+  --shadow-pop:  0 32px 80px -20px rgba(26, 21, 18, .45), 0 4px 16px rgba(26, 21, 18, .12);
+
+  /* --- motion ----------------------------------------------------------- */
+  /* Three durations only. Anything that responds to a pointer uses --dur-fast
+     so the UI never feels laggy; anything decorative uses --dur-slow. */
+  --ease:      cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:   cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast:  120ms;
+  --dur-base:  220ms;
+  --dur-slow:  420ms;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-accent: var(--color-accent);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-dark: var(--dark);
+  --color-dark-2: var(--dark-2);
+  --color-dark-3: var(--dark-3);
+  --color-dark-ink: var(--dark-ink);
+  --color-dark-ink-2: var(--dark-ink-2);
+  --color-dark-ink-3: var(--dark-ink-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --color-accent-lift: var(--accent-lift);
+  --color-veg: var(--veg);
+  --color-nonveg: var(--nonveg);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
-* {
-  box-sizing: border-box;
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), -apple-system, system-ui, "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
+/* Visible only for keyboard users — pointer users never see a ring. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+/* Panels and scroll containers take focus programmatically (modals, so the
+   Escape handler and focus trap have somewhere to start). They are not
+   interactive targets, so they must not draw a focus ring. */
+[tabindex="-1"]:focus,
+[tabindex="-1"]:focus-visible { outline: none; }
+
+/* The display face carries a fair amount of optical-size and softness range.
+   Pinning them here stops headings drifting as weights change. */
+.font-display {
+  font-family: var(--font-display), "Recoleta", Georgia, serif;
+  font-variation-settings: "SOFT" 40, "WONK" 0, "opsz" 60;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+
+/* ===========================================================================
+   Components
+   =========================================================================== */
+
 @layer components {
-  .form-input {
-    @apply w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm text-[#1a1a1a] placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors;
+
+  /* --- buttons --------------------------------------------------------- */
+  /* Transitions are scoped to transform / box-shadow / colour only. Animating
+     anything that triggers layout would drop frames on a long dish grid. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold text-sm rounded-full
+           px-6 py-3 cursor-pointer select-none whitespace-nowrap;
+    border: 1px solid transparent;
+    transition:
+      background-color var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      box-shadow var(--dur-base) var(--ease),
+      transform var(--dur-fast) var(--ease);
   }
+  .btn:active { transform: scale(0.97); transition-duration: 60ms; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60;
-    background: var(--color-accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 20px -6px color-mix(in srgb, var(--accent) 65%, transparent);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-medium text-stone-600 border border-stone-200 hover:border-stone-300 hover:bg-stone-50 transition-colors bg-white;
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--line-strong);
+    background: var(--surface-2);
   }
 
-  .font-display {
-    font-family: var(--font-display), 'Playfair Display', Georgia, serif;
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-2);
   }
+  .btn-ghost:hover:not(:disabled) { color: var(--ink); background: var(--surface-2); }
+
+  /* On the espresso ground the deep copper reads as brown mud, so the accent
+     lifts and the label flips to dark ink for contrast. */
+  .on-dark .btn-primary {
+    background: var(--accent-lift);
+    color: var(--dark);
+  }
+  .on-dark .btn-primary:hover:not(:disabled) {
+    background: #E99753;
+    box-shadow: 0 6px 24px -6px rgba(217, 133, 63, .5);
+  }
+  .on-dark .btn-secondary {
+    background: transparent;
+    color: var(--dark-ink);
+    border-color: var(--dark-line);
+  }
+  .on-dark .btn-secondary:hover:not(:disabled) {
+    background: rgba(247, 241, 230, .07);
+    border-color: rgba(247, 241, 230, .3);
+  }
+
+  .btn-sm { @apply px-4 py-2 text-[13px]; }
+
+  /* --- form controls ---------------------------------------------------- */
+  .form-input {
+    @apply w-full px-4 py-3 text-sm rounded-xl;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    transition: border-color var(--dur-fast) var(--ease),
+                box-shadow var(--dur-fast) var(--ease);
+  }
+  .form-input::placeholder { color: var(--ink-3); }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .form-label {
+    @apply block text-xs font-semibold tracking-wide uppercase mb-2;
+    color: var(--ink-3);
+    letter-spacing: .09em;
+  }
+
+  /* --- filter chip ------------------------------------------------------ */
+  .chip {
+    @apply inline-flex items-center gap-1.5 text-[13px] font-medium rounded-full px-4 py-2
+           cursor-pointer select-none whitespace-nowrap;
+    background: var(--surface);
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    transition:
+      background-color var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+  .chip:hover { border-color: var(--line-strong); color: var(--ink); }
+  .chip:active { transform: scale(0.96); transition-duration: 60ms; }
+  .chip[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .chip[aria-pressed="true"]:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+  /* --- card ------------------------------------------------------------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-rest);
+    transition: transform var(--dur-base) var(--ease),
+                box-shadow var(--dur-base) var(--ease),
+                border-color var(--dur-base) var(--ease);
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-3 text-[11px] font-bold uppercase;
+    letter-spacing: .18em;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 26px;
+    height: 1.5px;
+    background: currentColor;
+    opacity: .55;
+  }
+}
+
+/* ===========================================================================
+   Utilities
+   =========================================================================== */
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Modal entrance. Both keyframes touch only opacity and transform, so the
+   compositor handles them without a layout or paint pass. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+@media (max-width: 640px) {
+  @keyframes panelIn {
+    from { opacity: 1; transform: translateY(100%); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* Scroll reveal. The element is only transitioned once, and only on
+   transform/opacity, so it stays off the layout and paint path. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 520ms var(--ease), transform 520ms var(--ease);
+}
+
+/* While a filter transition is pending, dim the grid rather than blocking the
+   input. React keeps the previous result on screen; this just signals staleness. */
+.is-pending {
+  opacity: .55;
+  transition: opacity var(--dur-base) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { OrderProvider, useOrder } from './OrderContext'
 import { ContactStep } from './steps/ContactStep'
@@ -46,11 +46,11 @@ function StepIndicator({
                       ? 'text-white'
                       : i === currentIndex
                       ? 'text-white ring-4 ring-offset-2'
-                      : 'bg-stone-100 text-stone-400'
+                      : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
                   }`}
                   style={
                     i <= currentIndex
-                      ? { background: 'var(--color-accent)', ...(i === currentIndex ? { '--tw-ring-color': 'color-mix(in srgb, var(--color-accent) 25%, transparent)' } as React.CSSProperties : {}) }
+                      ? { background: 'var(--accent)', ...(i === currentIndex ? { '--tw-ring-color': 'color-mix(in srgb, var(--accent) 25%, transparent)' } as React.CSSProperties : {}) }
                       : {}
                   }
                 >
@@ -59,25 +59,25 @@ function StepIndicator({
               ) : (
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                    i === currentIndex ? 'text-white ring-4 ring-offset-2' : 'bg-stone-100 text-stone-400'
+                    i === currentIndex ? 'text-white ring-4 ring-offset-2' : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
                   }`}
                   style={
                     i === currentIndex
-                      ? { background: 'var(--color-accent)', '--tw-ring-color': 'color-mix(in srgb, var(--color-accent) 25%, transparent)' } as React.CSSProperties
+                      ? { background: 'var(--accent)', '--tw-ring-color': 'color-mix(in srgb, var(--accent) 25%, transparent)' } as React.CSSProperties
                       : {}
                   }
                 >
                   {i + 1}
                 </div>
               )}
-              <span className={`text-xs hidden sm:block ${i === currentIndex ? 'font-medium text-[#1a1a1a]' : 'text-stone-400'}`}>
+              <span className={`text-xs hidden sm:block ${i === currentIndex ? 'font-medium text-[var(--ink)]' : 'text-[var(--ink-3)]'}`}>
                 {step.label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
               <div
                 className="flex-1 h-0.5 mx-2 mb-4 transition-all"
-                style={{ background: i < currentIndex ? 'var(--color-accent)' : '#e7e5e4' }}
+                style={{ background: i < currentIndex ? 'var(--accent)' : '#e7e5e4' }}
               />
             )}
           </div>
@@ -87,35 +87,16 @@ function StepIndicator({
   )
 }
 
-function OrderFormInner({
-  dishes,
-  initialName,
-  initialEmail,
-}: {
-  dishes: Dish[]
-  initialName?: string
-  initialEmail?: string
-}) {
+function OrderFormInner({ dishes }: { dishes: Dish[] }) {
   const [step, setStep] = useState<StepId>('contact')
   const [highestReached, setHighestReached] = useState(0)
-  const { draft, setContact } = useOrder()
+  const { draft } = useOrder()
   const router = useRouter()
 
-  useEffect(() => {
-    if (draft.client_name === '' && draft.client_email === '') {
-      setContact({
-        client_name:  initialName  ?? '',
-        client_email: initialEmail ?? '',
-        client_phone: draft.client_phone,
-      })
-    }
-  }, []) // mount-only: pre-populate from Google auth
-
-  useEffect(() => {
-    if (draft.meals.length === 0 && highestReached >= 3) {
-      setHighestReached(2)
-    }
-  }, [draft.meals.length])
+  // Removing the last meal invalidates the dish-selection and review steps, so
+  // walk the furthest-reached marker back. Derived during render — an effect
+  // would leave those steps clickable for a frame.
+  if (draft.meals.length === 0 && highestReached >= 3) setHighestReached(2)
 
   function goToStep(targetIndex: number) {
     setStep(STEPS[targetIndex].id as StepId)
@@ -144,7 +125,7 @@ function OrderFormInner({
         onStepClick={i => setStep(STEPS[i].id as StepId)}
       />
 
-      <div className="bg-[#FAFAF8] rounded-3xl">
+      <div className="bg-[var(--paper)] rounded-3xl">
         {step === 'contact' && <ContactStep onNext={() => goToStep(1)} />}
         {step === 'event' && <EventStep onNext={() => goToStep(2)} onBack={() => setStep('contact')} />}
         {step === 'meals' && <MealsStep onNext={() => goToStep(3)} onBack={() => setStep('event')} />}
@@ -177,8 +158,8 @@ export function OrderForm({
   initialEmail?: string
 }) {
   return (
-    <OrderProvider>
-      <OrderFormInner dishes={dishes} initialName={initialName} initialEmail={initialEmail} />
+    <OrderProvider initialContact={{ name: initialName, email: initialEmail }}>
+      <OrderFormInner dishes={dishes} />
     </OrderProvider>
   )
 }

@@ -1,6 +1,13 @@
-export type Course = 'starter' | 'main' | 'side' | 'dessert' | 'snack' | 'beverage'
-export type Diet = 'vegetarian' | 'vegan' | 'jain' | 'non-vegetarian'
-export type SpiceLevel = 'mild' | 'medium' | 'hot'
+import type {
+  Course, Cuisine, CuisineGroup, Diet, SpiceLevel,
+  Occasion, Flavour, CookingMethod, ImageLicence,
+} from '@/lib/taxonomy'
+
+export type {
+  Course, Cuisine, CuisineGroup, Diet, SpiceLevel,
+  Occasion, Flavour, CookingMethod, ImageLicence,
+}
+
 export type EventType =
   | 'wedding' | 'engagement' | 'birthday' | 'anniversary'
   | 'housewarming' | 'baby_shower' | 'namakarana' | 'religious'
@@ -10,18 +17,36 @@ export type OrderStatus = 'submitted'
 export interface Dish {
   id: string
   name: string
+  /** Name in the local script/transliteration where it differs, e.g. "Kayi Obbattu". */
+  alt_names: string[]
   description: string
+
   image_url: string | null
+  /** Base64 LQIP inlined at first paint so cards never render as empty grey holes. */
+  blur_data_url: string | null
+  image_licence: ImageLicence
+  /** Required by cc-by / cc-by-sa; rendered in the dish detail panel. */
+  image_credit: string | null
+  image_source_url: string | null
+
   course: Course[]
-  cuisine: string | null
+  cuisine: Cuisine
+  cuisine_group: CuisineGroup
+  region_of_origin: string | null
+
   diet: Diet
-  spice_level: SpiceLevel | null
-  flavour_profile: string[]
-  cooking_method: string[]
+  /** Orthogonal to `diet` — a dish can be vegetarian, vegan and Jain at once. */
+  is_vegan: boolean
+  is_jain: boolean
+  /** Tracked apart from `is_jain`: satvik events exclude alliums without full Jain rules. */
+  contains_onion_garlic: boolean
+
+  spice_level: SpiceLevel
+  flavour_profile: Flavour[]
+  cooking_method: CookingMethod[]
   ingredients: string[]
   tags: string[]
-  occasion_fit: string[]
-  region_of_origin: string | null
+  occasion_fit: Occasion[]
 }
 
 export interface Order {

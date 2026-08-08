@@ -8,7 +8,7 @@ interface Props {
 export function FormField({ label, error, required, children }: Props) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#1a1a1a]">
+      <label className="block text-sm font-medium text-[var(--ink)]">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>

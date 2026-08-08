@@ -1,30 +1,35 @@
-import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { display, body } from './fonts'
 import { Nav } from '@/components/layout/Nav'
 import { Footer } from '@/components/layout/Footer'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: 'M G Prakash Catering',
-  description: 'Authentic South & North Indian catering for weddings, corporate events, and celebrations in Bengaluru.',
+  metadataBase: new URL('https://mgprakashcatering.com'),
+  title: {
+    default: 'M G Prakash Catering — Bengaluru',
+    template: '%s · M G Prakash Catering',
+  },
+  description:
+    'Authentic South and North Indian catering for weddings, naming ceremonies, corporate events and celebrations across Bengaluru. Serving since 2000.',
+  openGraph: {
+    title: 'M G Prakash Catering',
+    description:
+      'Authentic South and North Indian catering for weddings and celebrations across Bengaluru. Serving since 2000.',
+    locale: 'en_IN',
+    type: 'website',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1A1512',
+  colorScheme: 'light',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} h-full`}>
-      <body className="min-h-screen flex flex-col bg-[#FAFAF8] text-[#1a1a1a] antialiased" suppressHydrationWarning>
+    <html lang="en-IN" className={`${display.variable} ${body.variable}`}>
+      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />

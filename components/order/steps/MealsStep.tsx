@@ -33,12 +33,12 @@ function MealCard({
   }
 
   return (
-    <div className="bg-white border border-stone-200 rounded-2xl p-5 space-y-4">
+    <div className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-[#1a1a1a]">Meal details</h3>
+        <h3 className="font-semibold text-[var(--ink)]">Meal details</h3>
         <button
           onClick={onRemove}
-          className="text-stone-400 hover:text-red-500 transition-colors text-sm"
+          className="text-[var(--ink-3)] hover:text-red-500 transition-colors text-sm"
         >
           Remove
         </button>
@@ -99,8 +99,8 @@ function MealCard({
         </FormField>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-[#1a1a1a]">Vegetarian guests</label>
-            <label className="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer select-none">
+            <label className="text-sm font-medium text-[var(--ink)]">Vegetarian guests</label>
+            <label className="flex items-center gap-1.5 text-xs text-[var(--ink-3)] cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={allVeg}
@@ -108,7 +108,7 @@ function MealCard({
                   if (e.target.checked) update({ veg_guests: meal.total_guests })
                   else update({ veg_guests: '' })
                 }}
-                className="rounded border-stone-300"
+                className="rounded border-[var(--line-strong)]"
               />
               All veg
             </label>
@@ -121,7 +121,7 @@ function MealCard({
             onChange={e => update({ veg_guests: e.target.value ? parseInt(e.target.value) : '' })}
             onDoubleClick={e => (e.target as HTMLInputElement).select()}
             placeholder="60"
-            className={`form-input${allVeg ? ' opacity-60 bg-stone-50 cursor-not-allowed' : ''}`}
+            className={`form-input${allVeg ? ' opacity-60 bg-[var(--surface-2)] cursor-not-allowed' : ''}`}
           />
           {errors.veg_guests && <p className="text-xs text-red-600">{errors.veg_guests}</p>}
         </div>
@@ -167,8 +167,8 @@ export function MealsStep({ onNext, onBack }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-bold text-[#1a1a1a]">Add your meals</h2>
-        <p className="text-stone-500 mt-1">Each meal can have its own date, time, location, and dish selection.</p>
+        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Add your meals</h2>
+        <p className="text-[var(--ink-3)] mt-1">Each meal can have its own date, time, location, and dish selection.</p>
       </div>
 
       {topError && (
@@ -188,7 +188,7 @@ export function MealsStep({ onNext, onBack }: Props) {
 
       <button
         onClick={addMeal}
-        className="w-full py-3 rounded-xl border-2 border-dashed border-stone-200 text-sm font-medium text-stone-500 hover:border-stone-300 hover:text-stone-600 transition-colors"
+        className="w-full py-3 rounded-xl border-2 border-dashed border-[var(--line)] text-sm font-medium text-[var(--ink-3)] hover:border-[var(--line-strong)] hover:text-[var(--ink-2)] transition-colors"
       >
         + Add a meal
       </button>

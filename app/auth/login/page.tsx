@@ -29,13 +29,13 @@ export default function LoginPage() {
     <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-[#1a1a1a] mb-2">Sign in</h1>
-          <p className="text-stone-500 text-sm">
+          <h1 className="font-display text-3xl font-semibold text-[var(--ink)] mb-2">Sign in</h1>
+          <p className="text-[var(--ink-3)] text-sm">
             Sign in to view and manage your catering orders.
           </p>
         </div>
 
-        <div className="bg-white border border-stone-200 rounded-2xl p-8 space-y-4">
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-8 space-y-4">
           {error && (
             <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
           )}
@@ -43,10 +43,10 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-stone-300 rounded-xl bg-white hover:bg-stone-50 transition-colors disabled:opacity-60 font-medium text-[#1a1a1a] text-sm"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[var(--line-strong)] rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-60 font-medium text-[var(--ink)] text-sm"
           >
             {loading ? (
-              <svg className="animate-spin w-5 h-5 text-stone-400" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-5 h-5 text-[var(--ink-3)]" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -61,13 +61,13 @@ export default function LoginPage() {
             {loading ? 'Redirecting…' : 'Continue with Google'}
           </button>
 
-          <p className="text-center text-xs text-stone-400">
+          <p className="text-center text-xs text-[var(--ink-3)]">
             No account? One is created automatically on first sign-in.
           </p>
         </div>
 
-        <p className="text-center text-sm text-stone-400 mt-6">
-          <Link href="/" className="hover:text-stone-600 transition-colors">← Back to home</Link>
+        <p className="text-center text-sm text-[var(--ink-3)] mt-6">
+          <Link href="/" className="hover:text-[var(--ink-2)] transition-colors">← Back to home</Link>
         </p>
       </div>
     </div>
