@@ -24,8 +24,13 @@
  * Anything it cannot resolve keeps its placeholder tile, which is a perfectly
  * good outcome — a designed tile beats a photo of the wrong dish.
  *
- * REQUIRES: `npm i -D sharp`. Network access — this will not run inside a
- * sandbox with image hosts firewalled off.
+ * REQUIRES network access — this will not run inside a sandbox with image
+ * hosts firewalled off.
+ *
+ * sharp usually resolves already: Next depends on it for image optimisation,
+ * and npm normally hoists it to the top of node_modules. That is a hoisting
+ * accident rather than a guarantee, though — it is nested under next/ on some
+ * installs. If the import fails, `npm i -D sharp` makes it explicit.
  */
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -164,10 +169,30 @@ function normaliseLicence(raw: string): string {
   return 'cc-by'
 }
 
+/**
+ * sharp changed its module shape between 0.34 and 0.35: 0.34 uses `export =`,
+ * so the namespace itself is the callable factory, while 0.35 moved to a
+ * default export and the namespace stopped being callable. Writing against
+ * either one breaks on the other — and which version resolves depends on npm's
+ * hoisting, since Next carries its own copy.
+ *
+ * So the factory type is built from sharp's *named* type exports, which are
+ * stable across both, and the runtime picks whichever shape actually turned up.
+ */
+type SharpFactory = (
+  input?: Buffer | string,
+  options?: import('sharp').SharpOptions
+) => import('sharp').Sharp
+
 async function main() {
-  let sharp: typeof import('sharp')
+  // Imported dynamically so a missing sharp produces a useful message rather
+  // than a module-resolution stack trace at load time.
+  let sharp: SharpFactory
   try {
-    sharp = (await import('sharp')).default as unknown as typeof import('sharp')
+    const mod: unknown = await import('sharp')
+    sharp = (
+      typeof mod === 'function' ? mod : (mod as { default: unknown }).default
+    ) as SharpFactory
   } catch {
     console.error('sharp is not installed. Run:  npm i -D sharp\n')
     process.exit(1)
