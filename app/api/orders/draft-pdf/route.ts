@@ -1,43 +1,63 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
-import type { OrderDraft, Dish, Order, Meal } from '@/types'
+import { getDishesByIds } from '@/lib/dishes'
+import { validateOrderDraft } from '@/lib/validation'
+import type { Dish, Order, Meal } from '@/types'
 
-export async function POST(req: NextRequest) {
+/**
+ * Renders the "download a draft" preview from the review step.
+ *
+ * The client used to POST the entire 229-dish catalogue alongside the draft so
+ * the server could resolve dish names — roughly a quarter of a megabyte of
+ * JSON, uploaded on a mobile connection, to print at most a few dozen names
+ * the server can already look up. It now sends the draft alone and the ids are
+ * resolved here.
+ */
+export async function POST(req: Request) {
   try {
-    const { draft, dishes }: { draft: OrderDraft; dishes: Dish[] } = await req.json()
+    const parsed = validateOrderDraft(await req.json())
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
+    }
+    const draft = parsed.draft
 
-    const dishMap = Object.fromEntries((dishes as Dish[]).map(d => [d.id, d]))
+    const dishIds = [...new Set(draft.meals.flatMap(m => m.dish_ids))]
+    const dishMap = new Map((await getDishesByIds(dishIds)).map(d => [d.id, d]))
 
-    const mealsForPDF: Meal[] = draft.meals.map(m => ({
-      id: m.id,
+    const meals: Meal[] = draft.meals.map((m, i) => ({
+      // The preview is never persisted, so these ids only have to be unique
+      // enough to key a React list.
+      id: `draft-meal-${i}`,
       order_id: 'draft',
       name: m.name,
       date: m.date,
       time: m.time,
       location: m.location,
-      total_guests: Number(m.total_guests) || 0,
-      veg_guests: Number(m.veg_guests) || 0,
-      dishes: m.dish_ids.map(id => dishMap[id]).filter(Boolean) as Dish[],
+      total_guests: m.total_guests,
+      veg_guests: m.veg_guests,
+      dishes: m.dish_ids.map(id => dishMap.get(id)).filter((d): d is Dish => !!d),
     }))
 
-    const fakeOrder: Order = {
+    const preview: Order = {
       id: 'draft-preview-0000',
       client_name: draft.client_name,
       client_email: draft.client_email,
       client_phone: draft.client_phone,
       event_name: draft.event_name,
-      event_type: (draft.event_type || 'other') as Order['event_type'],
+      event_type: draft.event_type,
       status: 'submitted',
       created_at: new Date().toISOString(),
+      user_id: null,
     }
 
-    const pdfBuffer = await generateOrderPDF(fakeOrder, mealsForPDF, dishMap, true)
+    const pdfBuffer = await generateOrderPDF(preview, meals, true)
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="quote-draft.pdf"`,
+        'Content-Disposition': 'attachment; filename="mgprakash-quote-draft.pdf"',
+        'Content-Length': String(pdfBuffer.length),
       },
     })
   } catch (err) {

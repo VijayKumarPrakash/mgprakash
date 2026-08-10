@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createCookieClient } from '@/lib/supabase/server'
+import { orderRef } from '@/lib/format'
+import { EVENT_TYPE_LABELS } from '@/types'
 import type { Order } from '@/types'
 
 export default async function MyOrdersPage() {
@@ -29,7 +31,7 @@ export default async function MyOrdersPage() {
       {rows.length === 0 ? (
         <div className="text-center py-20 space-y-4">
           <p className="text-[var(--ink-3)] text-base">You haven&rsquo;t placed any orders yet.</p>
-          <Link href="/order/new" className="btn-primary inline-flex">
+          <Link href="/order/new" className="btn btn-primary">
             Place your first order
           </Link>
         </div>
@@ -44,7 +46,9 @@ export default async function MyOrdersPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="font-semibold text-[var(--ink)]">{order.event_name}</p>
-                  <p className="text-sm text-[var(--ink-3)] capitalize">{order.event_type}</p>
+                  <p className="text-sm text-[var(--ink-3)]">
+                    {EVENT_TYPE_LABELS[order.event_type] ?? order.event_type}
+                  </p>
                 </div>
                 <div className="text-right space-y-1 flex-shrink-0">
                   <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
@@ -58,7 +62,7 @@ export default async function MyOrdersPage() {
                 </div>
               </div>
               <p className="text-xs text-[var(--ink-3)] mt-3 font-mono">
-                #{order.id.slice(0, 8).toUpperCase()}
+                #{orderRef(order.id)}
               </p>
             </Link>
           ))}

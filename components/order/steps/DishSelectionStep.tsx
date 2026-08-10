@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useOrder } from '../OrderContext'
 import { CatalogueClient } from '@/components/catalogue/CatalogueClient'
 import type { Dish } from '@/types'
@@ -13,17 +14,26 @@ interface Props {
 export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
   const { draft, activeMeal, setActiveMeal, addDishToMeal, removeDishFromMeal } = useOrder()
 
-  const orderContext = {
-    activeMealId: draft.active_meal_id,
-    activeMealName: activeMeal?.name || null,
-    selectedDishIds: activeMeal?.dish_ids ?? [],
-    onAddDish: (dishId: string) => {
-      if (draft.active_meal_id) addDishToMeal(draft.active_meal_id, dishId)
-    },
-    onRemoveDish: (dishId: string) => {
-      if (draft.active_meal_id) removeDishFromMeal(draft.active_meal_id, dishId)
-    },
-  }
+  const activeMealId = draft.active_meal_id
+
+  // Memoised because this object is the sole prop that changes on the
+  // catalogue. Rebuilt fresh every render, it invalidated the whole 229-card
+  // grid on each keystroke of the search box sitting inside it — undoing the
+  // deferred-value work CatalogueClient does to stay responsive.
+  const orderContext = useMemo(
+    () => ({
+      activeMealId,
+      activeMealName: activeMeal?.name || null,
+      selectedDishIds: activeMeal?.dish_ids ?? [],
+      onAddDish: (dishId: string) => {
+        if (activeMealId) addDishToMeal(activeMealId, dishId)
+      },
+      onRemoveDish: (dishId: string) => {
+        if (activeMealId) removeDishFromMeal(activeMealId, dishId)
+      },
+    }),
+    [activeMealId, activeMeal?.name, activeMeal?.dish_ids, addDishToMeal, removeDishFromMeal]
+  )
 
   const totalDishesSelected = draft.meals.reduce((sum, m) => sum + m.dish_ids.length, 0)
 
@@ -74,14 +84,14 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
       <CatalogueClient dishes={dishes} orderContext={orderContext} />
 
       <div className="flex justify-between items-center pt-2 border-t border-[var(--line)]">
-        <button onClick={onBack} className="btn-secondary">Back</button>
+        <button onClick={onBack} className="btn btn-secondary">Back</button>
         <div className="flex items-center gap-4">
           {totalDishesSelected > 0 && (
             <p className="text-sm text-[var(--ink-3)]">
               {totalDishesSelected} dish{totalDishesSelected !== 1 ? 'es' : ''} selected across all meals
             </p>
           )}
-          <button onClick={onNext} className="btn-primary">
+          <button onClick={onNext} className="btn btn-primary">
             Review order
           </button>
         </div>

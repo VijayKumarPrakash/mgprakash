@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useOrder } from '../OrderContext'
-import type { Dish } from '@/types'
+import { formatDate, formatTime } from '@/lib/format'
+import { EVENT_TYPE_LABELS } from '@/types'
+import type { Dish, EventType } from '@/types'
 
 interface Props {
   dishes: Dish[]
@@ -16,26 +18,35 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [error, setError] = useState('')
 
-  const dishMap = Object.fromEntries(dishes.map(d => [d.id, d]))
+  const dishMap = useMemo(() => new Map(dishes.map(d => [d.id, d])), [dishes])
 
   async function handleDownloadDraft() {
     setDownloadingPdf(true)
+    setError('')
     try {
+      // Only the draft goes over the wire. This used to post `dishes` too —
+      // the entire 229-dish catalogue, a quarter of a megabyte uploaded from a
+      // phone — purely so the server could look up names it can already read
+      // from its own database.
       const res = await fetch('/api/orders/draft-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ draft, dishes }),
+        body: JSON.stringify(draft),
       })
       if (!res.ok) throw new Error('Failed to generate PDF')
+
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'quote-draft.pdf'
+      a.download = 'mgprakash-quote-draft.pdf'
       a.click()
-      URL.revokeObjectURL(url)
+      // Revoked on the next frame rather than synchronously — Safari has not
+      // started reading the blob by the time click() returns, and revoking
+      // immediately cancels the download.
+      requestAnimationFrame(() => URL.revokeObjectURL(url))
     } catch {
-      setError('Could not generate draft PDF. Please try again.')
+      setError('Could not generate the draft PDF. Please try again.')
     } finally {
       setDownloadingPdf(false)
     }
@@ -71,7 +82,9 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-2">
         <h3 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide">Event</h3>
         <p className="font-semibold text-[var(--ink)]">{draft.event_name}</p>
-        <p className="text-sm text-[var(--ink-2)] capitalize">{draft.event_type}</p>
+        <p className="text-sm text-[var(--ink-2)]">
+          {EVENT_TYPE_LABELS[draft.event_type as EventType] ?? draft.event_type}
+        </p>
       </section>
 
       {/* Meals */}
@@ -85,11 +98,11 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
           <div className="grid grid-cols-2 gap-3 text-sm text-[var(--ink-2)]">
             <div>
               <span className="text-xs text-[var(--ink-3)]">Date</span>
-              <p>{new Date(meal.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              <p>{formatDate(meal.date)}</p>
             </div>
             <div>
               <span className="text-xs text-[var(--ink-3)]">Time</span>
-              <p>{meal.time}</p>
+              <p>{formatTime(meal.time)}</p>
             </div>
             <div className="col-span-2">
               <span className="text-xs text-[var(--ink-3)]">Location</span>
@@ -116,7 +129,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
                 {meal.dish_ids.map(id => (
                   <li key={id} className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
-                    {dishMap[id]?.name ?? id}
+                    {dishMap.get(id)?.name ?? id}
                   </li>
                 ))}
               </ul>
@@ -128,36 +141,40 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       ))}
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>
+        <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          {error}
+        </p>
       )}
 
       <div className="flex justify-between pt-2 items-center">
-        <button onClick={onBack} disabled={submitting} className="btn-secondary disabled:opacity-50">
+        <button type="button" onClick={onBack} disabled={submitting} className="btn btn-secondary">
           Back
         </button>
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={handleDownloadDraft}
             disabled={downloadingPdf || submitting}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[var(--line)] text-sm font-medium text-[var(--ink-2)] hover:border-[var(--line-strong)] hover:bg-[var(--surface-2)] transition-colors bg-[var(--surface)] disabled:opacity-50"
+            className="btn btn-secondary"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             </svg>
-            {downloadingPdf ? 'Generating…' : 'Download Draft'}
+            {downloadingPdf ? 'Generating…' : 'Download draft'}
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="btn-primary disabled:opacity-60 flex items-center gap-2"
+            className="btn btn-primary"
           >
-          {submitting && (
-            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          )}
-          {submitting ? 'Submitting…' : 'Submit Order'}
+            {submitting && (
+              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            )}
+            {submitting ? 'Submitting…' : 'Submit request'}
           </button>
         </div>
       </div>

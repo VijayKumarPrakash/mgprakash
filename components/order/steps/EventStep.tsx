@@ -3,27 +3,12 @@
 import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
-import type { EventType } from '@/types'
+import { EVENT_TYPES, EVENT_TYPE_LABELS } from '@/types'
 
 interface Props {
   onNext: () => void
   onBack: () => void
 }
-
-const EVENT_TYPES: { value: EventType; label: string }[] = [
-  { value: 'wedding',      label: 'Wedding' },
-  { value: 'engagement',   label: 'Engagement' },
-  { value: 'birthday',     label: 'Birthday' },
-  { value: 'anniversary',  label: 'Anniversary' },
-  { value: 'housewarming', label: 'Gruha Pravesha / Housewarming' },
-  { value: 'baby_shower',  label: 'Seemantha / Baby Shower' },
-  { value: 'namakarana',   label: 'Namakarana' },
-  { value: 'religious',    label: 'Religious / Prasad' },
-  { value: 'party',        label: 'Party' },
-  { value: 'corporate',    label: 'Corporate' },
-  { value: 'funeral',      label: 'Funeral / Condolence' },
-  { value: 'other',        label: 'Other' },
-]
 
 export function EventStep({ onNext, onBack }: Props) {
   const { draft, setEvent } = useOrder()
@@ -62,19 +47,20 @@ export function EventStep({ onNext, onBack }: Props) {
 
         <FormField label="Event type" error={errors.event_type} required>
           <div className="grid grid-cols-2 gap-3">
-            {EVENT_TYPES.map(({ value, label }) => (
+            {EVENT_TYPES.map(value => (
               <button
                 key={value}
                 type="button"
+                aria-pressed={draft.event_type === value}
                 onClick={() => { setEvent({ ...draft, event_type: value }); setErrors(prev => ({ ...prev, event_type: '' })) }}
                 className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                   draft.event_type === value
-                    ? 'border-transparent text-white'
+                    ? 'border-transparent text-[var(--accent-ink)]'
                     : 'border-[var(--line)] text-[var(--ink-2)] hover:border-[var(--line-strong)] bg-[var(--surface)]'
                 }`}
                 style={draft.event_type === value ? { background: 'var(--accent)' } : {}}
               >
-                {label}
+                {EVENT_TYPE_LABELS[value]}
               </button>
             ))}
           </div>
@@ -82,8 +68,8 @@ export function EventStep({ onNext, onBack }: Props) {
       </div>
 
       <div className="flex justify-between pt-2">
-        <button onClick={onBack} className="btn-secondary">Back</button>
-        <button onClick={handleNext} className="btn-primary">Continue</button>
+        <button onClick={onBack} className="btn btn-secondary">Back</button>
+        <button onClick={handleNext} className="btn btn-primary">Continue</button>
       </div>
     </div>
   )

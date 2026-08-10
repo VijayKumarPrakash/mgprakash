@@ -10,15 +10,18 @@ import { DishSelectionStep } from './steps/DishSelectionStep'
 import { ReviewStep } from './steps/ReviewStep'
 import type { Dish } from '@/types'
 
+// `as const` matters: without it `StepId` widens to `string`, which is what
+// forced the three `as StepId` casts this file used to carry and would have
+// let a typo'd step id through the type checker untouched.
 const STEPS = [
   { id: 'contact', label: 'Contact' },
   { id: 'event', label: 'Event' },
   { id: 'meals', label: 'Meals' },
   { id: 'dishes', label: 'Dishes' },
   { id: 'review', label: 'Review' },
-]
+] as const
 
-type StepId = typeof STEPS[number]['id']
+type StepId = (typeof STEPS)[number]['id']
 
 function StepIndicator({
   currentStep,
@@ -77,7 +80,7 @@ function StepIndicator({
             {i < STEPS.length - 1 && (
               <div
                 className="flex-1 h-0.5 mx-2 mb-4 transition-all"
-                style={{ background: i < currentIndex ? 'var(--accent)' : '#e7e5e4' }}
+                style={{ background: i < currentIndex ? 'var(--accent)' : 'var(--line)' }}
               />
             )}
           </div>
@@ -99,7 +102,7 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
   if (draft.meals.length === 0 && highestReached >= 3) setHighestReached(2)
 
   function goToStep(targetIndex: number) {
-    setStep(STEPS[targetIndex].id as StepId)
+    setStep(STEPS[targetIndex].id)
     if (targetIndex > highestReached) setHighestReached(targetIndex)
   }
 
@@ -122,7 +125,7 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
       <StepIndicator
         currentStep={step}
         highestReached={highestReached}
-        onStepClick={i => setStep(STEPS[i].id as StepId)}
+        onStepClick={goToStep}
       />
 
       <div className="bg-[var(--paper)] rounded-3xl">

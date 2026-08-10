@@ -1,58 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createAnonClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+import { getOrderWithMeals } from '@/lib/orders'
 import { generateOrderPDF } from '@/lib/pdf/generate'
-import type { Order, Meal, Dish } from '@/types'
+import { orderRef } from '@/lib/format'
 
 export async function GET(
-  _req: NextRequest,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = createAnonClient()
 
-  const { data: order } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (!order) {
+  const result = await getOrderWithMeals(id)
+  if (!result) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  const { data: meals } = await supabase
-    .from('meals')
-    .select('*')
-    .eq('order_id', id)
-    .order('date')
-
-  const mealRows = (meals ?? []) as Meal[]
-
-  const { data: mealDishes } = await supabase
-    .from('meal_dishes')
-    .select('meal_id, dish_id')
-    .in('meal_id', mealRows.map(m => m.id))
-
-  const allDishIds = [...new Set((mealDishes ?? []).map(md => md.dish_id))]
-  const { data: dishRows } = allDishIds.length
-    ? await supabase.from('dishes').select('*').in('id', allDishIds)
-    : { data: [] }
-
-  const dishMap = Object.fromEntries((dishRows ?? []).map((d: Dish) => [d.id, d]))
-
-  const mealsWithDishes: Meal[] = mealRows.map(meal => ({
-    ...meal,
-    dishes: (mealDishes ?? [])
-      .filter(md => md.meal_id === meal.id)
-      .map(md => dishMap[md.dish_id])
-      .filter(Boolean) as Dish[],
-  }))
-
   let pdfBuffer: Buffer
   try {
-    pdfBuffer = await generateOrderPDF(order as Order, mealsWithDishes, dishMap)
+    pdfBuffer = await generateOrderPDF(result.order, result.meals)
   } catch (err) {
-    console.error('[pdf] generation failed:', err)
+    console.error(`[pdf] generation failed for ${id}:`, err)
     return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 })
   }
 
@@ -60,7 +26,7 @@ export async function GET(
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="mgprakash-order-${id.slice(0, 8)}.pdf"`,
+      'Content-Disposition': `attachment; filename="mgprakash-order-${orderRef(id).toLowerCase()}.pdf"`,
       'Content-Length': String(pdfBuffer.length),
     },
   })

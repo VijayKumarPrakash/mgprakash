@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useDeferredValue, useTransition, useRef, useEffect } from 'react'
+import { useState, useMemo, useCallback, useDeferredValue, useTransition } from 'react'
 import Fuse from 'fuse.js'
 import type { Dish } from '@/types'
 import { COURSES, CUISINE_GROUPS, OCCASIONS, SPICE_LEVELS } from '@/lib/taxonomy'
@@ -102,8 +102,9 @@ export function CatalogueClient({ dishes, orderContext }: Props) {
       )
     }
 
-    // Only re-sort when a search is not active — Fuse already ordered by relevance.
-    return q ? results : results
+    // No re-sort: with a query, Fuse has already ordered by relevance; without
+    // one, `dishes` arrives pre-sorted into BROWSE_ORDER by lib/dishes.ts.
+    return results
   }, [deferredQuery, filters, dishes, fuse])
 
   const visible = useMemo(() => filtered.slice(0, page * PAGE_SIZE), [filtered, page])
@@ -141,16 +142,10 @@ export function CatalogueClient({ dishes, orderContext }: Props) {
   const activeCount =
     Object.values(filters).reduce((n, list) => n + list.length, 0) + (query.trim() ? 1 : 0)
 
-  // The grid is aria-busy while a transition is pending so screen readers are
-  // told the results are stale, matching the visual dimming.
-  const gridRef = useRef<HTMLDivElement>(null)
-  const prevCount = useRef(visible.length)
-  useEffect(() => { prevCount.current = visible.length }, [visible.length])
-
   return (
     <>
       <div className="flex flex-col gap-5">
-        <SearchBar value={query} onChange={handleQuery} resultCount={filtered.length} />
+        <SearchBar value={query} onChange={handleQuery} />
 
         <FilterPanel
           filters={filters}
@@ -181,8 +176,9 @@ export function CatalogueClient({ dishes, orderContext }: Props) {
           </div>
         ) : (
           <>
+            {/* aria-busy while a transition is pending, so a screen reader is
+                told the results are stale — the spoken equivalent of the dim. */}
             <div
-              ref={gridRef}
               aria-busy={isPending}
               className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 ${isPending ? 'is-pending' : ''}`}
             >

@@ -7,8 +7,17 @@ import {
   Font,
   Link,
 } from '@react-pdf/renderer'
-import type { Order, Meal, Dish } from '@/types'
+import { formatDate, formatTime, orderRef } from '@/lib/format'
+import { BUSINESS, BRAND, TEL_HREF, WHATSAPP_HREF } from '@/lib/business'
+import type { Order, Meal } from '@/types'
 
+/**
+ * React-PDF can only embed TTF/OTF, so it cannot reuse the site's self-hosted
+ * variable woff2 files and fetches Inter over the network at render time
+ * instead. That is a live dependency inside a serverless function, which is
+ * why `generateOrderPDF` is called defensively — a font host having a bad day
+ * must not take an order submission down with it.
+ */
 Font.register({
   family: 'Inter',
   fonts: [
@@ -17,14 +26,14 @@ Font.register({
   ],
 })
 
-const ACCENT = '#C8860A'
-const DARK = '#1a1a1a'
-const MUTED = '#78716c'
+// React-PDF has no cascade and cannot read a CSS custom property, so the brand
+// tokens arrive as literals from lib/business.ts rather than being re-typed.
+const { accent: ACCENT, ink: DARK, muted: MUTED, line: LINE, paper: PAPER, surface: SURFACE } = BRAND
 
-const MAPS_URL = 'https://maps.google.com/?q=M+G+Prakash+Catering,+611+10th+Cross+Rd,+Indiranagar+Rajajinagar,+Bengaluru,+Karnataka+560079'
+const MAPS_URL = BUSINESS.mapsUrl
 
 const s = StyleSheet.create({
-  page: { fontFamily: 'Inter', fontSize: 10, color: DARK, backgroundColor: '#FAFAF8', paddingVertical: 48, paddingHorizontal: 52 },
+  page: { fontFamily: 'Inter', fontSize: 10, color: DARK, backgroundColor: PAPER, paddingVertical: 48, paddingHorizontal: 52 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 20, borderBottomWidth: 2, borderBottomColor: ACCENT, marginBottom: 28 },
   businessName: { fontSize: 16, fontWeight: 600, color: DARK, marginBottom: 4 },
   businessDetail: { fontSize: 8.5, color: MUTED, lineHeight: 1.6 },
@@ -38,69 +47,65 @@ const s = StyleSheet.create({
   infoBlock: { flex: 1 },
   infoLabel: { fontSize: 8, color: MUTED, marginBottom: 2 },
   infoValue: { fontSize: 10, fontWeight: 600, color: DARK },
-  mealCard: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e7e5e4', borderRadius: 6, padding: 16, marginBottom: 14 },
+  mealCard: { backgroundColor: SURFACE, borderWidth: 1, borderColor: LINE, borderRadius: 6, padding: 16, marginBottom: 14 },
   mealName: { fontSize: 12, fontWeight: 600, color: DARK, marginBottom: 8 },
   mealMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 12 },
   metaItem: { minWidth: 80 },
-  dishList: { borderTopWidth: 1, borderTopColor: '#e7e5e4', paddingTop: 10, marginTop: 4 },
+  dishList: { borderTopWidth: 1, borderTopColor: LINE, paddingTop: 10, marginTop: 4 },
   dishItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: ACCENT, marginRight: 8 },
   dishName: { fontSize: 9.5, color: DARK },
-  footer: { position: 'absolute', bottom: 28, left: 52, right: 52, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#e7e5e4', paddingTop: 12 },
+  footer: { position: 'absolute', bottom: 28, left: 52, right: 52, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: LINE, paddingTop: 12 },
   footerText: { fontSize: 8, color: MUTED },
 })
 
 interface Props {
   order: Order
   meals: Meal[]
-  dishMap: Record<string, Dish>
+  /** Renders the "not yet submitted" header used by the draft preview. */
   isDraft?: boolean
 }
 
-export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
-  const formatDate = (d: string) =>
-    new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    })
-
-  const formatTime = (t: string) => {
-    const [h, m] = t.split(':').map(Number)
-    const ampm = h >= 12 ? 'PM' : 'AM'
-    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
-  }
+export function OrderPDF({ order, meals, isDraft = false }: Props) {
+  const today = formatDate(new Date().toISOString().slice(0, 10))
 
   return (
-    <Document>
+    <Document
+      title={`${BUSINESS.name} — ${order.event_name}`}
+      author={BUSINESS.name}
+      subject={isDraft ? 'Draft quote preview' : `Order confirmation #${orderRef(order.id)}`}
+    >
       <Page size="A4" style={s.page}>
         {/* Header */}
         <View style={s.header}>
           <View>
-            <Text style={s.businessName}>M G Prakash Catering</Text>
+            <Text style={s.businessName}>{BUSINESS.name}</Text>
             <Link src={MAPS_URL} style={s.link}>
-              <Text>611, 10th Cross Rd, Indiranagar Rajajinagar{'\n'}Bengaluru, Karnataka 560079</Text>
+              <Text>
+                {BUSINESS.address.line1}, {BUSINESS.address.line2}{'\n'}
+                {BUSINESS.address.city}, {BUSINESS.address.state} {BUSINESS.address.postcode}
+              </Text>
             </Link>
             <View style={{ flexDirection: 'row', gap: 6, marginTop: 2 }}>
-              <Link src="tel:+919880193165" style={s.link}><Text>+91 98801 93165</Text></Link>
+              <Link src={TEL_HREF} style={s.link}><Text>{BUSINESS.phone}</Text></Link>
               <Text style={s.businessDetail}>·</Text>
-              <Link src="https://wa.me/919880193165" style={s.link}><Text>WhatsApp</Text></Link>
+              <Link src={WHATSAPP_HREF} style={s.link}><Text>WhatsApp</Text></Link>
             </View>
-            <Text style={s.businessDetail}>vijaykumar.sb.99@gmail.com</Text>
+            <Text style={s.businessDetail}>{BUSINESS.email}</Text>
           </View>
           <View>
             {isDraft ? (
               <>
                 <Text style={s.draftBadge}>Draft Preview</Text>
                 <Text style={s.draftNote}>Not yet submitted</Text>
-                <Text style={s.draftNote}>
-                  {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </Text>
+                <Text style={s.draftNote}>{today}</Text>
               </>
             ) : (
               <>
                 <Text style={s.orderRef}>Order Confirmation</Text>
-                <Text style={s.orderRef}>#{order.id.slice(0, 8).toUpperCase()}</Text>
+                <Text style={s.orderRef}>#{orderRef(order.id)}</Text>
                 <Text style={s.orderRef}>
-                  {new Date(order.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {formatDate(order.created_at.slice(0, 10))}
                 </Text>
               </>
             )}
@@ -109,15 +114,19 @@ export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
 
         {/* Client & Event */}
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Client & Event Details</Text>
+          <Text style={s.sectionTitle}>Client &amp; Event Details</Text>
           <View style={s.infoGrid}>
             <View style={s.infoBlock}>
               <Text style={s.infoLabel}>Client</Text>
               <Text style={s.infoValue}>{order.client_name}</Text>
               <Text style={[s.infoLabel, { marginTop: 6 }]}>Email</Text>
               <Text style={s.infoValue}>{order.client_email}</Text>
-              <Text style={[s.infoLabel, { marginTop: 6 }]}>Phone</Text>
-              <Text style={s.infoValue}>{order.client_phone}</Text>
+              {!!order.client_phone && (
+                <>
+                  <Text style={[s.infoLabel, { marginTop: 6 }]}>Phone</Text>
+                  <Text style={s.infoValue}>{order.client_phone}</Text>
+                </>
+              )}
             </View>
             <View style={s.infoBlock}>
               <Text style={s.infoLabel}>Event</Text>
@@ -131,8 +140,8 @@ export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
         {/* Meals */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>Meals ({meals.length})</Text>
-          {meals.map((meal, i) => (
-            <View key={meal.id} style={s.mealCard}>
+          {meals.map(meal => (
+            <View key={meal.id} style={s.mealCard} wrap={false}>
               <Text style={s.mealName}>{meal.name}</Text>
               <View style={s.mealMeta}>
                 <View style={s.metaItem}>
@@ -153,7 +162,7 @@ export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
                 </View>
               </View>
 
-              {meal.dishes && meal.dishes.length > 0 && (
+              {!!meal.dishes?.length && (
                 <View style={s.dishList}>
                   <Text style={[s.sectionTitle, { marginBottom: 6 }]}>
                     Selected Dishes ({meal.dishes.length})
@@ -172,8 +181,15 @@ export function OrderPDF({ order, meals, dishMap, isDraft = false }: Props) {
 
         {/* Footer */}
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>M G Prakash Catering · Established 2000</Text>
-          <Text style={s.footerText}>Thank you for your order</Text>
+          <Text style={s.footerText}>
+            {BUSINESS.name} · Established {BUSINESS.established}
+          </Text>
+          <Text
+            style={s.footerText}
+            render={({ pageNumber, totalPages }) =>
+              totalPages > 1 ? `Page ${pageNumber} of ${totalPages}` : 'Thank you for your order'
+            }
+          />
         </View>
       </Page>
     </Document>

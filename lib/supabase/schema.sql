@@ -53,12 +53,26 @@ create table if not exists orders (
   id            uuid primary key default uuid_generate_v4(),
   client_name   text not null,
   client_email  text not null,
-  client_phone  text not null,
+  -- The phone number is optional on the form, so an empty string is a valid
+  -- value here. Defaulted rather than made nullable so every read gets a
+  -- string and no caller has to null-check it.
+  client_phone  text not null default '',
   event_name    text not null,
   event_type    text not null,
   status        text not null default 'submitted',
   created_at    timestamptz not null default now()
 );
+
+-- Added when optional Google sign-in landed. Null for a guest order, which is
+-- the common case — signing in only pre-fills the contact step and lets the
+-- customer find the order again later under /account/orders.
+--
+-- This column was live in the application (written by POST /api/orders, read by
+-- the account page) before it was written down here, so a database built from
+-- this file alone rejected every order insert. Keep the two in step.
+alter table orders add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table orders alter column client_phone set default '';
+create index if not exists orders_user_id_idx on orders (user_id);
 
 create table if not exists meals (
   id            uuid primary key default uuid_generate_v4(),
@@ -86,26 +100,53 @@ create index if not exists meal_dishes_meal_id_idx on meal_dishes (meal_id);
 create index if not exists orders_created_at_idx   on orders (created_at desc);
 
 -- ---------------------------------------------------------------------------
+-- Keep-alive
+--
+-- Supabase pauses a free-tier project after a week with no activity, which
+-- would take the live menu down. .github/workflows/keep-supabase-alive.yml
+-- PATCHes row 1 twice a week. It is a dedicated table so the ping can never
+-- touch real data.
+-- ---------------------------------------------------------------------------
+create table if not exists keepalive (
+  id         integer primary key,
+  pinged_at  timestamptz not null default now()
+);
+insert into keepalive (id) values (1) on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
 -- Row Level Security
+--
+-- Reads are public and writes are not. Every write in the application goes
+-- through the service-role key, which bypasses RLS altogether, so no table
+-- needs an insert policy — and granting one grants it to `anon`, which is the
+-- key shipped in the client bundle.
+--
+-- The three "Service role insert …" policies this file used to create did
+-- exactly that. Named as though they scoped anything to the service role, they
+-- were `with check (true)` for every role, so anyone holding the public anon
+-- key could insert rows straight into orders, meals and meal_dishes without
+-- going near the API route or its validation. They are dropped below.
+--
+-- Public SELECT on orders is deliberate and is the one thing to understand
+-- here: the confirmation link is a capability URL. Anyone holding the order's
+-- uuid can read it — that is what makes /order/[id] shareable and what lets
+-- the emailed link work without a login. The uuid is the secret. Do not print
+-- order ids anywhere they can be enumerated, and do not add a sequential id.
 -- ---------------------------------------------------------------------------
 alter table dishes      enable row level security;
 alter table orders      enable row level security;
 alter table meals       enable row level security;
 alter table meal_dishes enable row level security;
+alter table keepalive   enable row level security;
+
+drop policy if exists "Service role insert orders"      on orders;
+drop policy if exists "Service role insert meals"       on meals;
+drop policy if exists "Service role insert meal_dishes" on meal_dishes;
 
 do $$
 begin
   if not exists (select 1 from pg_policies where tablename = 'dishes' and policyname = 'Public read dishes') then
     create policy "Public read dishes" on dishes for select using (true);
-  end if;
-  if not exists (select 1 from pg_policies where tablename = 'orders' and policyname = 'Service role insert orders') then
-    create policy "Service role insert orders" on orders for insert with check (true);
-  end if;
-  if not exists (select 1 from pg_policies where tablename = 'meals' and policyname = 'Service role insert meals') then
-    create policy "Service role insert meals" on meals for insert with check (true);
-  end if;
-  if not exists (select 1 from pg_policies where tablename = 'meal_dishes' and policyname = 'Service role insert meal_dishes') then
-    create policy "Service role insert meal_dishes" on meal_dishes for insert with check (true);
   end if;
   if not exists (select 1 from pg_policies where tablename = 'orders' and policyname = 'Public read orders') then
     create policy "Public read orders" on orders for select using (true);
@@ -115,5 +156,10 @@ begin
   end if;
   if not exists (select 1 from pg_policies where tablename = 'meal_dishes' and policyname = 'Public read meal_dishes') then
     create policy "Public read meal_dishes" on meal_dishes for select using (true);
+  end if;
+  -- The keep-alive workflow authenticates with the anon key, so its update is
+  -- the one write in the whole schema that RLS actually has to permit.
+  if not exists (select 1 from pg_policies where tablename = 'keepalive' and policyname = 'Anon update keepalive') then
+    create policy "Anon update keepalive" on keepalive for update using (true) with check (true);
   end if;
 end $$;

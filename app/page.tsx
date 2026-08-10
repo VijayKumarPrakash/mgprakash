@@ -6,7 +6,8 @@ import { COURSE_LABELS } from '@/lib/taxonomy'
 import type { Course } from '@/lib/taxonomy'
 import type { Dish } from '@/types'
 
-export const revalidate = 3600
+// See the note in app/menu/page.tsx — these pages are dynamic because the nav
+// reads the session, so caching lives in lib/dishes.ts rather than in ISR.
 
 const PILLARS = [
   {

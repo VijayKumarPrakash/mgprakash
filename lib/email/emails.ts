@@ -1,120 +1,163 @@
 import nodemailer from 'nodemailer'
-import type { Order, Meal, Dish } from '@/types'
-
-const BUSINESS_EMAIL = 'vijaykumar.sb.99@gmail.com'
+import { formatDate, formatTime, formatDateTime, orderRef } from '@/lib/format'
+import { BUSINESS, ADDRESS_LINE, TEL_HREF, WHATSAPP_HREF, BRAND } from '@/lib/business'
+import type { Order, Meal } from '@/types'
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.GMAIL_USER!,
-    pass: process.env.GMAIL_APP_PASSWORD!,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
   },
 })
 
-function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  })
+const FROM = `"${BUSINESS.name}" <${process.env.GMAIL_USER}>`
+
+/**
+ * Every interpolation below is customer-supplied: the name, the event title,
+ * the venue address, all typed into a public form by anyone on the internet.
+ * Dropped into the template raw, a venue field containing markup would render
+ * as markup — in the business's own inbox, in an email that appears to come
+ * from the business. Escaping is not optional here just because the output is
+ * an email rather than a page.
+ */
+function esc(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
-function formatTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  const ampm = h >= 12 ? 'PM' : 'AM'
-  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+function dishListHtml(meal: Meal): string {
+  return (meal.dishes ?? []).map(d => `<li>${esc(d.name)}</li>`).join('')
 }
+
+/** Shared sign-off. Table-free and inline-styled — Outlook strips the rest. */
+const signature = `
+  <hr style="border:none;border-top:1px solid ${BRAND.line};margin:28px 0;">
+  <p style="font-size:12px;color:${BRAND.muted};margin:0;">
+    ${esc(BUSINESS.name)} · ${esc(ADDRESS_LINE)}<br>
+    <a href="${TEL_HREF}" style="color:${BRAND.muted};text-decoration:none;">${esc(BUSINESS.phone)}</a> ·
+    <a href="${WHATSAPP_HREF}" style="color:${BRAND.muted};text-decoration:none;">WhatsApp</a> ·
+    ${esc(BUSINESS.email)}
+  </p>`
 
 export async function sendClientConfirmation(
   order: Order,
   meals: Meal[],
-  dishMap: Record<string, Dish>,
-  pdfBuffer: Buffer,
-  orderUrl: string
+  orderUrl: string,
+  /** Omitted when PDF rendering failed — the email still goes, without it. */
+  pdfBuffer?: Buffer
 ) {
   const mealsHtml = meals.map(meal => {
-    const dishes = (meal.dishes ?? []).map(d => `<li>${d.name}</li>`).join('')
+    const dishes = dishListHtml(meal)
+    const row = (label: string, value: string) =>
+      `<tr><td style="padding:3px 12px 3px 0;font-weight:600;color:${BRAND.ink};">${label}</td><td>${value}</td></tr>`
+
     return `
-      <div style="margin-bottom:24px;padding:20px;background:#fff;border:1px solid #e7e5e4;border-radius:8px;">
-        <h3 style="margin:0 0 12px;font-size:16px;color:#1a1a1a;">${meal.name}</h3>
-        <table style="font-size:13px;color:#78716c;border-collapse:collapse;width:100%;">
-          <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#1a1a1a;">Date</td><td>${formatDate(meal.date)}</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#1a1a1a;">Time</td><td>${formatTime(meal.time)}</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#1a1a1a;">Location</td><td>${meal.location}</td></tr>
-          <tr><td style="padding:3px 12px 3px 0;font-weight:600;color:#1a1a1a;">Guests</td><td>${meal.total_guests} total (${meal.veg_guests} vegetarian)</td></tr>
+      <div style="margin-bottom:24px;padding:20px;background:${BRAND.surface};border:1px solid ${BRAND.line};border-radius:8px;">
+        <h3 style="margin:0 0 12px;font-size:16px;color:${BRAND.ink};">${esc(meal.name)}</h3>
+        <table style="font-size:13px;color:${BRAND.muted};border-collapse:collapse;width:100%;">
+          ${row('Date', esc(formatDate(meal.date)))}
+          ${row('Time', esc(formatTime(meal.time)))}
+          ${row('Location', esc(meal.location))}
+          ${row('Guests', `${esc(meal.total_guests)} total (${esc(meal.veg_guests)} vegetarian)`)}
         </table>
-        ${dishes ? `<p style="font-size:12px;font-weight:600;color:#78716c;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em;">Dishes</p><ul style="margin:0;padding-left:20px;font-size:13px;color:#1a1a1a;">${dishes}</ul>` : ''}
+        ${dishes
+          ? `<p style="font-size:12px;font-weight:600;color:${BRAND.muted};margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em;">Dishes</p>
+             <ul style="margin:0;padding-left:20px;font-size:13px;color:${BRAND.ink};">${dishes}</ul>`
+          : ''}
       </div>`
   }).join('')
 
   await transporter.sendMail({
-    from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
+    from: FROM,
     to: order.client_email,
     subject: `Quote request received — ${order.event_name}`,
     html: `
-      <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;background:#FAFAF8;padding:32px;">
-        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;">We've received your request</h1>
-        <p style="color:#78716c;margin:0 0 24px;">Thank you, ${order.client_name}. We'll be in touch shortly to confirm availability and pricing for <strong>${order.event_name}</strong>.</p>
+      <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:${BRAND.ink};background:${BRAND.paper};padding:32px;">
+        <h1 style="font-size:22px;font-weight:700;margin:0 0 4px;">We&rsquo;ve received your request</h1>
+        <p style="color:${BRAND.muted};margin:0 0 24px;">
+          Thank you, ${esc(order.client_name)}. We&rsquo;ll be in touch shortly to confirm availability
+          and pricing for <strong>${esc(order.event_name)}</strong>.
+        </p>
 
         ${mealsHtml}
 
         <div style="margin-top:28px;text-align:center;">
-          <a href="${orderUrl}" style="display:inline-block;padding:12px 28px;background:#C8860A;color:#fff;border-radius:999px;text-decoration:none;font-size:14px;font-weight:600;">
-            View Your Order
+          <a href="${esc(orderUrl)}" style="display:inline-block;padding:12px 28px;background:${BRAND.accent};color:#fff;border-radius:999px;text-decoration:none;font-size:14px;font-weight:600;">
+            View your order
           </a>
         </div>
 
-        <hr style="border:none;border-top:1px solid #e7e5e4;margin:28px 0;">
-        <p style="font-size:12px;color:#a8a29e;margin:0;">
-          M G Prakash Catering · 611, 10th Cross Rd, Indiranagar Rajajinagar, Bengaluru 560079<br>
-          <a href="tel:+919880193165" style="color:#a8a29e;text-decoration:none;">+91 98801 93165</a> ·
-          <a href="https://wa.me/919880193165" style="color:#a8a29e;text-decoration:none;">WhatsApp</a> ·
-          vijaykumar.sb.99@gmail.com
+        <p style="font-size:12px;color:${BRAND.muted};text-align:center;margin:14px 0 0;">
+          Reference #${esc(orderRef(order.id))}
         </p>
+
+        ${signature}
       </div>`,
-    attachments: [
-      {
-        filename: `order-${order.id.slice(0, 8)}.pdf`,
-        content: pdfBuffer,
-      },
-    ],
+    attachments: pdfBuffer
+      ? [
+          {
+            filename: `mgprakash-order-${orderRef(order.id).toLowerCase()}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ]
+      : [],
   })
 }
 
 export async function sendBusinessNotification(
   order: Order,
   meals: Meal[],
-  dishMap: Record<string, Dish>,
   orderUrl: string
 ) {
   const mealsHtml = meals.map(meal => {
-    const dishes = (meal.dishes ?? []).map(d => `<li>${d.name}</li>`).join('')
+    const dishes = dishListHtml(meal)
     return `
-      <div style="margin-bottom:16px;padding:16px;background:#fff;border:1px solid #e7e5e4;border-radius:6px;">
-        <strong>${meal.name}</strong><br>
-        <span style="font-size:13px;color:#78716c;">${formatDate(meal.date)} at ${formatTime(meal.time)} · ${meal.location} · ${meal.total_guests} guests (${meal.veg_guests} veg)</span>
-        ${dishes ? `<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;">${dishes}</ul>` : '<p style="font-size:13px;color:#a8a29e;margin:8px 0 0;">No dishes selected</p>'}
+      <div style="margin-bottom:16px;padding:16px;background:${BRAND.surface};border:1px solid ${BRAND.line};border-radius:6px;">
+        <strong>${esc(meal.name)}</strong><br>
+        <span style="font-size:13px;color:${BRAND.muted};">
+          ${esc(formatDate(meal.date))} at ${esc(formatTime(meal.time))} · ${esc(meal.location)} ·
+          ${esc(meal.total_guests)} guests (${esc(meal.veg_guests)} veg)
+        </span>
+        ${dishes
+          ? `<ul style="margin:8px 0 0;padding-left:18px;font-size:13px;">${dishes}</ul>`
+          : `<p style="font-size:13px;color:${BRAND.muted};margin:8px 0 0;">No dishes selected</p>`}
       </div>`
   }).join('')
 
+  const row = (label: string, value: string) =>
+    `<tr><td style="padding:4px 16px 4px 0;color:${BRAND.muted};">${label}</td><td>${value}</td></tr>`
+
   await transporter.sendMail({
-    from: `"M G Prakash Catering" <${process.env.GMAIL_USER}>`,
-    to: BUSINESS_EMAIL,
+    from: FROM,
+    // Replying to the notification should reach the customer, not the business
+    // replying to itself — this is the whole point of the notification.
+    replyTo: order.client_email,
+    to: BUSINESS.email,
     subject: `New quote request — ${order.event_name} (${order.client_name})`,
     html: `
-      <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;padding:24px;">
-        <h2 style="margin:0 0 4px;">New catering order received</h2>
-        <p style="color:#78716c;margin:0 0 20px;">Submitted on ${new Date(order.created_at).toLocaleString('en-GB')}</p>
+      <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:${BRAND.ink};padding:24px;">
+        <h2 style="margin:0 0 4px;">New catering request received</h2>
+        <p style="color:${BRAND.muted};margin:0 0 20px;">
+          Submitted ${esc(formatDateTime(order.created_at))} · #${esc(orderRef(order.id))}
+        </p>
 
         <table style="font-size:14px;margin-bottom:20px;border-collapse:collapse;">
-          <tr><td style="padding:4px 16px 4px 0;color:#78716c;">Client</td><td><strong>${order.client_name}</strong></td></tr>
-          <tr><td style="padding:4px 16px 4px 0;color:#78716c;">Email</td><td>${order.client_email}</td></tr>
-          <tr><td style="padding:4px 16px 4px 0;color:#78716c;">Phone</td><td>${order.client_phone}</td></tr>
-          <tr><td style="padding:4px 16px 4px 0;color:#78716c;">Event</td><td>${order.event_name} (${order.event_type})</td></tr>
+          ${row('Client', `<strong>${esc(order.client_name)}</strong>`)}
+          ${row('Email', esc(order.client_email))}
+          ${row('Phone', esc(order.client_phone))}
+          ${row('Event', `${esc(order.event_name)} (${esc(order.event_type)})`)}
         </table>
 
         ${mealsHtml}
 
-        <a href="${orderUrl}" style="display:inline-block;margin-top:8px;padding:10px 24px;background:#1a1a1a;color:#fff;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;">
-          View Full Order
+        <a href="${esc(orderUrl)}" style="display:inline-block;margin-top:8px;padding:10px 24px;background:${BRAND.dark};color:#fff;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;">
+          View full order
         </a>
       </div>`,
   })

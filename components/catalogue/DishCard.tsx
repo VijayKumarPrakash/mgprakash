@@ -2,7 +2,7 @@
 
 import type { Dish } from '@/types'
 import type { OrderContextShape } from './CatalogueClient'
-
+import { DietBadge } from './DietBadge'
 import { DishImage } from './DishImage'
 
 interface Props {
@@ -43,28 +43,12 @@ export function DishCard({ dish, onViewDetails, orderContext, priority }: Props)
           />
         )}
 
+        {/* DietBadge, not a second copy of the mark. The card used to inline
+            its own square-and-dot, so the two drifted: the card drew the mark
+            at 10px and the modal at 11px, and a change to the veg/non-veg
+            colours had to be made in both places or only half the site moved. */}
         <div className="absolute top-3 left-3 z-10">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-[rgba(255,253,249,.94)] text-[var(--ink-2)] backdrop-blur-sm shadow-[0_1px_4px_rgba(0,0,0,.12)]">
-            <span
-              aria-hidden="true"
-              className="relative block w-[10px] h-[10px] rounded-[2px]"
-              style={{
-                boxShadow: `inset 0 0 0 1.5px ${
-                  dish.diet === 'non-vegetarian' ? 'var(--nonveg)' : dish.diet === 'egg' ? 'var(--egg)' : 'var(--veg)'
-                }`,
-              }}
-            >
-              <span
-                className="absolute rounded-full"
-                style={{
-                  inset: '2.5px',
-                  background:
-                    dish.diet === 'non-vegetarian' ? 'var(--nonveg)' : dish.diet === 'egg' ? 'var(--egg)' : 'var(--veg)',
-                }}
-              />
-            </span>
-            {dish.diet === 'non-vegetarian' ? 'Non-veg' : dish.diet === 'egg' ? 'Egg' : 'Veg'}
-          </span>
+          <DietBadge dish={dish} variant="on-image" />
         </div>
       </div>
 

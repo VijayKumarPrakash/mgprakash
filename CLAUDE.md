@@ -8,7 +8,12 @@ Use **British/Indian English** throughout — in UI copy, emails, PDF content, c
 
 ## Project overview
 
-**M G Prakash Catering** — a customer-facing catering order platform where clients browse a dish catalog and place catering orders for events. No admin dashboard or authentication in scope for this iteration.
+**M G Prakash Catering** — a customer-facing catering platform where clients browse a dish
+catalogue and submit quote requests for events. No pricing, no payment, no admin dashboard.
+
+Google sign-in **is** implemented but is entirely optional: it pre-fills the contact step and
+lets a customer find past requests under `/account/orders`. Nothing on the site requires it,
+and the quote form must keep working with Supabase unconfigured or unreachable.
 
 **Tech stack:** Next.js (App Router), Supabase (PostgreSQL), Nodemailer + Gmail SMTP (email), React-PDF, Tailwind CSS, Fuse.js, Vercel (deployment target).
 
@@ -38,7 +43,8 @@ Seed the `dishes` table using the `json5` npm package to parse `food_db.json5` �
 orders → meals → meal_dishes ← dishes
 ```
 
-- **orders**: client contact info, event name/type, status (`"submitted"`)
+- **orders**: client contact info, event name/type, status (`"submitted"`), and `user_id`
+  (null for guest requests, which is the common case)
 - **meals**: one or more per order; date, time, location, guest counts
 - **meal_dishes**: junction table — links meals to selected dishes (no quantities)
 - **dishes**: 229 rows seeded from `food_db.json5`
@@ -71,9 +77,14 @@ the catalogue's default sort — food first, drinks last.
 
 Multi-step form: contact info → event details → add meals → per-meal dish selection → order review → submit.
 
-On submit: write to Supabase → trigger two Resend emails (client confirmation with PDF + business notification) → redirect to `/order/[id]`.
+On submit, `POST /api/orders`: validate the payload (`lib/validation.ts`) → write the order,
+meals and dish links → render the PDF → send both emails → redirect to `/order/[id]`.
 
-### Dish catalog
+Everything after the write is best-effort and logged rather than thrown. React-PDF fetches
+its font over the network at render time and Gmail SMTP can rate-limit; either failing must
+not turn a saved order into a 500, because a customer who sees an error submits again.
+
+### Dish catalogue
 
 - Fuse.js weighted fuzzy search across name, alt_names, cuisine, tags, ingredients, description
 - Chip filters: course, cuisine group, diet, spice, occasion. **AND across groups, OR within
@@ -106,10 +117,42 @@ varied and the markup stays byte-identical between server and client. This is a 
 
 Generated server-side on order submission, attached to client confirmation email. Includes: business header, client info, event details, per-meal sections with dish lists, branded footer.
 
-### Emails (Resend)
+### Emails (Nodemailer + Gmail SMTP)
 
 1. **Client** — confirmation with `/order/[id]` link and PDF attachment
 2. **Business** (`vijaykumar.sb.99@gmail.com`) — full order summary in HTML
+
+Both templates are hand-built HTML strings, so **every interpolation goes through `esc()`**.
+The name, event title and venue are typed into a public form by anyone on the internet.
+
+### Shared modules — check these before writing a helper
+
+Four small modules exist specifically because the same logic had been copied into three or
+four places and then drifted apart. Reach for them rather than reimplementing:
+
+- **`lib/format.ts`** — `formatDate`, `formatTime`, `formatDateTime`, `orderRef`. Pinned to
+  en-GB and Asia/Kolkata: the PDF and emails render on a Vercel function in UTC and every
+  reader is in Bengaluru. Never format a date or a meal time inline.
+- **`lib/business.ts`** — business details plus `BRAND`, the palette as hex literals.
+  React-PDF has no cascade and email clients drop `var()`, so those two renderers cannot read
+  `globals.css`. This is the *only* sanctioned place for a hard-coded brand hex; changing a
+  token in `globals.css` means changing it here too.
+- **`lib/orders.ts`** — `getOrderWithMeals(id)`, the order → meals → dishes fan-out shared by
+  the confirmation page and the PDF route. Two copies of that join is two chances for the
+  screen and the attachment to disagree about what was ordered.
+- **`lib/validation.ts`** — server-side checks for the submitted order. `POST /api/orders`
+  writes with the service-role key, which bypasses RLS entirely, so the route cannot trust
+  the form to have validated anything.
+
+### Row level security
+
+Reads are public; **writes have no policy at all**, because every write goes through the
+service-role client, which bypasses RLS. Do not add an insert policy to "make writes work" —
+that grants insert to `anon`, the key shipped in the client bundle.
+
+Public SELECT on `orders` is deliberate: `/order/[id]` is a capability URL, and the uuid is
+the secret that makes the emailed link work without a login. Never surface order ids anywhere
+they can be enumerated.
 
 ## Design system — "Sandalwood & Ink"
 
@@ -162,7 +205,8 @@ prefix.
 
 ## Out of scope (do not build yet)
 
-User auth, order editing, admin dashboard, per-dish quantities, allergen tracking, service style fields, popularity/featured flags.
+Order editing, admin dashboard, per-dish quantities, allergen tracking, service style fields,
+popularity/featured flags, pricing and payment.
 
 ## Deferred (build later)
 

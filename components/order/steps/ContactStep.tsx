@@ -104,7 +104,7 @@ export function ContactStep({ onNext }: Props) {
       </div>
 
       <div className="flex justify-end pt-2">
-        <button onClick={handleNext} className="btn-primary">
+        <button onClick={handleNext} className="btn btn-primary">
           Continue
         </button>
       </div>

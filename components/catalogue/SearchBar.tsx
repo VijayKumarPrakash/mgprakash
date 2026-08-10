@@ -5,7 +5,6 @@ import { useRef, useEffect } from 'react'
 interface Props {
   value: string
   onChange: (value: string) => void
-  resultCount?: number
 }
 
 export function SearchBar({ value, onChange }: Props) {

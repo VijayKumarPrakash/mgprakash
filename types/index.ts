@@ -8,10 +8,38 @@ export type {
   Occasion, Flavour, CookingMethod, ImageLicence,
 }
 
-export type EventType =
-  | 'wedding' | 'engagement' | 'birthday' | 'anniversary'
-  | 'housewarming' | 'baby_shower' | 'namakarana' | 'religious'
-  | 'party' | 'corporate' | 'funeral' | 'other'
+/**
+ * Event types, as a runtime list rather than a bare union — the order route has
+ * to check a submitted value against it, and the form has to render the whole
+ * set. Two hand-maintained copies of the same twelve strings would drift.
+ */
+export const EVENT_TYPES = [
+  'wedding', 'engagement', 'birthday', 'anniversary',
+  'housewarming', 'baby_shower', 'namakarana', 'religious',
+  'party', 'corporate', 'funeral', 'other',
+] as const
+export type EventType = (typeof EVENT_TYPES)[number]
+
+/**
+ * Display labels. Without these the confirmation page and the account list
+ * rendered the raw column through a `capitalize` class, so a naming ceremony
+ * read as "Namakarana" but a baby shower read as "Baby_shower".
+ */
+export const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  wedding: 'Wedding',
+  engagement: 'Engagement',
+  birthday: 'Birthday',
+  anniversary: 'Anniversary',
+  housewarming: 'Gruha Pravesha / Housewarming',
+  baby_shower: 'Seemantha / Baby Shower',
+  namakarana: 'Namakarana',
+  religious: 'Religious / Prasad',
+  party: 'Party',
+  corporate: 'Corporate',
+  funeral: 'Funeral / Condolence',
+  other: 'Other',
+}
+
 export type OrderStatus = 'submitted'
 
 export interface Dish {
@@ -58,6 +86,8 @@ export interface Order {
   event_type: EventType
   status: OrderStatus
   created_at: string
+  /** Set when the request was placed while signed in; null for guest orders. */
+  user_id: string | null
   meals?: Meal[]
 }
 

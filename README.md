@@ -1,2 +1,243 @@
-# mgprakash
-Self-serve catering request website for my father's business: M G Prakash, Cooking Contractor
+# M G Prakash Catering
+
+A self-serve quote-request site for **M G Prakash Catering**, a cooking
+contractor operating in Bengaluru since 2000.
+
+A customer browses a catalogue of 229 dishes, filters it down to what their
+event actually needs — pure veg, Jain, no onion or garlic, a particular course
+or cuisine — assembles one or more meals, and submits a request. The business
+gets an email with the full menu; the customer gets a confirmation with a PDF
+quote attached and a shareable link back to their order.
+
+There is no pricing, no payment and no admin dashboard. It replaces a phone
+call and a WhatsApp thread, not an ERP.
+
+**Live:** https://mgprakash.vercel.app
+
+---
+
+## Stack
+
+| Concern | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, React 19, Turbopack) |
+| Database | Supabase (PostgreSQL, RLS) |
+| Styling | Tailwind CSS v4, tokens in `app/globals.css` |
+| Search | Fuse.js (weighted fuzzy, client-side) |
+| PDF | `@react-pdf/renderer`, rendered server-side |
+| Email | Nodemailer over Gmail SMTP |
+| Auth | Supabase Auth, Google OAuth — **optional**, see below |
+| Hosting | Vercel, deploys on push to `main` |
+
+---
+
+## Getting started
+
+```bash
+git clone <this repo> && cd mgprakash
+npm install
+cp .env.example .env.local     # then fill it in — see the notes in that file
+npm run dev                    # http://localhost:3000
+```
+
+**The site runs with no environment variables at all.** `lib/dishes.ts` falls
+back to reading `food_db.json5` off disk when Supabase is not configured or not
+reachable, so a fresh clone builds and renders the full catalogue immediately.
+Submitting an order needs a real database and mail credentials; browsing does
+not.
+
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Dev server |
+| `npm run build` | Production build — run before pushing |
+| `npm run lint` | ESLint. Must be clean: 0 errors, 0 warnings |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run validate:dishes` | Checks `food_db.json5` against `lib/taxonomy.ts` |
+| `npm run seed` | Validates, then upserts every dish into Supabase |
+| `npm run fetch:images` | Sources dish photos from Wikimedia Commons (needs network) |
+
+### First-time database setup
+
+Run `lib/supabase/schema.sql` in the Supabase SQL editor, then `npm run seed`.
+The schema is idempotent and safe to re-run — it is also how migrations are
+applied, since every added column uses `add column if not exists`.
+
+---
+
+## Repository layout
+
+```
+app/
+  page.tsx                  Home — hero, pillars, catalogue preview strip
+  menu/                     The public dish catalogue
+  order/new/                The five-step quote request form
+  order/[id]/               Order confirmation, publicly readable by uuid
+  account/orders/           A signed-in customer's past requests
+  auth/                     Google sign-in and the OAuth callback
+  api/orders/               POST a request · GET its PDF · POST a draft preview
+  globals.css               Every design token lives in the :root block here
+  fonts.ts                  Self-hosted variable fonts
+
+components/
+  catalogue/                Search, chip filters, card grid, dish modal
+  order/                    Form context + the five steps
+  layout/                   Nav (server) + NavClient, Footer
+  pdf/OrderPDF.tsx          The quote document
+  Reveal.tsx                Scroll-reveal wrapper
+
+lib/
+  taxonomy.ts               Controlled vocabulary for the catalogue
+  dishes.ts                 Catalogue reads, cache, and the file fallback
+  orders.ts                 Order + meals + dishes fan-out, used by page and PDF
+  validation.ts             Server-side checks for the submitted order
+  format.ts                 Shared date / time / reference formatting
+  business.ts               Business details and the brand palette as literals
+  email/emails.ts           The two transactional emails
+  pdf/generate.ts           React-PDF render entry point
+  supabase/                 Clients (browser, anon, service, cookie) + schema.sql
+
+scripts/
+  validate-dishes.ts        Vocabulary + internal-consistency checks
+  seed.ts                   Chunked upsert into the dishes table
+  fetch-images.ts           Commons search → resize → LQIP → patch food_db.json5
+
+food_db.json5               The 229-dish source of truth. JSON5 on purpose.
+proxy.ts                    Session-cookie refresh on every request
+```
+
+---
+
+## How it fits together
+
+### The catalogue
+
+`food_db.json5` is the source of truth, hand-editable by the business owner —
+which is exactly why it is JSON5 and not JSON. It keeps comments and trailing
+commas. **Do not rename it to `.json`.**
+
+`npm run seed` validates it against `lib/taxonomy.ts` and upserts it into
+Supabase. At runtime `lib/dishes.ts` reads from Supabase and falls back to the
+file, sorting both paths identically so the catalogue never looks different
+depending on whether the database answered.
+
+**Dish ids are permanent.** `meal_dishes.dish_id` is a foreign key with
+`ON DELETE RESTRICT`, so re-slugging a dish breaks or blocks every past order
+that referenced it. A few ids are historical and slightly wrong (`dosa-1` is
+Masala Dosa, `dal-makhni` is Dal Makhani). Leave them.
+
+### Diet is not one field
+
+`diet` is `vegetarian | non-vegetarian | egg`, with **orthogonal** `is_vegan`
+and `is_jain` booleans and a separate `contains_onion_garlic`. A flat enum
+could not express that Chitranna is vegetarian *and* vegan *and* Jain at once —
+and `contains_onion_garlic` is tracked apart from `is_jain` because satvik and
+temple-adjacent events exclude alliums without applying Jain rules on root
+vegetables. `npm run validate:dishes` cross-checks all of this against the
+ingredient list.
+
+### Data model
+
+```
+orders ──< meals ──< meal_dishes >── dishes
+```
+
+No quantities, no line-item pricing. `orders.user_id` is null for guest
+requests, which is the common case.
+
+### The order flow
+
+Contact → event → meals → per-meal dish selection → review → submit.
+
+On submit, `POST /api/orders` validates the payload (`lib/validation.ts`),
+writes the order, renders the PDF, and sends both emails. Everything after the
+write is best-effort: a font host or SMTP failure is logged but never turns a
+saved order into a 500, because a customer who sees an error retries and
+submits twice.
+
+### Reading orders
+
+`/order/[id]` is a **capability URL** — anyone holding the uuid can read the
+order, which is what makes the emailed link work without a login. The uuid is
+the secret. Do not surface order ids anywhere enumerable.
+
+Signing in is entirely optional. It pre-fills the contact step and lets a
+customer find past requests under `/account/orders`; nothing requires it.
+
+---
+
+## Design system — "Sandalwood & Ink"
+
+Every colour, radius and duration is a custom property in the `:root` block of
+`app/globals.css`. **Nothing downstream hard-codes a hex.**
+
+- **Paper** `#F6F2EB`, **surface** `#FFFDF9`, **ink** `#1C1A17`
+- **Dark ground** `#1A1512` — the hero, CTA band and footer invert to espresso.
+  Wrap those sections in `.on-dark`, which retargets the button variants: deep
+  copper reads as mud on dark, so the accent lifts to `--accent-lift`
+- **Accent** copper `#A63D17` — 4.62:1 against white, so it passes WCAG AA as a
+  button fill. The old `#C8860A` managed 3.2:1 and failed
+- **Type**: Fraunces (display) over Plus Jakarta Sans (body), both self-hosted
+  variable woff2. Fraunces stands in for the commercial Recoleta; see
+  `app/fonts.ts` for the two-step swap once a licence is bought
+- **Motion**: three durations only — 120ms pointer feedback, 220ms colour and
+  card lift, 420ms image scale. Only `transform` and `opacity` are animated
+- No dark mode. The dark bands are a design device, not a theme
+
+The PDF and the emails cannot read CSS custom properties, so they take the same
+values as literals from `lib/business.ts`. If you change a token in
+`globals.css`, change it there too.
+
+---
+
+## Things that look wrong but are deliberate
+
+- **`useDeferredValue` and `useTransition` in `CatalogueClient`.** The search
+  input stays at interactive priority while Fuse runs against a lagging copy;
+  chips latch instantly while the re-filter stays interruptible, and `isPending`
+  dims the grid rather than blanking it. Do not "simplify" this away.
+- **`next.config.ts` `remotePatterns` is locked to two hosts.** Adding `'**'`
+  back turns `/_next/image` into an open proxy anyone can bill to this account.
+- **Dishes with no photo get a component, not a file.** `DishImage` draws a
+  thali tile whose hue comes from an FNV-1a hash of the dish id — deterministic,
+  so server and client markup stay byte-identical. It is a design, not a gap.
+- **Images are self-hosted under `public/dishes/`, never hotlinked.**
+  `image_licence` / `image_credit` / `image_source_url` are schema columns
+  because CC-BY and CC-BY-SA legally require a visible credit, which the dish
+  modal renders.
+- **`.github/workflows/keep-supabase-alive.yml`** writes to a dedicated
+  `keepalive` table twice a week, so a free-tier project is never paused for
+  inactivity and never has its real data touched by the ping.
+
+---
+
+## Conventions
+
+- **British / Indian English** everywhere — UI copy, comments, emails, PDF.
+  "flavour", "colour", "catalogue", "organise".
+- `npm run lint` and `npm run typecheck` must both be clean before a push.
+- Comments explain *why*, not *what*. If a line looks odd, the comment should
+  say what breaks without it.
+- Never commit `.env.local` or anything holding a real key. `.env.example` is
+  the committed reference and carries only placeholders.
+- `SUPABASE_SERVICE_ROLE_KEY` must never gain a `NEXT_PUBLIC_` prefix —
+  anything so prefixed is inlined into the client bundle at build time.
+
+---
+
+## Not built yet
+
+**Out of scope for now:** order editing, an admin dashboard, per-dish
+quantities, allergen tracking, service-style fields, popularity flags.
+
+**Deferred, with a plan:**
+
+- Google Maps Places autocomplete on the meal location field — plain text input
+  for now
+- A real logo — text placeholder in the nav and PDF header until one arrives
+- Migrating email off Gmail SMTP to a proper provider once a custom domain is
+  bought, for deliverability and an `orders@` from-address
+- Saving a draft request to return to later
+- Real photography for the dishes still on a placeholder tile
+- A Recoleta webfont licence — see `app/fonts.ts`

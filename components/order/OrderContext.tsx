@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import type { OrderDraft, MealDraft, EventType } from '@/types'
+import type { OrderDraft, MealDraft } from '@/types'
 
 type Action =
   | { type: 'SET_CONTACT'; payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'> }

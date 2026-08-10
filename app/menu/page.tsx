@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import { getAllDishes } from '@/lib/dishes'
 import { CatalogueClient } from '@/components/catalogue/CatalogueClient'
 
-export const revalidate = 3600
+// No `revalidate` export: the root layout renders <Nav />, which reads the
+// session cookie, so every page in the tree is dynamic and an ISR window here
+// would be silently ignored. The catalogue is cached in lib/dishes.ts instead.
 
 export const metadata: Metadata = {
   title: 'Menu',
