@@ -8,13 +8,14 @@ type Action =
   | { type: 'SET_CONTACT'; payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'> }
   | { type: 'SET_EVENT'; payload: Pick<OrderDraft, 'event_name' | 'event_type'> }
   | { type: 'ADD_MEAL' }
-  | { type: 'UPDATE_MEAL'; id: string; payload: Partial<Omit<MealDraft, 'id' | 'dish_ids'>> }
+  | { type: 'UPDATE_MEAL'; id: string; payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>> }
   | { type: 'REMOVE_MEAL'; id: string }
   | { type: 'SET_ACTIVE_MEAL'; id: string }
   | { type: 'ADD_DISH_TO_MEAL'; mealId: string; dishId: string }
   | { type: 'REMOVE_DISH_FROM_MEAL'; mealId: string; dishId: string }
+  | { type: 'SET_DISH_NOTE'; mealId: string; dishId: string; note: string }
 
-function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids'>> = {}): MealDraft {
+function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>> = {}): MealDraft {
   return {
     id: uuid(),
     name: '',
@@ -24,6 +25,7 @@ function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids'>> = {}): 
     total_guests: '',
     veg_guests: '',
     dish_ids: [],
+    dish_notes: {},
     ...overrides,
   }
 }
@@ -87,9 +89,22 @@ function reducer(state: OrderDraft, action: Action): OrderDraft {
     case 'REMOVE_DISH_FROM_MEAL':
       return {
         ...state,
+        meals: state.meals.map(m => {
+          if (m.id !== action.mealId) return m
+          // Drop the note along with the dish. Keeping it would resurrect a
+          // note the customer thought they had deleted if they re-added the
+          // dish, and would otherwise linger in state attached to nothing.
+          const dish_notes = { ...m.dish_notes }
+          delete dish_notes[action.dishId]
+          return { ...m, dish_ids: m.dish_ids.filter(id => id !== action.dishId), dish_notes }
+        }),
+      }
+    case 'SET_DISH_NOTE':
+      return {
+        ...state,
         meals: state.meals.map(m =>
           m.id === action.mealId
-            ? { ...m, dish_ids: m.dish_ids.filter(id => id !== action.dishId) }
+            ? { ...m, dish_notes: { ...m.dish_notes, [action.dishId]: action.note } }
             : m
         ),
       }
@@ -104,11 +119,12 @@ interface OrderContextValue {
   setContact: (payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'>) => void
   setEvent: (payload: Pick<OrderDraft, 'event_name' | 'event_type'>) => void
   addMeal: () => void
-  updateMeal: (id: string, payload: Partial<Omit<MealDraft, 'id' | 'dish_ids'>>) => void
+  updateMeal: (id: string, payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>>) => void
   removeMeal: (id: string) => void
   setActiveMeal: (id: string) => void
   addDishToMeal: (mealId: string, dishId: string) => void
   removeDishFromMeal: (mealId: string, dishId: string) => void
+  setDishNote: (mealId: string, dishId: string, note: string) => void
 }
 
 const OrderCtx = createContext<OrderContextValue | null>(null)
@@ -145,7 +161,7 @@ export function OrderProvider({
   )
   const addMeal = useCallback(() => dispatch({ type: 'ADD_MEAL' }), [])
   const updateMeal = useCallback(
-    (id: string, p: Partial<Omit<MealDraft, 'id' | 'dish_ids'>>) =>
+    (id: string, p: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>>) =>
       dispatch({ type: 'UPDATE_MEAL', id, payload: p }),
     []
   )
@@ -167,6 +183,11 @@ export function OrderProvider({
       dispatch({ type: 'REMOVE_DISH_FROM_MEAL', mealId, dishId }),
     []
   )
+  const setDishNote = useCallback(
+    (mealId: string, dishId: string, note: string) =>
+      dispatch({ type: 'SET_DISH_NOTE', mealId, dishId, note }),
+    []
+  )
 
   return (
     <OrderCtx.Provider
@@ -181,6 +202,7 @@ export function OrderProvider({
         setActiveMeal,
         addDishToMeal,
         removeDishFromMeal,
+        setDishNote,
       }}
     >
       {children}

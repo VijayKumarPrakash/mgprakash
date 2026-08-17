@@ -97,8 +97,16 @@ create table if not exists meal_dishes (
   id       uuid primary key default uuid_generate_v4(),
   meal_id  uuid not null references meals(id) on delete cascade,
   dish_id  text not null references dishes(id) on delete restrict,
+  -- Free-text note the customer wrote against this dish for this order:
+  -- spice, portion, substitutions. On the link row rather than on the dish,
+  -- because it describes the order and not the dish.
+  note     text,
   unique(meal_id, dish_id)
 );
+
+-- Added after the table shipped, so existing databases need it backfilled.
+-- This file is the migration path: it is idempotent and safe to re-run.
+alter table meal_dishes add column if not exists note text;
 
 create index if not exists meals_order_id_idx      on meals (order_id);
 create index if not exists meal_dishes_meal_id_idx on meal_dishes (meal_id);

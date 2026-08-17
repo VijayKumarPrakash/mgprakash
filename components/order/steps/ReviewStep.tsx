@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
-  const { draft } = useOrder()
+  const { draft, setDishNote } = useOrder()
   const [submitting, setSubmitting] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [error, setError] = useState('')
@@ -122,14 +122,34 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
 
           {meal.dish_ids.length > 0 ? (
             <div>
-              <p className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide mb-2">
+              <p className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide mb-1">
                 Selected dishes ({meal.dish_ids.length})
               </p>
-              <ul className="space-y-1">
+              {/* Notes are collected here rather than in the dish-selection
+                  step: that step is the whole 229-card catalogue, and there is
+                  nowhere in it to annotate a choice you have already made.
+                  This is also the moment the customer is checking the order
+                  over, which is when "mild, for the children" occurs to them. */}
+              <p className="text-[12px] text-[var(--ink-3)] mb-3">
+                Add a note to any dish — spice, portions, substitutions.
+              </p>
+              <ul className="space-y-3">
                 {meal.dish_ids.map(id => (
-                  <li key={id} className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
-                    {dishMap.get(id)?.name ?? id}
+                  <li key={id}>
+                    <div className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
+                      {dishMap.get(id)?.name ?? id}
+                    </div>
+                    <input
+                      type="text"
+                      value={meal.dish_notes[id] ?? ''}
+                      onChange={e => setDishNote(meal.id, id, e.target.value)}
+                      maxLength={300}
+                      placeholder="Add a note (optional)"
+                      aria-label={`Note for ${dishMap.get(id)?.name ?? id}`}
+                      className="form-input mt-1.5 ml-3.5 py-2 text-[13px]"
+                      style={{ width: 'calc(100% - 0.875rem)' }}
+                    />
                   </li>
                 ))}
               </ul>

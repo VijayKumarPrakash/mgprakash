@@ -98,13 +98,21 @@ export interface Meal {
   location: string
   total_guests: number
   veg_guests: number
-  dishes?: Dish[]
+  dishes?: SelectedDish[]
 }
+
+/**
+ * A dish as it appears on an order, carrying the note the customer wrote
+ * against it. The note lives on the link row rather than on the dish, because
+ * it is about this order — "mild, for the children" — not about the dish.
+ */
+export type SelectedDish = Dish & { note: string | null }
 
 export interface MealDish {
   id: string
   meal_id: string
   dish_id: string
+  note: string | null
 }
 
 // Order form draft state (client-side only, not persisted until submit)
@@ -117,6 +125,8 @@ export interface MealDraft {
   total_guests: number | ''
   veg_guests: number | ''
   dish_ids: string[]
+  /** Per-dish note, keyed by dish id. A missing or empty entry means no note. */
+  dish_notes: Record<string, string>
 }
 
 export interface OrderDraft {

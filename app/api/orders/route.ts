@@ -3,7 +3,7 @@ import { createServiceClient, createRequestClient } from '@/lib/supabase/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
 import { sendClientConfirmation, sendBusinessNotification, emailConfigError } from '@/lib/email/emails'
 import { validateOrderDraft } from '@/lib/validation'
-import type { Dish, Meal, Order } from '@/types'
+import type { Dish, Meal, Order, SelectedDish } from '@/types'
 
 export async function POST(req: NextRequest) {
   try {
@@ -93,7 +93,11 @@ export async function POST(req: NextRequest) {
       if (mealDraft.dish_ids.length > 0) {
         const { error: linkError } = await supabase
           .from('meal_dishes')
-          .insert(mealDraft.dish_ids.map(dish_id => ({ meal_id: meal.id, dish_id })))
+          .insert(mealDraft.dish_ids.map(dish_id => ({
+            meal_id: meal.id,
+            dish_id,
+            note: mealDraft.dish_notes[dish_id] ?? null,
+          })))
         if (linkError) {
           console.error(`[POST /api/orders] dish links failed on meal ${meal.id}:`, linkError.message)
         }
@@ -101,7 +105,12 @@ export async function POST(req: NextRequest) {
 
       meals.push({
         ...(meal as Meal),
-        dishes: mealDraft.dish_ids.map(id => dishMap[id]).filter((d): d is Dish => !!d),
+        dishes: mealDraft.dish_ids
+          .map((id): SelectedDish | null => {
+            const dish = dishMap[id]
+            return dish ? { ...dish, note: mealDraft.dish_notes[id] ?? null } : null
+          })
+          .filter((d): d is SelectedDish => !!d),
       })
     }
 

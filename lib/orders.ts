@@ -1,5 +1,5 @@
 import { createAnonClient } from './supabase/server'
-import type { Order, Meal, Dish } from '@/types'
+import type { Order, Meal, Dish, SelectedDish } from '@/types'
 
 /**
  * Loads an order with its meals and each meal's dishes.
@@ -41,9 +41,9 @@ export async function getOrderWithMeals(id: string): Promise<OrderWithMeals | nu
   const { data: mealDishes } = mealRows.length
     ? await supabase
         .from('meal_dishes')
-        .select('meal_id, dish_id')
+        .select('meal_id, dish_id, note')
         .in('meal_id', mealRows.map(m => m.id))
-    : { data: [] as { meal_id: string; dish_id: string }[] }
+    : { data: [] as { meal_id: string; dish_id: string; note: string | null }[] }
 
   const links = mealDishes ?? []
   const dishIds = [...new Set(links.map(md => md.dish_id))]
@@ -58,10 +58,16 @@ export async function getOrderWithMeals(id: string): Promise<OrderWithMeals | nu
 
   const withDishes: Meal[] = mealRows.map(meal => ({
     ...meal,
+    // The note travels with the dish rather than in a parallel structure, so
+    // the PDF and the confirmation page cannot drift over which note belongs
+    // to which dish.
     dishes: links
       .filter(md => md.meal_id === meal.id)
-      .map(md => dishMap[md.dish_id])
-      .filter((d): d is Dish => !!d),
+      .map(md => {
+        const dish = dishMap[md.dish_id]
+        return dish ? { ...dish, note: md.note ?? null } : null
+      })
+      .filter((d): d is SelectedDish => !!d),
   }))
 
   return { order: order as Order, meals: withDishes, dishMap }

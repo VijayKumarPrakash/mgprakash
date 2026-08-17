@@ -91,6 +91,31 @@ Everything after the write is best-effort and logged rather than thrown. React-P
 its font over the network at render time and Gmail SMTP can rate-limit; either failing must
 not turn a saved order into a 500, because a customer who sees an error submits again.
 
+### Per-dish notes
+
+Every selected dish can carry a free-text note — "mild, for the children", "extra crisp",
+"no onion". It is the replacement for the spice classification that used to live on the
+dish, and the mechanism for any per-dish preference generally.
+
+- Stored on `meal_dishes.note`, not on the dish: the note is about *this order*.
+- Captured in **`ReviewStep`**, not the dish-selection step. That step is the whole
+  229-card catalogue and has nowhere to annotate a choice already made; review is also
+  when "mild, for the children" actually occurs to the customer.
+- Carried by `SelectedDish` (`Dish & { note: string | null }`) so the note travels with
+  the dish through `lib/orders.ts`, the PDF and both emails, rather than in a parallel
+  map that can drift out of alignment.
+- `validateOrderDraft` drops any note keyed to a dish that is not on the meal and caps
+  each at 300 characters. `POST /api/orders` writes with the service-role key, so the
+  route cannot trust the form.
+- In the emails it goes through `esc()` like every other interpolation. It is free text
+  typed into a public form.
+
+**The PDF prints a dashed rule under every dish, note or not.** That is not decoration:
+the document gets printed and marked up by hand when a menu is settled over the phone.
+Keep the rule when the note is empty. Note also that the hint line above the dish list
+must not be italic — only Inter regular and semibold are registered, and React-PDF
+throws on an unresolvable font style rather than falling back, failing the whole document.
+
 ### Dish catalogue
 
 - Fuse.js weighted fuzzy search across name, alt_names, cuisine, tags, ingredients, description
@@ -214,6 +239,10 @@ prefix.
 
 Order editing, admin dashboard, per-dish quantities, allergen tracking, service style fields,
 popularity/featured flags, pricing and payment.
+
+Per-dish *notes* are built and in scope — see **Per-dish notes**. Quantities are not:
+a note is free text the kitchen reads, a quantity is a number something would have to
+calculate against.
 
 ## Deferred (build later)
 

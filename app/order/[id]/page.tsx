@@ -118,10 +118,17 @@ export default async function OrderConfirmationPage({ params }: Props) {
               </p>
               <ul className="space-y-2">
                 {meal.dishes.map(dish => (
-                  <li key={dish.id} className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
-                    <span className="text-sm text-[var(--ink)]">{dish.name}</span>
-                    <span className="text-xs text-[var(--ink-3)] capitalize">{dish.diet}</span>
+                  <li key={dish.id}>
+                    <div className="flex items-center gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
+                      <span className="text-sm text-[var(--ink)]">{dish.name}</span>
+                      <span className="text-xs text-[var(--ink-3)] capitalize">{dish.diet}</span>
+                    </div>
+                    {/* Shown so the customer can confirm the note they wrote
+                        actually reached the order, not only the PDF. */}
+                    {!!dish.note && (
+                      <p className="text-[13px] text-[var(--ink-3)] ml-[18px] mt-0.5">{dish.note}</p>
+                    )}
                   </li>
                 ))}
               </ul>

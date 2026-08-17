@@ -52,9 +52,28 @@ const s = StyleSheet.create({
   mealMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 12 },
   metaItem: { minWidth: 80 },
   dishList: { borderTopWidth: 1, borderTopColor: LINE, paddingTop: 10, marginTop: 4 },
-  dishItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
+  dishItem: { marginBottom: 9 },
+  dishLine: { flexDirection: 'row', alignItems: 'center' },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: ACCENT, marginRight: 8 },
   dishName: { fontSize: 9.5, color: DARK },
+  /** The customer's own note, printed under the dish it belongs to. */
+  dishNote: { fontSize: 8.5, color: MUTED, marginLeft: 12, marginTop: 3, lineHeight: 1.45 },
+  /**
+   * A dashed rule under every dish, whether or not it carries a typed note.
+   * Dashed rather than solid so it reads as somewhere to write instead of as a
+   * divider — this document gets printed and marked up by hand when a menu is
+   * settled over the phone.
+   */
+  dishRule: {
+    marginLeft: 12, marginTop: 6,
+    borderBottomWidth: 0.5, borderBottomColor: LINE, borderBottomStyle: 'dashed',
+  },
+  /**
+   * Not italic. Only Inter regular and semibold are registered above, and
+   * React-PDF throws "Could not resolve font for Inter, fontStyle italic"
+   * rather than falling back — which fails the whole document, not one line.
+   */
+  notesHint: { fontSize: 7.5, color: MUTED, marginBottom: 8 },
   footer: { position: 'absolute', bottom: 28, left: 52, right: 52, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: LINE, paddingTop: 12 },
   footerText: { fontSize: 8, color: MUTED },
 })
@@ -164,13 +183,20 @@ export function OrderPDF({ order, meals, isDraft = false }: Props) {
 
               {!!meal.dishes?.length && (
                 <View style={s.dishList}>
-                  <Text style={[s.sectionTitle, { marginBottom: 6 }]}>
+                  <Text style={[s.sectionTitle, { marginBottom: 4 }]}>
                     Selected Dishes ({meal.dishes.length})
                   </Text>
+                  <Text style={s.notesHint}>
+                    Space under each dish for notes and adjustments
+                  </Text>
                   {meal.dishes.map(d => (
-                    <View key={d.id} style={s.dishItem}>
-                      <View style={s.dot} />
-                      <Text style={s.dishName}>{d.name}</Text>
+                    <View key={d.id} style={s.dishItem} wrap={false}>
+                      <View style={s.dishLine}>
+                        <View style={s.dot} />
+                        <Text style={s.dishName}>{d.name}</Text>
+                      </View>
+                      {!!d.note && <Text style={s.dishNote}>{d.note}</Text>}
+                      <View style={s.dishRule} />
                     </View>
                   ))}
                 </View>

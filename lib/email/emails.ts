@@ -69,7 +69,17 @@ function esc(value: unknown): string {
 }
 
 function dishListHtml(meal: Meal): string {
-  return (meal.dishes ?? []).map(d => `<li>${esc(d.name)}</li>`).join('')
+  // The note is free text typed into a public form, so it goes through esc()
+  // like every other interpolation in this file — these templates are
+  // hand-built HTML strings with no framework escaping anything for us.
+  return (meal.dishes ?? [])
+    .map(d =>
+      d.note
+        ? `<li>${esc(d.name)}<br>` +
+          `<span style="font-size:12px;color:${BRAND.muted};">${esc(d.note)}</span></li>`
+        : `<li>${esc(d.name)}</li>`
+    )
+    .join('')
 }
 
 /** Shared sign-off. Table-free and inline-styled — Outlook strips the rest. */

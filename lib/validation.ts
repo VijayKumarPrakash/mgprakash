@@ -27,6 +27,7 @@ const LIMITS = {
   mealName: 120,
   meals: 20,
   dishesPerMeal: 200,
+  dishNote: 300,
   guests: 100_000,
 } as const
 
@@ -52,6 +53,8 @@ export interface SubmittedMeal {
   total_guests: number
   veg_guests: number
   dish_ids: string[]
+  /** Per-dish notes, keyed by dish id. Only ids present in `dish_ids` survive. */
+  dish_notes: Record<string, string>
 }
 
 function str(value: unknown): string {
@@ -141,7 +144,24 @@ export function validateOrderDraft(body: unknown): ValidationResult {
     // constraint on (meal_id, dish_id), so a repeat would fail the whole insert.
     const dish_ids = [...new Set(rawIds.filter((v): v is string => typeof v === 'string' && !!v))]
 
-    meals.push({ name, date, time, location, total_guests, veg_guests, dish_ids })
+    // Notes are keyed by dish id, and the route writes with the service-role
+    // key, so this cannot trust the form: anything keyed to a dish that is not
+    // actually on this meal is dropped rather than written to a row that does
+    // not exist, and each note is trimmed and capped.
+    const rawNotes = (m.dish_notes ?? {}) as Record<string, unknown>
+    const dish_notes: Record<string, string> = {}
+    if (typeof rawNotes === 'object' && rawNotes !== null) {
+      for (const id of dish_ids) {
+        const note = str(rawNotes[id])
+        if (!note) continue
+        if (note.length > LIMITS.dishNote) {
+          return { ok: false, error: `${label} has a dish note that is too long.` }
+        }
+        dish_notes[id] = note
+      }
+    }
+
+    meals.push({ name, date, time, location, total_guests, veg_guests, dish_ids, dish_notes })
   }
 
   return {

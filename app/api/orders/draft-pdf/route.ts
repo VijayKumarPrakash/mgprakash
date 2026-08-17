@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
 import { getDishesByIds } from '@/lib/dishes'
 import { validateOrderDraft } from '@/lib/validation'
-import type { Dish, Order, Meal } from '@/types'
+import type { Order, Meal, SelectedDish } from '@/types'
 
 /**
  * Renders the "download a draft" preview from the review step.
@@ -35,7 +35,14 @@ export async function POST(req: Request) {
       location: m.location,
       total_guests: m.total_guests,
       veg_guests: m.veg_guests,
-      dishes: m.dish_ids.map(id => dishMap.get(id)).filter((d): d is Dish => !!d),
+      // The draft preview must show the notes too, or the PDF a customer
+      // downloads before submitting disagrees with the one they get after.
+      dishes: m.dish_ids
+        .map((id): SelectedDish | null => {
+          const dish = dishMap.get(id)
+          return dish ? { ...dish, note: m.dish_notes?.[id] ?? null } : null
+        })
+        .filter((d): d is SelectedDish => !!d),
     }))
 
     const preview: Order = {
