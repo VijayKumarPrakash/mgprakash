@@ -52,8 +52,6 @@ export const BROWSE_ORDER: readonly Course[] = [
 export const DIETS = ['vegetarian', 'non-vegetarian', 'egg'] as const
 export type Diet = (typeof DIETS)[number]
 
-export const SPICE_LEVELS = ['mild', 'medium', 'hot'] as const
-export type SpiceLevel = (typeof SPICE_LEVELS)[number]
 
 /* ------------------------------------------------------------------ *
  * Cuisine — two levels. The group drives the filter chips (four options

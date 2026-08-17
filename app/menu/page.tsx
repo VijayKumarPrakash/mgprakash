@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       `The full M G Prakash Catering menu — ${count} Karnataka, Udupi, South Indian, North Indian, ` +
       'Mughlai and Indo-Chinese dishes for weddings and events in Bengaluru. Filter by course, diet, ' +
-      'spice and occasion, including pure veg, Jain and no onion-garlic.',
+      'cuisine and occasion, including pure veg, Jain and no onion-garlic.',
     alternates: { canonical: '/menu' },
     openGraph: { url: absoluteUrl('/menu'), title },
   }
@@ -116,7 +116,7 @@ export default async function MenuPage({ searchParams }: Props) {
             Every dish, by course
           </h2>
           <p className="text-[15px] text-[var(--ink-3)] mb-8 max-w-2xl">
-            The complete list. Each dish has its own page with ingredients, spice level and
+            The complete list. Each dish has its own page with ingredients and
             the occasions it suits.
           </p>
 

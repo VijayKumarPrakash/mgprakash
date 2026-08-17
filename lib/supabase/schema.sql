@@ -18,6 +18,11 @@ create table if not exists dishes (
   course            text[] not null default '{}',
   cuisine           text,
   diet              text not null,
+  -- Retained but unused. A fixed spice classification was removed from the
+  -- catalogue: how hot a dish should be is a per-customer preference, captured
+  -- as a per-dish note on the order instead. Nothing reads or writes this
+  -- column; it is kept only because dropping a column is irreversible and this
+  -- file is add-only. Safe to drop by hand once you are sure.
   spice_level       text,
   flavour_profile   jsonb not null default '[]',
   cooking_method    jsonb not null default '[]',

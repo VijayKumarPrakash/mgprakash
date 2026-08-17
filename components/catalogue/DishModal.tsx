@@ -151,7 +151,6 @@ export function DishModal({ dish, onClose, orderContext }: Props) {
           <div className="grid grid-cols-2 gap-x-5 gap-y-4 py-5 border-y border-[var(--line)]">
             <Field label="Course" value={dish.course.map(c => COURSE_LABELS[c]).join(' · ')} />
             <Field label="Cuisine" value={dish.cuisine} />
-            <Field label="Spice" value={<span className="capitalize">{dish.spice_level}</span>} />
             <Field
               label="Method"
               value={<span className="capitalize">{dish.cooking_method.join(', ').replace(/-/g, ' ')}</span>}

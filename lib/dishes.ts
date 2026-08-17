@@ -59,7 +59,6 @@ function fromFile(): Dish[] {
       is_jain: Boolean(d.is_jain),
       // Absent means unknown, and unknown must not read as "safe" — see hydrate().
       contains_onion_garlic: d.contains_onion_garlic !== false,
-      spice_level: d.spice_level as Dish['spice_level'],
       flavour_profile: (d.flavour_profile as Dish['flavour_profile']) ?? [],
       cooking_method: (d.cooking_method as Dish['cooking_method']) ?? [],
       ingredients: (d.ingredients as string[]) ?? [],
@@ -97,7 +96,6 @@ function hydrate(row: Record<string, unknown>): Dish {
     is_vegan: Boolean(row.is_vegan),
     is_jain: Boolean(row.is_jain),
     contains_onion_garlic: row.contains_onion_garlic !== false,
-    spice_level: (row.spice_level as Dish['spice_level']) ?? 'medium',
     course: (row.course as Dish['course']) ?? [],
     flavour_profile: (row.flavour_profile as Dish['flavour_profile']) ?? [],
     cooking_method: (row.cooking_method as Dish['cooking_method']) ?? [],

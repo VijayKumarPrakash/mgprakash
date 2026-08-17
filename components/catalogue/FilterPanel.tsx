@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { CatalogueFilters } from './CatalogueClient'
 import { COURSE_LABELS, OCCASION_LABELS } from '@/lib/taxonomy'
-import type { Course, CuisineGroup, Occasion, SpiceLevel } from '@/lib/taxonomy'
+import type { Course, CuisineGroup, Occasion } from '@/lib/taxonomy'
 
 interface Props {
   filters: CatalogueFilters
@@ -13,7 +13,6 @@ interface Props {
   courses: readonly Course[]
   cuisineGroups: readonly CuisineGroup[]
   occasions: readonly Occasion[]
-  spiceLevels: readonly SpiceLevel[]
 }
 
 const DIET_OPTIONS = [
@@ -49,7 +48,7 @@ function Row({
 
 export function FilterPanel({
   filters, onToggle, onClear, activeCount,
-  courses, cuisineGroups, occasions, spiceLevels,
+  courses, cuisineGroups, occasions,
 }: Props) {
   const [showAll, setShowAll] = useState(false)
 
@@ -101,19 +100,6 @@ export function FilterPanel({
 
       {showAll && (
         <div className="grid gap-5 sm:grid-cols-[auto_1fr]">
-          <Row label="Spice" count={filters.spice_level.length}>
-            {spiceLevels.map(s => (
-              <button
-                key={s}
-                type="button"
-                className="chip capitalize"
-                aria-pressed={filters.spice_level.includes(s)}
-                onClick={() => onToggle('spice_level', s)}
-              >
-                {s}
-              </button>
-            ))}
-          </Row>
 
           <Row label="Occasion" count={filters.occasion.length}>
             {occasions.map(o => (
@@ -137,7 +123,7 @@ export function FilterPanel({
           onClick={() => setShowAll(v => !v)}
           className="text-[13px] font-medium text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors inline-flex items-center gap-1.5"
         >
-          {showAll ? 'Fewer filters' : 'Spice and occasion'}
+          {showAll ? 'Fewer filters' : 'Occasion'}
           <svg
             width="11" height="7" viewBox="0 0 11 7" fill="none"
             className="transition-transform duration-200"

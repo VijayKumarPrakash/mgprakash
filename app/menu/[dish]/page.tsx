@@ -196,7 +196,6 @@ export default async function DishPage({ params }: Props) {
             <dl className="grid grid-cols-2 gap-x-6 gap-y-4 py-6 border-y border-[var(--line)] mb-6">
               <Fact label="Course" value={dish.course.map(c => COURSE_LABELS[c]).join(' · ')} />
               <Fact label="Cuisine" value={dish.cuisine} />
-              <Fact label="Spice" value={<span className="capitalize">{dish.spice_level}</span>} />
               <Fact
                 label="Method"
                 value={<span className="capitalize">{dish.cooking_method.join(', ').replace(/-/g, ' ')}</span>}

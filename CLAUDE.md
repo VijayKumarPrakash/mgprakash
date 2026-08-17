@@ -69,6 +69,13 @@ so a value outside the vocabulary can never reach the database. Two modelling no
 - **`contains_onion_garlic` is separate from `is_jain`.** Satvik and temple-adjacent
   events exclude alliums without applying Jain rules on root vegetables. It cannot be
   derived from the other flags.
+- **There is no spice level, deliberately.** Dishes used to carry a fixed
+  `mild | medium | hot` classification, a filter chip and a field in the modal. It was
+  removed: how hot a dish should be is a property of the customer, not of the dish, and
+  the same sambar is mild at one wedding and hot at the next. The customer states it
+  per dish as an order note instead — see **Per-dish notes** below. Do not reintroduce
+  it as a catalogue field. (`dishes.spice_level` still exists in the database, unread,
+  because dropping a column is irreversible.)
 
 `COURSES` is menu-service order (used by the PDF and order summary). `BROWSE_ORDER` is
 the catalogue's default sort — food first, drinks last.
@@ -87,7 +94,7 @@ not turn a saved order into a 500, because a customer who sees an error submits 
 ### Dish catalogue
 
 - Fuse.js weighted fuzzy search across name, alt_names, cuisine, tags, ingredients, description
-- Chip filters: course, cuisine group, diet, spice, occasion. **AND across groups, OR within
+- Chip filters: course, cuisine group, diet, occasion. **AND across groups, OR within
   a group** — the standard faceted-search behaviour
 - Card grid: 3 cols desktop / 2 tablet / 1 mobile; 12 cards + "Load more"
 - Modal detail view with focus trap, scrollbar-compensated body lock, and restore-focus-on-close

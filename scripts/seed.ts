@@ -68,8 +68,6 @@ async function seed() {
       is_vegan: Boolean(d.is_vegan),
       is_jain: Boolean(d.is_jain),
       contains_onion_garlic: Boolean(d.contains_onion_garlic),
-
-      spice_level: String(d.spice_level),
       flavour_profile: arr(d.flavour_profile),
       cooking_method: arr(d.cooking_method),
       ingredients: arr(d.ingredients),

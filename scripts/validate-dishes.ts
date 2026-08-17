@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import JSON5 from 'json5'
 import {
-  COURSES, DIETS, SPICE_LEVELS, CUISINES, OCCASIONS,
+  COURSES, DIETS, CUISINES, OCCASIONS,
   FLAVOURS, COOKING_METHODS, IMAGE_LICENCES,
 } from '../lib/taxonomy'
 
@@ -71,7 +71,6 @@ function main() {
     checkList(id, 'occasion_fit', d.occasion_fit, OCCASIONS, 1, 8)
     checkOne(id, 'cuisine', d.cuisine, CUISINES)
     checkOne(id, 'diet', d.diet, DIETS)
-    checkOne(id, 'spice_level', d.spice_level, SPICE_LEVELS)
     checkOne(id, 'image_licence', d.image_licence ?? 'placeholder', IMAGE_LICENCES)
 
     for (const f of ['is_vegan', 'is_jain', 'contains_onion_garlic'] as const) {

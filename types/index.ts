@@ -1,10 +1,10 @@
 import type {
-  Course, Cuisine, CuisineGroup, Diet, SpiceLevel,
+  Course, Cuisine, CuisineGroup, Diet,
   Occasion, Flavour, CookingMethod, ImageLicence,
 } from '@/lib/taxonomy'
 
 export type {
-  Course, Cuisine, CuisineGroup, Diet, SpiceLevel,
+  Course, Cuisine, CuisineGroup, Diet,
   Occasion, Flavour, CookingMethod, ImageLicence,
 }
 
@@ -68,8 +68,6 @@ export interface Dish {
   is_jain: boolean
   /** Tracked apart from `is_jain`: satvik events exclude alliums without full Jain rules. */
   contains_onion_garlic: boolean
-
-  spice_level: SpiceLevel
   flavour_profile: Flavour[]
   cooking_method: CookingMethod[]
   ingredients: string[]

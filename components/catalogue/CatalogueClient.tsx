@@ -3,8 +3,8 @@
 import { useState, useMemo, useCallback, useDeferredValue, useTransition } from 'react'
 import Fuse from 'fuse.js'
 import type { Dish } from '@/types'
-import { COURSES, CUISINE_GROUPS, OCCASIONS, SPICE_LEVELS } from '@/lib/taxonomy'
-import type { Course, CuisineGroup, Occasion, SpiceLevel } from '@/lib/taxonomy'
+import { COURSES, CUISINE_GROUPS, OCCASIONS } from '@/lib/taxonomy'
+import type { Course, CuisineGroup, Occasion } from '@/lib/taxonomy'
 import { DishCard } from './DishCard'
 import { DishModal } from './DishModal'
 import { SearchBar } from './SearchBar'
@@ -16,12 +16,11 @@ export interface CatalogueFilters {
   course: Course[]
   cuisine_group: CuisineGroup[]
   occasion: Occasion[]
-  spice_level: SpiceLevel[]
   diet: ('vegetarian' | 'non-vegetarian' | 'vegan' | 'jain' | 'no-onion-garlic')[]
 }
 
 export const EMPTY_FILTERS: CatalogueFilters = {
-  course: [], cuisine_group: [], occasion: [], spice_level: [], diet: [],
+  course: [], cuisine_group: [], occasion: [], diet: [],
 }
 
 export interface OrderContextShape {
@@ -100,8 +99,6 @@ export function CatalogueClient({ dishes, orderContext, initialQuery = '' }: Pro
       results = results.filter(d => filters.cuisine_group.includes(d.cuisine_group))
     if (filters.occasion.length)
       results = results.filter(d => d.occasion_fit.some(o => filters.occasion.includes(o)))
-    if (filters.spice_level.length)
-      results = results.filter(d => filters.spice_level.includes(d.spice_level))
     if (filters.diet.length) {
       results = results.filter(d =>
         filters.diet.every(f =>
@@ -167,7 +164,6 @@ export function CatalogueClient({ dishes, orderContext, initialQuery = '' }: Pro
           courses={COURSES}
           cuisineGroups={CUISINE_GROUPS}
           occasions={OCCASIONS}
-          spiceLevels={SPICE_LEVELS}
         />
 
         <p className="text-[13px] text-[var(--ink-3)] tabular-nums" aria-live="polite">
