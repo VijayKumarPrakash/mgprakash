@@ -159,6 +159,15 @@ begin
   end if;
   -- The keep-alive workflow authenticates with the anon key, so its update is
   -- the one write in the whole schema that RLS actually has to permit.
+  --
+  -- Both policies are required, not just the update one: PostgreSQL applies
+  -- SELECT policies to an UPDATE that reads existing rows, and the workflow
+  -- filters on `?id=eq.1`. With only the UPDATE policy the PATCH matches zero
+  -- rows and the ping silently stops keeping anything alive. The table holds
+  -- one timestamp and nothing else, so a public read costs nothing.
+  if not exists (select 1 from pg_policies where tablename = 'keepalive' and policyname = 'Public read keepalive') then
+    create policy "Public read keepalive" on keepalive for select using (true);
+  end if;
   if not exists (select 1 from pg_policies where tablename = 'keepalive' and policyname = 'Anon update keepalive') then
     create policy "Anon update keepalive" on keepalive for update using (true) with check (true);
   end if;
