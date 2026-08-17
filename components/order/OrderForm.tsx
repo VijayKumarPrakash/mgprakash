@@ -121,7 +121,10 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
   }, [draft, router])
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+    // pt-6 rather than py-12: the page now renders its own <h1> block above,
+    // which owns the top spacing. A second py-12 here left a gap between the
+    // heading and the step indicator big enough to read as a mistake.
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-12">
       <StepIndicator
         currentStep={step}
         highestReached={highestReached}

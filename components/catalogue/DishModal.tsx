@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import type { Dish } from '@/types'
 import type { OrderContextShape } from './CatalogueClient'
 import { DietBadge } from './DietBadge'
@@ -135,6 +136,17 @@ export function DishModal({ dish, onClose, orderContext }: Props) {
           </div>
 
           <p className="text-[15px] leading-[1.65] text-[var(--ink-2)]">{dish.description}</p>
+
+          {/* The modal has no URL, so this is the only way out of it to something
+              shareable. Also the internal link that connects the catalogue grid
+              to the dish pages for anything crawling with JavaScript on. */}
+          <Link
+            href={`/menu/${dish.id}`}
+            className="text-[13px] font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)]
+                       underline underline-offset-2 transition-colors duration-[var(--dur-fast)] -mt-2"
+          >
+            Open full dish page ↗
+          </Link>
 
           <div className="grid grid-cols-2 gap-x-5 gap-y-4 py-5 border-y border-[var(--line)]">
             <Field label="Course" value={dish.course.map(c => COURSE_LABELS[c]).join(' · ')} />

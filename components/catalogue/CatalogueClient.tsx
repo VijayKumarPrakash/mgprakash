@@ -35,10 +35,22 @@ export interface OrderContextShape {
 interface Props {
   dishes: Dish[]
   orderContext?: OrderContextShape
+  /**
+   * Seeds the search box from `?q=` on /menu.
+   *
+   * Deliberately an initial value and not a controlled mirror of the URL: the
+   * search input is on the interactive path and pushing a history entry per
+   * keystroke would both flood the back button and re-render the tree at
+   * exactly the priority `useDeferredValue` exists to protect. Reading it once
+   * is enough to make a shared or linked search land on real results, which is
+   * the whole point — it is also the URL the WebSite SearchAction in
+   * `lib/seo.ts` advertises, so it has to actually work.
+   */
+  initialQuery?: string
 }
 
-export function CatalogueClient({ dishes, orderContext }: Props) {
-  const [query, setQuery] = useState('')
+export function CatalogueClient({ dishes, orderContext, initialQuery = '' }: Props) {
+  const [query, setQuery] = useState(initialQuery)
   const [filters, setFilters] = useState<CatalogueFilters>(EMPTY_FILTERS)
   const [page, setPage] = useState(1)
   const [modalDish, setModalDish] = useState<Dish | null>(null)

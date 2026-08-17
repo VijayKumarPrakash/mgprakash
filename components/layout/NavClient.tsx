@@ -87,16 +87,27 @@ export function NavClient({ user }: { user: User | null }) {
         </Link>
 
         <nav className="flex items-center gap-2 sm:gap-5">
-          <Link
-            href="/menu"
-            className={`hidden sm:inline-block text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
-              dark
-                ? 'text-[var(--dark-ink-2)] hover:text-[var(--dark-ink)]'
-                : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
-            }`}
-          >
-            Menu
-          </Link>
+          {/* Menu, Services and Areas are the three indexable hub pages. Linking
+              them from every page is what gives them internal weight — a page
+              reachable only from the sitemap is crawled, but ranks like an
+              orphan. Hidden below sm, where the quote button has to win. */}
+          {[
+            { href: '/menu', label: 'Menu' },
+            { href: '/services', label: 'Services' },
+            { href: '/areas', label: 'Areas' },
+          ].map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`hidden sm:inline-block text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
+                dark
+                  ? 'text-[var(--dark-ink-2)] hover:text-[var(--dark-ink)]'
+                  : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
 
           {user && (
             <Link

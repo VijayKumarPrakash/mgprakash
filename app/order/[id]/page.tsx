@@ -1,8 +1,27 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getOrderWithMeals } from '@/lib/orders'
 import { formatDate, formatTime, orderRef } from '@/lib/format'
 import { EVENT_TYPE_LABELS } from '@/types'
+
+/**
+ * Never indexed.
+ *
+ * This URL is a capability: the uuid is the only thing protecting it, which is
+ * what lets the emailed link work without a login, and public SELECT on
+ * `orders` is deliberate for the same reason. That makes indexing actively
+ * dangerous — a crawled confirmation page puts a customer's name, phone number
+ * and venue into a public search result, and `noindex` is the only thing
+ * standing between those two facts.
+ *
+ * robots.txt disallows /order/ as well, but the two are not redundant: a
+ * disallowed URL can still be indexed from an external link, because Google
+ * will list a URL it was told not to fetch. Only the header actually removes it.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
 
 interface Props {
   params: Promise<{ id: string }>

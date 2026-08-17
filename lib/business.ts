@@ -17,6 +17,17 @@
 
 export const BUSINESS = {
   name: 'M G Prakash Catering',
+  /**
+   * The name on the Google Business Profile, which is "M G Prakash - Cooking
+   * Contractor" rather than "…Catering".
+   *
+   * Kept verbatim and deliberately. Search engines corroborate a site against
+   * the profile it claims to be, and "cooking contractor" is also the phrase
+   * customers here actually type — the trade has been called that in Bengaluru
+   * far longer than "caterer" has. Both names are therefore surfaced in the
+   * structured data via `alternateName`, so the two records reconcile.
+   */
+  gmbName: 'M G Prakash - Cooking Contractor',
   established: 2000,
   email: 'vijaykumar.sb.99@gmail.com',
   phone: '+91 98801 93165',
@@ -28,7 +39,14 @@ export const BUSINESS = {
     city: 'Bengaluru',
     state: 'Karnataka',
     postcode: '560079',
+    countryCode: 'IN',
   },
+  /**
+   * Read off the resolved Google Maps place link below, not guessed. A
+   * LocalBusiness `geo` that disagrees with the map pin is worse than no geo
+   * at all — it is the kind of contradiction that costs local trust.
+   */
+  geo: { lat: 12.9967523, lng: 77.5446946 },
   mapsUrl: 'https://maps.app.goo.gl/uCvx2H7ypzXHDoPi9',
 } as const
 
@@ -42,6 +60,44 @@ export const ADDRESS_LINE = [
 
 export const TEL_HREF = `tel:+${BUSINESS.phoneDigits}`
 export const WHATSAPP_HREF = `https://wa.me/${BUSINESS.phoneDigits}`
+
+/**
+ * Years trading, computed rather than written down.
+ *
+ * The home page read "Twenty-five years" for long enough that it stopped being
+ * true — the business was established in 2000. Any copy that states an age has
+ * to derive it, or it quietly ages into a false claim on a page written
+ * specifically to be indexed.
+ */
+export function yearsTrading(): number {
+  return new Date().getFullYear() - BUSINESS.established
+}
+
+/**
+ * Where the kitchen actually travels.
+ *
+ * Two tiers, because they are not the same claim and must not be flattened
+ * into one list. The neighbourhoods are where a van leaves Rajajinagar in the
+ * morning and is back the same night; the wider cities are real but need a
+ * conversation about travel and an overnight team. Structured data reads both
+ * as `areaServed`, but the copy has to keep the distinction or the site is
+ * promising a Kochi wedding on Bengaluru terms.
+ */
+export const SERVICE_AREAS = {
+  /** Same-day reach from the Rajajinagar kitchen. */
+  local: [
+    'Rajajinagar', 'Malleshwaram', 'Basaveshwaranagar', 'Vijayanagar',
+    'Yeshwanthpur', 'Mahalakshmi Layout', 'Jayanagar', 'Basavanagudi',
+    'Indiranagar', 'Koramangala', 'Whitefield', 'Hebbal',
+    'Banashankari', 'RR Nagar', 'Kengeri', 'Yelahanka',
+  ],
+  /** Travelled to on request, across South India. */
+  regional: [
+    'Mysuru', 'Mangaluru', 'Hubballi–Dharwad', 'Davangere',
+    'Tumakuru', 'Shivamogga', 'Belagavi', 'Kalaburagi',
+    'Chennai', 'Coimbatore', 'Hyderabad', 'Kochi',
+  ],
+} as const
 
 /** Mirrors the `:root` tokens in app/globals.css. See the note above. */
 export const BRAND = {

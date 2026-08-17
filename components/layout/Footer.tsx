@@ -1,14 +1,39 @@
+import Link from 'next/link'
+
 export function Footer() {
   return (
     <footer className="border-t border-[var(--line)] bg-[var(--paper)] mt-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
+            {/* The one-line description a crawler reads alongside the address.
+                Says what the business is, in the words it is searched by. */}
             <p className="font-display text-base font-semibold text-[var(--ink)] mb-1">
               M G Prakash Catering
             </p>
+            <p className="text-sm text-[var(--ink-2)] leading-relaxed mb-2">
+              Cooking contractor &amp; caterer in Bengaluru
+            </p>
             <p className="text-xs text-[var(--ink-3)]">Established 2000</p>
           </div>
+
+          {/* Sitewide links to the indexable pages. */}
+          <nav aria-label="Footer" className="text-sm text-[var(--ink-2)] space-y-2">
+            {[
+              { href: '/menu', label: 'Full menu — 229 dishes' },
+              { href: '/services', label: 'Catering services' },
+              { href: '/areas', label: 'Areas we serve' },
+              { href: '/order/new', label: 'Get a quote' },
+            ].map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block hover:text-[var(--ink)] transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
           <a
             href="https://maps.app.goo.gl/uCvx2H7ypzXHDoPi9"
@@ -16,9 +41,15 @@ export function Footer() {
             rel="noopener noreferrer"
             className="text-sm text-[var(--ink-2)] leading-relaxed hover:text-[var(--ink)] transition-colors group"
           >
-            <p>611, 10th Cross Rd</p>
-            <p>Indiranagar Rajajinagar</p>
-            <p>Bengaluru, Karnataka 560079</p>
+            {/* <address> so the NAP block is machine-readable and matches the
+                PostalAddress in the JSON-LD character for character — that
+                match is what corroborates the site against the Google Business
+                Profile in local search. */}
+            <address className="not-italic">
+              <p>611, 10th Cross Rd</p>
+              <p>Indiranagar Rajajinagar</p>
+              <p>Bengaluru, Karnataka 560079</p>
+            </address>
             <p className="text-xs text-[var(--ink-3)] mt-1 group-hover:text-[var(--accent)] transition-colors">
               Open in Google Maps ↗
             </p>

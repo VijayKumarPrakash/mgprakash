@@ -1,18 +1,100 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getAllDishes } from '@/lib/dishes'
 import { Reveal } from '@/components/Reveal'
 import { DishImage } from '@/components/catalogue/DishImage'
 import { COURSE_LABELS } from '@/lib/taxonomy'
+import { BUSINESS, yearsTrading } from '@/lib/business'
+import { faqSchema, graph, jsonLdScript, SITE_URL } from '@/lib/seo'
 import type { Course } from '@/lib/taxonomy'
 import type { Dish } from '@/types'
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: { url: SITE_URL },
+}
+
+/**
+ * Real pre-quote questions, answered properly.
+ *
+ * These earn their place twice. As FAQPage structured data they are eligible
+ * for expansion under the search result, which takes up more of the page than
+ * a plain listing does. And as page copy they are the only place on the home
+ * page that uses the words people search — "cooking contractor", "how much",
+ * "how many days notice" — because the hero deliberately does not.
+ *
+ * Answers must match the visible text exactly. Marking up an answer that is not
+ * on the page is a structured-data violation, not a shortcut.
+ */
+const FAQS = [
+  {
+    q: 'What is a cooking contractor?',
+    a:
+      'In Bengaluru, a cooking contractor cooks at your venue rather than delivering food from a ' +
+      'central kitchen — the team, the vessels and the burners come to you, and the meal is made ' +
+      'on site and served fresh. M G Prakash has worked this way since 2000, and we still do it ' +
+      'wherever the venue has the space. Where it does not, we cook at our Rajajinagar kitchen.',
+  },
+  {
+    q: 'How much does catering cost per plate?',
+    a:
+      'It depends on the menu, the headcount and the venue, so we quote rather than publish a rate ' +
+      'card. Pick your dishes on the site and we will send a written quote the same day, with a PDF ' +
+      'of the menu exactly as you chose it. There is no charge for the quote and no obligation.',
+  },
+  {
+    q: 'How much notice do you need?',
+    a:
+      'Two to three weeks is comfortable for a wedding. Smaller functions we can often take on a ' +
+      'few days notice, and condolence meals we will always try to accommodate at short notice — ' +
+      'call rather than use the form for those.',
+  },
+  {
+    q: 'Do you cater pure vegetarian, Jain and satvik menus?',
+    a:
+      'Yes, and they are treated as first-class filters rather than special requests. Every one of ' +
+      'our 229 dishes is tagged for vegetarian, vegan and Jain suitability, and onion and garlic ' +
+      'are tracked separately — so a satvik menu for a naming ceremony or temple event can exclude ' +
+      'alliums without applying full Jain rules on root vegetables.',
+  },
+  {
+    q: 'How many guests can you cater for?',
+    a:
+      'From about thirty people at a house function up to gatherings where more than five thousand ' +
+      'have eaten. Most of our weddings fall between two hundred and six hundred guests, but the ' +
+      'kitchen scales well past that and has done so many times since 2000.',
+  },
+  {
+    q: 'Which areas of Bangalore do you serve?',
+    a:
+      'All of Bengaluru, from our kitchen in Rajajinagar — Malleshwaram, Basaveshwaranagar, ' +
+      'Vijayanagar, Jayanagar, Basavanagudi, Indiranagar, Koramangala, Whitefield, Hebbal and ' +
+      'everywhere between. We also travel across Karnataka and South India for weddings and ' +
+      'larger functions.',
+  },
+  {
+    q: 'Do you serve both vegetarian and non-vegetarian at the same event?',
+    a:
+      'Yes. We ask for a veg and non-veg headcount separately when you request a quote, and the two ' +
+      'are cooked and served separately at the venue, with every dish clearly labelled.',
+  },
+  {
+    q: 'Do I need an account to request a quote?',
+    a:
+      'No. The quote form works without signing in. Signing in with Google only pre-fills your ' +
+      'contact details and lets you find past requests later.',
+  },
+] as const
 
 // See the note in app/menu/page.tsx — these pages are dynamic because the nav
 // reads the session, so caching lives in lib/dishes.ts rather than in ISR.
 
 const PILLARS = [
   {
-    label: 'Since 2000',
-    title: 'Twenty-five years of Bengaluru weddings',
+    label: `Since ${BUSINESS.established}`,
+    // Derived, not written. This read "Twenty-five years" a year past the point
+    // it was true — see yearsTrading() in lib/business.ts.
+    title: `${yearsTrading()} years of Bengaluru weddings`,
     body: 'Hundreds of families, from Rajajinagar house functions to reception halls across the city.',
   },
   {
@@ -61,6 +143,11 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(graph(faqSchema(FAQS.map(f => ({ ...f })))))}
+      />
+
       {/* ================= HERO ================= */}
       {/* -mt-[68px] + pt pulls the section under the transparent sticky nav so
           the dark ground runs edge to edge behind it. */}
@@ -114,9 +201,14 @@ export default async function HomePage() {
               Catering crafted for every occasion
             </h1>
 
+            {/* Carries "cooking contractor" and "Bengaluru" in the first
+                paragraph of the page. The h1 above is deliberately the mood
+                line and matches nothing anyone searches for, so this is where
+                the page states plainly what the business is and where it is. */}
             <p className="text-[19px] leading-[1.62] text-[var(--dark-ink-2)] max-w-[46ch] mb-10">
-              From a naming ceremony at home to a reception for six hundred — South and
-              North Indian cooking, prepared fresh on the day and served with care.
+              A cooking contractor and caterer in Bengaluru since {BUSINESS.established}. From a
+              naming ceremony at home to a function for five thousand — South and North Indian
+              cooking, prepared fresh on the day and served with care.
             </p>
 
             <div className="flex flex-wrap gap-3.5">
@@ -235,6 +327,78 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ================= FAQ ================= */}
+      {/* Native <details> rather than a state-driven accordion: it is keyboard
+          accessible and findable by in-page search for free, it needs no
+          JavaScript, and — the part that matters here — the answer text is in
+          the DOM whether or not the panel is open, so a crawler reads all eight
+          answers and the FAQPage markup above is corroborated by the page. */}
+      <section className="bg-[var(--paper)]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
+          <Reveal>
+            <p className="eyebrow text-[var(--ink-3)] mb-4">Before you ask</p>
+            <h2 className="font-display text-[clamp(28px,4vw,40px)] text-[var(--ink)] mb-9 text-balance">
+              Questions we get every week
+            </h2>
+          </Reveal>
+
+          {/*
+            Deliberately NOT wrapped in <Reveal>, unlike every other block on
+            this page. `.reveal` sets `opacity: 0` and waits for an
+            IntersectionObserver to add `.reveal-in` — decorative sections can
+            afford that, but a FAQPage rich result requires the answer to be
+            visible on the page, and "invisible until JavaScript says otherwise"
+            is not a guarantee worth betting the markup on. These eight answers
+            are the one place on the site where paint reliability outranks the
+            reveal animation.
+          */}
+          <div className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
+            {FAQS.map(faq => (
+              <details key={faq.q} className="group py-5">
+                <summary
+                  className="flex items-start justify-between gap-5 cursor-pointer list-none
+                             text-[16.5px] font-medium text-[var(--ink)] leading-[1.45]
+                             hover:text-[var(--accent)] transition-colors duration-[var(--dur-fast)]"
+                >
+                  {faq.q}
+                  <span
+                    aria-hidden="true"
+                    className="mt-1.5 flex-shrink-0 w-3 h-3 text-[var(--ink-3)]
+                               transition-transform duration-[var(--dur-base)] ease-[cubic-bezier(.22,1,.36,1)]
+                               group-open:rotate-180"
+                  >
+                    <svg viewBox="0 0 12 12" fill="none" className="w-full h-full">
+                      <path d="M1.5 4L6 8.5L10.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                </summary>
+                <p className="text-[15px] leading-[1.7] text-[var(--ink-2)] mt-3 pr-8">
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+
+          <p className="text-[15px] text-[var(--ink-2)] mt-8">
+            Still unsure?{' '}
+            <Link
+              href="/services"
+              className="text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors"
+            >
+              See everything we cater
+            </Link>
+            , or{' '}
+            <Link
+              href="/areas"
+              className="text-[var(--accent)] hover:text-[var(--accent-hover)] underline underline-offset-2 transition-colors"
+            >
+              check whether we cover your area
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
 
       {/* ================= CTA ================= */}
       <section className="on-dark relative overflow-hidden bg-[var(--dark)] text-[var(--dark-ink)]">

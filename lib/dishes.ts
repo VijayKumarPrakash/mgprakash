@@ -149,3 +149,45 @@ export async function getDishesByIds(ids: string[]): Promise<Dish[]> {
   const index = new Map((await getAllDishes()).map(d => [d.id, d]))
   return ids.map(id => index.get(id)).filter((d): d is Dish => !!d)
 }
+
+/**
+ * One dish by id, for `/menu/[dish]`.
+ *
+ * Reads through `getAllDishes` rather than issuing its own `.eq('id', …)`
+ * query. A per-dish select would be one Supabase round-trip per page — 229 of
+ * them on a cold build — where the full catalogue is already in module scope
+ * behind the hour-long cache, and a scan of 229 items is free next to a network
+ * call. It also means this path inherits the food_db.json5 fallback rather
+ * than 404ing every dish page the moment the database is unreachable.
+ */
+export async function getDishById(id: string): Promise<Dish | null> {
+  return (await getAllDishes()).find(d => d.id === id) ?? null
+}
+
+/**
+ * Dishes to suggest alongside `dish` — same course first, then same cuisine.
+ *
+ * These links are doing real SEO work, not just filling space: 229 dish pages
+ * reachable only from the /menu index form a flat, shallow graph that crawlers
+ * traverse slowly and weight poorly. Cross-links between related dishes turn it
+ * into a connected one, and they are genuinely useful to someone building a
+ * menu, which is the test any internal link has to pass.
+ */
+export async function getRelatedDishes(dish: Dish, limit = 6): Promise<Dish[]> {
+  const all = await getAllDishes()
+  const scored = all
+    .filter(d => d.id !== dish.id)
+    .map(d => {
+      let score = 0
+      if (d.course.some(c => dish.course.includes(c))) score += 3
+      if (d.cuisine === dish.cuisine) score += 2
+      else if (d.cuisine_group === dish.cuisine_group) score += 1
+      if (d.diet === dish.diet) score += 1
+      if (d.occasion_fit.some(o => dish.occasion_fit.includes(o))) score += 1
+      return { d, score }
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.d.name.localeCompare(b.d.name, 'en-IN'))
+
+  return scored.slice(0, limit).map(({ d }) => d)
+}
