@@ -67,6 +67,40 @@ export function NavClient({ user }: { user: User | null }) {
   const dark = overHero && !scrolled
   const initial = (user?.name ?? user?.email ?? '?')[0].toUpperCase()
 
+  /** `/menu` stays current while reading `/menu/masala-dosa`. */
+  const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
+
+  /**
+   * Nav items are pills rather than bare text. As plain labels they sat at
+   * --ink-2 with only a colour shift on hover, so nothing said they were
+   * interactive until the pointer was already on them — and there was no
+   * current-page state at all: standing on /menu, "Menu" looked exactly like
+   * "Areas". The resting label is full ink now, hover paints a soft well, and
+   * the current page holds a copper-tinted pill.
+   */
+  function pill(href: string) {
+    const current = isCurrent(href)
+    const base =
+      'px-3 py-1.5 rounded-[var(--r-pill)] text-sm font-medium ' +
+      'transition-[background-color,color] duration-[var(--dur-fast)] ' +
+      'focus-visible:outline-none focus-visible:ring-2 ' +
+      'focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 ' +
+      (dark ? 'focus-visible:ring-offset-[var(--dark)]' : 'focus-visible:ring-offset-[var(--paper)]')
+
+    if (dark) {
+      return `${base} ${
+        current
+          ? 'bg-[rgba(247,241,230,.14)] text-[var(--accent-lift)]'
+          : 'text-[var(--dark-ink)] hover:bg-[rgba(247,241,230,.09)]'
+      }`
+    }
+    return `${base} ${
+      current
+        ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
+        : 'text-[var(--ink)] hover:bg-[var(--surface-2)]'
+    }`
+  }
+
   return (
     <header
       className={`sticky top-0 z-40 transition-[background-color,border-color,backdrop-filter] duration-[var(--dur-base)] ${
@@ -83,10 +117,13 @@ export function NavClient({ user }: { user: User | null }) {
           }`}
           style={{ fontWeight: 500 }}
         >
-          M G Prakash <span className="opacity-60">Catering</span>
+          M G Prakash{' '}
+          <span className={dark ? 'text-[var(--accent-lift)]' : 'text-[var(--accent)]'}>
+            Catering
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-2 sm:gap-5">
+        <nav className="flex items-center gap-1 sm:gap-1.5">
           {/* Menu, Services and Areas are the three indexable hub pages. Linking
               them from every page is what gives them internal weight — a page
               reachable only from the sitemap is crawled, but ranks like an
@@ -99,11 +136,8 @@ export function NavClient({ user }: { user: User | null }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`hidden sm:inline-block text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
-                dark
-                  ? 'text-[var(--dark-ink-2)] hover:text-[var(--dark-ink)]'
-                  : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
-              }`}
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+              className={`hidden sm:inline-block ${pill(item.href)}`}
             >
               {item.label}
             </Link>
@@ -112,18 +146,17 @@ export function NavClient({ user }: { user: User | null }) {
           {user && (
             <Link
               href="/account/orders"
-              className={`hidden sm:inline-block text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
-                dark
-                  ? 'text-[var(--dark-ink-2)] hover:text-[var(--dark-ink)]'
-                  : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
-              }`}
+              aria-current={isCurrent('/account/orders') ? 'page' : undefined}
+              className={`hidden sm:inline-block ${pill('/account/orders')}`}
             >
               My Orders
             </Link>
           )}
 
           {!isOrderFlow && (
-            <Link href="/order/new" className="btn btn-primary btn-sm">
+            // Set apart from the pill group so the CTA reads as the primary
+            // action rather than as one more tab in the row.
+            <Link href="/order/new" className="btn btn-primary btn-sm ml-1 sm:ml-2">
               Get a Quote
             </Link>
           )}
@@ -179,14 +212,7 @@ export function NavClient({ user }: { user: User | null }) {
               )}
             </div>
           ) : (
-            <Link
-              href="/auth/login"
-              className={`text-sm font-medium transition-colors duration-[var(--dur-fast)] ${
-                dark
-                  ? 'text-[var(--dark-ink-2)] hover:text-[var(--dark-ink)]'
-                  : 'text-[var(--ink-2)] hover:text-[var(--ink)]'
-              }`}
-            >
+            <Link href="/auth/login" className={pill('/auth/login')}>
               Sign in
             </Link>
           )}
