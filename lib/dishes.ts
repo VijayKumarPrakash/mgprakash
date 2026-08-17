@@ -144,6 +144,21 @@ export async function getAllDishes(): Promise<Dish[]> {
   }
 }
 
+/**
+ * How many dishes the catalogue actually holds.
+ *
+ * Exists so no page has to write the number down. "229" had been typed into
+ * nine pieces of user-facing copy — page titles, meta descriptions, the FAQ
+ * answer, the social card — none of which would have changed when the next
+ * `npm run seed` added a dish, leaving the site advertising a figure that was
+ * quietly wrong to both customers and Google.
+ *
+ * Free to call: it reads through the hour-long module cache in `getAllDishes`.
+ */
+export async function getDishCount(): Promise<number> {
+  return (await getAllDishes()).length
+}
+
 export async function getDishesByIds(ids: string[]): Promise<Dish[]> {
   if (!ids.length) return []
   const index = new Map((await getAllDishes()).map(d => [d.id, d]))

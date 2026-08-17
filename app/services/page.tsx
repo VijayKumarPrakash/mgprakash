@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BUSINESS, TEL_HREF } from '@/lib/business'
+import { getDishCount } from '@/lib/dishes'
 import { absoluteUrl, breadcrumbSchema, graph, jsonLdScript, ID } from '@/lib/seo'
 
 /**
@@ -34,7 +35,8 @@ export const metadata: Metadata = {
   },
 }
 
-const SERVICES = [
+/** A function of the dish count, so the catalogue size is never typed in. */
+const services = (dishCount: number) => [
   {
     slug: 'wedding',
     title: 'Wedding & reception catering',
@@ -85,10 +87,10 @@ const SERVICES = [
     title: 'Festival & religious catering',
     lede: 'Ugadi, Ganesha Chaturthi, Deepavali, temple prasad and satvik meals.',
     body:
-      'Onion and garlic are tracked as a separate field on every one of the 229 dishes, apart from ' +
-      'the Jain flag, because a temple-adjacent meal excludes alliums without necessarily applying ' +
-      'Jain rules on root vegetables. That distinction is built into the catalogue, so a satvik ' +
-      'menu is filtered rather than remembered.',
+      `Onion and garlic are tracked as a separate field on every one of our ${dishCount} dishes, ` +
+      'apart from the Jain flag, because a temple-adjacent meal excludes alliums without necessarily ' +
+      'applying Jain rules on root vegetables. That distinction is built into the catalogue, so a ' +
+      'satvik menu is filtered rather than remembered.',
     scale: '50–1,500 guests',
   },
   {
@@ -102,7 +104,10 @@ const SERVICES = [
   },
 ] as const
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const dishCount = await getDishCount()
+  const SERVICES = services(dishCount)
+
   const pageGraph = graph(
     {
       '@type': 'WebPage',
@@ -193,7 +198,7 @@ export default function ServicesPage() {
               {
                 n: '01',
                 t: 'Build a menu',
-                d: 'Browse all 229 dishes and pick what you want, meal by meal. No account needed.',
+                d: `Browse all ${dishCount} dishes and pick what you want, meal by meal. No account needed.`,
               },
               {
                 n: '02',

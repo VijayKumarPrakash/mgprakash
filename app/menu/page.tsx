@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllDishes } from '@/lib/dishes'
+import { getAllDishes, getDishCount } from '@/lib/dishes'
 import { CatalogueClient } from '@/components/catalogue/CatalogueClient'
 import { COURSES, COURSE_LABELS } from '@/lib/taxonomy'
 import { absoluteUrl, breadcrumbSchema, graph, jsonLdScript, ID } from '@/lib/seo'
@@ -9,14 +9,25 @@ import { absoluteUrl, breadcrumbSchema, graph, jsonLdScript, ID } from '@/lib/se
 // session cookie, so every page in the tree is dynamic and an ISR window here
 // would be silently ignored. The catalogue is cached in lib/dishes.ts instead.
 
-export const metadata: Metadata = {
-  title: 'Full Menu — 229 South & North Indian Dishes',
-  description:
-    'The full M G Prakash Catering menu — 229 Karnataka, Udupi, South Indian, North Indian, Mughlai ' +
-    'and Indo-Chinese dishes for weddings and events in Bengaluru. Filter by course, diet, spice and ' +
-    'occasion, including pure veg, Jain and no onion-garlic.',
-  alternates: { canonical: '/menu' },
-  openGraph: { url: absoluteUrl('/menu'), title: 'Full Menu — 229 South & North Indian Dishes' },
+/**
+ * `generateMetadata` rather than a static `metadata` export, so the dish count
+ * in the title and description is the real one. Hardcoded, it would have gone
+ * stale the first time a dish was added — and a title advertising the wrong
+ * number is worse than one carrying no number at all.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const count = await getDishCount()
+  const title = `Full Menu — ${count} South & North Indian Dishes`
+
+  return {
+    title,
+    description:
+      `The full M G Prakash Catering menu — ${count} Karnataka, Udupi, South Indian, North Indian, ` +
+      'Mughlai and Indo-Chinese dishes for weddings and events in Bengaluru. Filter by course, diet, ' +
+      'spice and occasion, including pure veg, Jain and no onion-garlic.',
+    alternates: { canonical: '/menu' },
+    openGraph: { url: absoluteUrl('/menu'), title },
+  }
 }
 
 interface Props {

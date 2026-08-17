@@ -20,7 +20,11 @@ export function Footer() {
           {/* Sitewide links to the indexable pages. */}
           <nav aria-label="Footer" className="text-sm text-[var(--ink-2)] space-y-2">
             {[
-              { href: '/menu', label: 'Full menu — 229 dishes' },
+              // No dish count here. The footer is in the root layout, so
+              // reading the catalogue to print one would put a Supabase call on
+              // every route in the site — including the auth pages that have no
+              // other reason to touch it.
+              { href: '/menu', label: 'Full menu' },
               { href: '/services', label: 'Catering services' },
               { href: '/areas', label: 'Areas we serve' },
               { href: '/order/new', label: 'Get a quote' },

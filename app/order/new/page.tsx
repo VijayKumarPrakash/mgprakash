@@ -1,19 +1,23 @@
 import type { Metadata } from 'next'
-import { getAllDishes } from '@/lib/dishes'
+import { getAllDishes, getDishCount } from '@/lib/dishes'
 import { createCookieClient } from '@/lib/supabase/server'
 import { OrderForm } from '@/components/order/OrderForm'
 import { absoluteUrl } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Get a Free Catering Quote — Bengaluru',
-  description:
-    'Tell us about your event, pick from 229 dishes, and we will send a written catering quote the ' +
-    'same day. No account needed, no obligation. M G Prakash Catering, Bengaluru.',
-  alternates: { canonical: '/order/new' },
-  openGraph: {
-    url: absoluteUrl('/order/new'),
+export async function generateMetadata(): Promise<Metadata> {
+  const count = await getDishCount()
+
+  return {
     title: 'Get a Free Catering Quote — Bengaluru',
-  },
+    description:
+      `Tell us about your event, pick from ${count} dishes, and we will send a written catering ` +
+      'quote the same day. No account needed, no obligation. M G Prakash Catering, Bengaluru.',
+    alternates: { canonical: '/order/new' },
+    openGraph: {
+      url: absoluteUrl('/order/new'),
+      title: 'Get a Free Catering Quote — Bengaluru',
+    },
+  }
 }
 
 /**

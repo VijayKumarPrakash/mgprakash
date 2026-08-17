@@ -24,9 +24,11 @@ export const metadata: Metadata = {
  * "how many days notice" — because the hero deliberately does not.
  *
  * Answers must match the visible text exactly. Marking up an answer that is not
- * on the page is a structured-data violation, not a shortcut.
+ * on the page is a structured-data violation, not a shortcut — which is also
+ * why this is one function feeding both the JSON-LD and the rendered list, and
+ * why the dish count is a parameter rather than a number typed into the prose.
  */
-const FAQS = [
+const faqs = (dishCount: number) => [
   {
     q: 'What is a cooking contractor?',
     a:
@@ -53,9 +55,9 @@ const FAQS = [
     q: 'Do you cater pure vegetarian, Jain and satvik menus?',
     a:
       'Yes, and they are treated as first-class filters rather than special requests. Every one of ' +
-      'our 229 dishes is tagged for vegetarian, vegan and Jain suitability, and onion and garlic ' +
-      'are tracked separately — so a satvik menu for a naming ceremony or temple event can exclude ' +
-      'alliums without applying full Jain rules on root vegetables.',
+      `our ${dishCount} dishes is tagged for vegetarian, vegan and Jain suitability, and onion and ` +
+      'garlic are tracked separately — so a satvik menu for a naming ceremony or temple event can ' +
+      'exclude alliums without applying full Jain rules on root vegetables.',
   },
   {
     q: 'How many guests can you cater for?',
@@ -118,6 +120,7 @@ export default async function HomePage() {
   }
 
   const total = dishes.length
+  const faqList = faqs(total)
 
   // One dish per course rather than the first six in the list — otherwise the
   // strip fills with whatever course happens to sort first and the home page
@@ -145,7 +148,7 @@ export default async function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(graph(faqSchema(FAQS.map(f => ({ ...f })))))}
+        dangerouslySetInnerHTML={jsonLdScript(graph(faqSchema(faqList.map(f => ({ ...f })))))}
       />
 
       {/* ================= HERO ================= */}
@@ -354,7 +357,7 @@ export default async function HomePage() {
             reveal animation.
           */}
           <div className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
-            {FAQS.map(faq => (
+            {faqList.map(faq => (
               <details key={faq.q} className="group py-5">
                 <summary
                   className="flex items-start justify-between gap-5 cursor-pointer list-none

@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { BUSINESS, BRAND } from '@/lib/business'
+import { getDishCount } from '@/lib/dishes'
 
 /**
  * The social card. There was none, so a link pasted into WhatsApp — which is
@@ -20,7 +21,9 @@ export const alt = `${BUSINESS.name} — cooking contractor and caterer in Benga
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const dishCount = await getDishCount()
+
   return new ImageResponse(
     (
       <div
@@ -103,7 +106,7 @@ export default function OpengraphImage() {
             paddingTop: 26,
           }}
         >
-          <div style={{ display: 'flex' }}>229 dishes · South &amp; North Indian</div>
+          <div style={{ display: 'flex' }}>{dishCount} dishes · South &amp; North Indian</div>
           <div style={{ display: 'flex' }}>{BUSINESS.phone}</div>
         </div>
       </div>
