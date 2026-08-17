@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "validate:dishes": "tsx scripts/validate-dishes.ts",
     "seed": "npm run validate:dishes && tsx scripts/seed.ts",
-    "fetch:images": "tsx scripts/fetch-images.ts"
+    "fetch:images": "tsx scripts/fetch-images.ts",
+    "check:email": "tsx scripts/check-email.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",

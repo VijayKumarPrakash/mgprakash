@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient, createRequestClient } from '@/lib/supabase/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
-import { sendClientConfirmation, sendBusinessNotification } from '@/lib/email/emails'
+import { sendClientConfirmation, sendBusinessNotification, emailConfigError } from '@/lib/email/emails'
 import { validateOrderDraft } from '@/lib/validation'
 import type { Dish, Meal, Order } from '@/types'
 
@@ -127,6 +127,21 @@ export async function POST(req: NextRequest) {
 
 /** Best-effort. Logs every failure and throws none of them. */
 async function deliverNotifications(order: Order, meals: Meal[], orderUrl: string) {
+  // Checked before doing any work. A missing app password is not a transient
+  // send failure buried in an SMTP stack trace, it is a deployment that was
+  // never finished — and it silently costs the business every enquiry, so it
+  // gets a log line that names the problem and the customer left waiting.
+  const misconfigured = emailConfigError()
+  if (misconfigured) {
+    console.error(
+      `[orders] EMAIL NOT SENT for ${order.id} — ${misconfigured}. ` +
+      `Order is saved, but ${order.client_email} received no confirmation and ` +
+      `the business was not notified. Set it in .env.local and in the Vercel ` +
+      `project environment, then redeploy.`
+    )
+    return
+  }
+
   let pdf: Buffer | undefined
   try {
     pdf = await generateOrderPDF(order, meals)
@@ -136,14 +151,17 @@ async function deliverNotifications(order: Order, meals: Meal[], orderUrl: strin
     console.error(`[orders] PDF generation failed for ${order.id}:`, err)
   }
 
-  const results = await Promise.allSettled([
+  const [client, business] = await Promise.allSettled([
     sendClientConfirmation(order, meals, orderUrl, pdf),
     sendBusinessNotification(order, meals, orderUrl),
   ])
 
-  for (const r of results) {
-    if (r.status === 'rejected') {
-      console.error(`[orders] notification failed for ${order.id}:`, r.reason)
-    }
+  // Named individually: "the customer got nothing" and "the business got
+  // nothing" are different problems and only one of them loses an enquiry.
+  if (client.status === 'rejected') {
+    console.error(`[orders] confirmation to ${order.client_email} failed for ${order.id}:`, client.reason)
+  }
+  if (business.status === 'rejected') {
+    console.error(`[orders] business notification failed for ${order.id}:`, business.reason)
   }
 }

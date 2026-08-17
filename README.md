@@ -54,6 +54,7 @@ not.
 | `npm run build` | Production build — run before pushing |
 | `npm run lint` | ESLint. Must be clean: 0 errors, 0 warnings |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run check:email` | Authenticates against Gmail SMTP without sending |
 | `npm run validate:dishes` | Checks `food_db.json5` against `lib/taxonomy.ts` |
 | `npm run seed` | Validates, then upserts every dish into Supabase |
 | `npm run fetch:images` | Sources dish photos from Wikimedia Commons (needs network) |

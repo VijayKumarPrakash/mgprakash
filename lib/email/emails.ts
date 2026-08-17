@@ -3,15 +3,53 @@ import { formatDate, formatTime, formatDateTime, orderRef } from '@/lib/format'
 import { BUSINESS, ADDRESS_LINE, TEL_HREF, WHATSAPP_HREF, BRAND } from '@/lib/business'
 import type { Order, Meal } from '@/types'
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-})
+/**
+ * Mail is configured entirely by environment, and a missing value used to fail
+ * the same way a wrong one did: Gmail rejected the connection, `allSettled`
+ * swallowed the rejection, and the order went through with no confirmation and
+ * nothing in the logs. `GMAIL_APP_PASSWORD` sat empty for some time before
+ * anyone noticed.
+ *
+ * Misconfiguration is now separable from a send failure, so the log can say
+ * which one happened and the caller can skip a doomed connection attempt.
+ */
+const REQUIRED_ENV = ['GMAIL_USER', 'GMAIL_APP_PASSWORD'] as const
 
-const FROM = `"${BUSINESS.name}" <${process.env.GMAIL_USER}>`
+/** Returns a human-readable reason mail cannot be sent, or null if it can. */
+export function emailConfigError(): string | null {
+  const missing = REQUIRED_ENV.filter(key => !process.env[key]?.trim())
+  if (!missing.length) return null
+  return `${missing.join(' and ')} ${missing.length > 1 ? 'are' : 'is'} not set`
+}
+
+// Built on first use rather than at import: the env is not necessarily
+// populated when this module is first evaluated during a build, and creating
+// the transport there would bake in whatever was — or was not — present then.
+let transporter: nodemailer.Transporter | null = null
+
+function getTransporter(): nodemailer.Transporter {
+  const problem = emailConfigError()
+  if (problem) throw new Error(`Email is not configured: ${problem}`)
+
+  transporter ??= nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  })
+  return transporter
+}
+
+const from = () => `"${BUSINESS.name}" <${process.env.GMAIL_USER}>`
+
+/**
+ * Authenticates against Gmail without sending anything. Used by
+ * `npm run check:email` to tell a bad app password apart from a missing one.
+ */
+export async function verifyEmailTransport(): Promise<void> {
+  await getTransporter().verify()
+}
 
 /**
  * Every interpolation below is customer-supplied: the name, the event title,
@@ -72,8 +110,8 @@ export async function sendClientConfirmation(
       </div>`
   }).join('')
 
-  await transporter.sendMail({
-    from: FROM,
+  await getTransporter().sendMail({
+    from: from(),
     to: order.client_email,
     subject: `Quote request received — ${order.event_name}`,
     html: `
@@ -133,8 +171,8 @@ export async function sendBusinessNotification(
   const row = (label: string, value: string) =>
     `<tr><td style="padding:4px 16px 4px 0;color:${BRAND.muted};">${label}</td><td>${value}</td></tr>`
 
-  await transporter.sendMail({
-    from: FROM,
+  await getTransporter().sendMail({
+    from: from(),
     // Replying to the notification should reach the customer, not the business
     // replying to itself — this is the whole point of the notification.
     replyTo: order.client_email,
