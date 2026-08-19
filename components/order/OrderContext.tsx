@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
-import { v4 as uuid } from 'uuid'
 import type { OrderDraft, MealDraft } from '@/types'
 
 type Action =
@@ -15,9 +14,16 @@ type Action =
   | { type: 'REMOVE_DISH_FROM_MEAL'; mealId: string; dishId: string }
   | { type: 'SET_DISH_NOTE'; mealId: string; dishId: string; note: string }
 
+/**
+ * These ids never leave the browser — the database generates its own uuid for
+ * every meal on insert. They only have to be unique enough to key a React list
+ * and to address a meal in the reducer, which `crypto.randomUUID` does natively
+ * in every browser this app supports. It replaced the `uuid` package, a
+ * production dependency that existed for this one call.
+ */
 function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>> = {}): MealDraft {
   return {
-    id: uuid(),
+    id: crypto.randomUUID(),
     name: '',
     date: '',
     time: '00:00',
