@@ -33,7 +33,13 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(draft),
       })
-      if (!res.ok) throw new Error('Failed to generate PDF')
+      // The server's own message is surfaced when there is one: a customer told
+      // "try again in a few minutes" waits, where one told "try again" retries
+      // immediately and hits the same limit.
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? 'Failed to generate PDF')
+      }
 
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
@@ -45,8 +51,8 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       // started reading the blob by the time click() returns, and revoking
       // immediately cancels the download.
       requestAnimationFrame(() => URL.revokeObjectURL(url))
-    } catch {
-      setError('Could not generate the draft PDF. Please try again.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not generate the draft PDF. Please try again.')
     } finally {
       setDownloadingPdf(false)
     }

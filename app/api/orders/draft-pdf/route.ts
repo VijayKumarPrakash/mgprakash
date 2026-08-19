@@ -2,7 +2,18 @@ import { NextResponse } from 'next/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
 import { getDishesByIds } from '@/lib/dishes'
 import { validateOrderDraft } from '@/lib/validation'
+import { checkRateLimit, clientKey } from '@/lib/rate-limit'
 import type { Order, Meal, SelectedDish } from '@/types'
+
+/**
+ * Ten previews every ten minutes per address.
+ *
+ * Looser than the submit limit because re-downloading a draft after an edit is
+ * normal behaviour on the review step, and nothing here is written or emailed.
+ * It is still bounded: each call renders a full React-PDF document, which costs
+ * CPU and a network font fetch, and the endpoint needs no authentication.
+ */
+const LIMIT = { limit: 10, windowMs: 10 * 60 * 1000 }
 
 /**
  * Renders the "download a draft" preview from the review step.
@@ -15,6 +26,14 @@ import type { Order, Meal, SelectedDish } from '@/types'
  */
 export async function POST(req: Request) {
   try {
+    const limit = checkRateLimit(clientKey(req, 'draft-pdf'), LIMIT)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Too many draft downloads. Please try again in a few minutes.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
+    }
+
     const parsed = validateOrderDraft(await req.json())
     if (!parsed.ok) {
       return NextResponse.json({ error: parsed.error }, { status: 400 })

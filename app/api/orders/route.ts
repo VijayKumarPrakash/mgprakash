@@ -3,14 +3,56 @@ import { createServiceClient, createReadOnlyRequestClient } from '@/lib/supabase
 import { generateOrderPDF } from '@/lib/pdf/generate'
 import { sendClientConfirmation, sendBusinessNotification, emailConfigError } from '@/lib/email/emails'
 import { validateOrderDraft } from '@/lib/validation'
+import { checkRateLimit, clientKey } from '@/lib/rate-limit'
 import type { Dish, Meal, Order, SelectedDish } from '@/types'
+
+/**
+ * Five submissions an hour per address.
+ *
+ * Generous for a human — a couple of genuine requests for the same event, plus
+ * a retry or two if something looked wrong — and low enough that this endpoint
+ * cannot be used to drain the day's Gmail quota, which is the real damage. Every
+ * accepted call writes rows and sends two messages from the business's own
+ * account; exhausting it means real enquiries stop arriving.
+ */
+const LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }
 
 export async function POST(req: NextRequest) {
   try {
+    const limit = checkRateLimit(clientKey(req, 'orders'), LIMIT)
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: 'Too many requests from this connection. Please try again shortly, or call us — the number is in the footer.' },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } }
+      )
+    }
+    const body = await req.json()
+
+    /**
+     * Honeypot. `bot_field` is rendered as a real input that is hidden from
+     * people and left empty by them; a bot filling every field in the form
+     * fills this one too. Either way nothing is written and no mail is sent.
+     *
+     * The usual advice is to answer a trip with a fake success so a script
+     * learns nothing. That is the wrong trade here. If this ever fires on a real
+     * customer — an unexpected autofill, an accessibility tool walking the DOM —
+     * a fake 201 sends them to a confirmation page for an order that does not
+     * exist, they believe the request went in, and the business never hears
+     * about a wedding. An error they can act on costs a bot one retry, which the
+     * rate limit above then absorbs; the other way round costs a booking.
+     */
+    if (typeof body?.bot_field === 'string' && body.bot_field.trim()) {
+      console.warn('[POST /api/orders] honeypot tripped, discarding submission')
+      return NextResponse.json(
+        { error: 'We could not accept this submission. Please call or WhatsApp us on the number in the footer and we will take the details directly.' },
+        { status: 400 }
+      )
+    }
+
     // The form validates step by step, but this is a public endpoint and the
     // form is not the only thing that can call it. Anything that reaches the
     // database has to have been checked here.
-    const parsed = validateOrderDraft(await req.json())
+    const parsed = validateOrderDraft(body)
     if (!parsed.ok) {
       return NextResponse.json({ error: parsed.error }, { status: 400 })
     }

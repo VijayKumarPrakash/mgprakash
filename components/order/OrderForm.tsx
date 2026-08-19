@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { OrderProvider, useOrder } from './OrderContext'
 import { ContactStep } from './steps/ContactStep'
@@ -96,6 +96,17 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
   const { draft } = useOrder()
   const router = useRouter()
 
+  /**
+   * Honeypot.
+   *
+   * Deliberately a real text input rather than `type="hidden"`, because the
+   * bots worth catching fill visible fields and skip hidden ones. It is held in
+   * a ref rather than the reducer: it is not part of the order, and putting it
+   * in `OrderDraft` would mean every consumer of that type — validation, the
+   * PDF, both emails — carrying a field that exists only to be empty.
+   */
+  const botField = useRef<HTMLInputElement>(null)
+
   // Removing the last meal invalidates the dish-selection and review steps, so
   // walk the furthest-reached marker back. Derived during render — an effect
   // would leave those steps clickable for a frame.
@@ -110,7 +121,7 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(draft),
+      body: JSON.stringify({ ...draft, bot_field: botField.current?.value ?? '' }),
     })
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
@@ -130,6 +141,26 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
         highestReached={highestReached}
         onStepClick={goToStep}
       />
+
+      {/*
+        Off-screen rather than `display:none` — some bots skip anything they can
+        tell is not rendered. `aria-hidden` and `tabIndex={-1}` keep it out of
+        the accessibility tree and the tab order, so a screen reader is never
+        asked to fill a trap, and `autoComplete="off"` stops a browser
+        helpfully populating it.
+      */}
+      <div aria-hidden="true" className="absolute left-[-9999px] top-auto w-px h-px overflow-hidden">
+        <label htmlFor="bot_field">Do not fill this in</label>
+        <input
+          ref={botField}
+          id="bot_field"
+          name="bot_field"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
 
       <div className="bg-[var(--paper)] rounded-3xl">
         {step === 'contact' && <ContactStep onNext={() => goToStep(1)} />}
