@@ -69,6 +69,10 @@ export async function POST(req: NextRequest) {
     // the wrong menu against every meal after it, in the PDF and in the
     // customer's email alike.
     const meals: Meal[] = []
+    // Collected rather than only logged. A `console.error` in a Vercel log is
+    // invisible to the person who needs to know that a meal the customer chose
+    // is not in the order they are about to be quoted for.
+    const issues: string[] = []
 
     for (const mealDraft of draft.meals) {
       const { data: meal, error: mealError } = await supabase
@@ -87,6 +91,7 @@ export async function POST(req: NextRequest) {
 
       if (mealError || !meal) {
         console.error(`[POST /api/orders] meal insert failed on ${order.id}:`, mealError?.message)
+        issues.push(`"${mealDraft.name}" (${mealDraft.date}) could not be saved — the customer selected it but it is not on this order.`)
         continue
       }
 
@@ -100,6 +105,7 @@ export async function POST(req: NextRequest) {
           })))
         if (linkError) {
           console.error(`[POST /api/orders] dish links failed on meal ${meal.id}:`, linkError.message)
+          issues.push(`The ${mealDraft.dish_ids.length} dishes chosen for "${mealDraft.name}" were not saved against it — check the menu with the customer.`)
         }
       }
 
@@ -125,7 +131,7 @@ export async function POST(req: NextRequest) {
     //
     //    Awaited rather than fired and forgotten: a serverless function can be
     //    frozen the instant it responds, which would drop the emails outright.
-    await deliverNotifications(order as Order, meals, orderUrl)
+    await deliverNotifications(order as Order, meals, orderUrl, issues)
 
     return NextResponse.json({ id: order.id }, { status: 201 })
   } catch (err) {
@@ -135,7 +141,13 @@ export async function POST(req: NextRequest) {
 }
 
 /** Best-effort. Logs every failure and throws none of them. */
-async function deliverNotifications(order: Order, meals: Meal[], orderUrl: string) {
+async function deliverNotifications(
+  order: Order,
+  meals: Meal[],
+  orderUrl: string,
+  /** Anything the write phase could not persist; flagged to the business only. */
+  issues: string[] = []
+) {
   // Checked before doing any work. A missing app password is not a transient
   // send failure buried in an SMTP stack trace, it is a deployment that was
   // never finished — and it silently costs the business every enquiry, so it
@@ -148,6 +160,12 @@ async function deliverNotifications(order: Order, meals: Meal[], orderUrl: strin
       `the business was not notified. Set it in .env.local and in the Vercel ` +
       `project environment, then redeploy.`
     )
+    // The banner in the business email is the only place these are reported, so
+    // if that email is not going out they would vanish entirely. Log them here
+    // rather than lose them.
+    if (issues.length) {
+      console.error(`[orders] ${order.id} also had write failures:`, issues.join(' | '))
+    }
     return
   }
 
@@ -162,7 +180,7 @@ async function deliverNotifications(order: Order, meals: Meal[], orderUrl: strin
 
   const [client, business] = await Promise.allSettled([
     sendClientConfirmation(order, meals, orderUrl, pdf),
-    sendBusinessNotification(order, meals, orderUrl),
+    sendBusinessNotification(order, meals, orderUrl, issues),
   ])
 
   // Named individually: "the customer got nothing" and "the business got

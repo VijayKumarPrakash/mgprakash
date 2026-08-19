@@ -158,10 +158,40 @@ export async function sendClientConfirmation(
   })
 }
 
+/**
+ * A banner naming what did not get saved.
+ *
+ * `POST /api/orders` deliberately never fails an order that has already been
+ * written — a customer who sees an error submits the whole thing again. But a
+ * meal or a dish link that failed to insert used to leave no trace beyond a
+ * `console.error` in the Vercel log, while the confirmation page, the PDF and
+ * both emails all quietly showed fewer meals or dishes than the customer chose.
+ *
+ * So the failure goes where somebody can act on it: the business's own copy,
+ * which is read by a person who can pick up the phone. The customer's
+ * confirmation is left alone on purpose — they cannot do anything about a failed
+ * insert, and a warning about database internals in a quote confirmation is
+ * alarming rather than useful.
+ */
+function issuesHtml(issues: string[]): string {
+  if (!issues.length) return ''
+  return `
+    <div style="margin:0 0 20px;padding:14px 16px;background:${BRAND.accentSoft};border:1px solid ${BRAND.accent};border-radius:6px;">
+      <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:${BRAND.accent};">
+        Some of this request did not save — confirm with the customer
+      </p>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:${BRAND.ink};">
+        ${issues.map(i => `<li>${esc(i)}</li>`).join('')}
+      </ul>
+    </div>`
+}
+
 export async function sendBusinessNotification(
   order: Order,
   meals: Meal[],
-  orderUrl: string
+  orderUrl: string,
+  /** Anything the write phase could not persist. Empty in the normal case. */
+  issues: string[] = []
 ) {
   const mealsHtml = meals.map(meal => {
     const dishes = dishListHtml(meal)
@@ -187,13 +217,19 @@ export async function sendBusinessNotification(
     // replying to itself — this is the whole point of the notification.
     replyTo: order.client_email,
     to: BUSINESS.email,
-    subject: `New quote request — ${order.event_name} (${order.client_name})`,
+    // Flagged in the subject too. The banner is no use if the mail reads as
+    // routine and sits unopened until the evening.
+    subject: issues.length
+      ? `Incomplete quote request — ${order.event_name} (${order.client_name})`
+      : `New quote request — ${order.event_name} (${order.client_name})`,
     html: `
       <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:${BRAND.ink};padding:24px;">
         <h2 style="margin:0 0 4px;">New catering request received</h2>
         <p style="color:${BRAND.muted};margin:0 0 20px;">
           Submitted ${esc(formatDateTime(order.created_at))} · #${esc(orderRef(order.id))}
         </p>
+
+        ${issuesHtml(issues)}
 
         <table style="font-size:14px;margin-bottom:20px;border-collapse:collapse;">
           ${row('Client', `<strong>${esc(order.client_name)}</strong>`)}

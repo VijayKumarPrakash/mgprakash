@@ -102,6 +102,8 @@ export const SERVICE_AREAS = {
 /** Mirrors the `:root` tokens in app/globals.css. See the note above. */
 export const BRAND = {
   accent: '#A63D17',
+  /** `--accent-soft`. The tinted ground behind a callout that must not shout. */
+  accentSoft: '#F7EAE1',
   ink: '#1C1A17',
   ink2: '#524C43',
   muted: '#857C6F',
