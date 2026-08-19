@@ -16,6 +16,32 @@
 const TIME_ZONE = 'Asia/Kolkata'
 const LOCALE = 'en-GB'
 
+/**
+ * Today's date in Bengaluru, as `YYYY-MM-DD`.
+ *
+ * Exists because "today" is not a server-side fact here. The PDF, the emails
+ * and the order route all run on a Vercel function in UTC, and for the five and
+ * a half hours after midnight IST a UTC date is still yesterday — so a same-day
+ * booking made at 2am in Bengaluru would compare as being in the past. The
+ * date-picker on the meals step had exactly that bug: its `min` came from
+ * `new Date().toISOString()`.
+ *
+ * `en-CA` renders as ISO, but the parts are assembled by hand rather than
+ * trusting that: a locale is free to change its pattern, and this string is
+ * compared against a database `date` column.
+ */
+export function todayInIndia(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIME_ZONE,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find(p => p.type === type)?.value ?? ''
+
+  return `${get('year')}-${get('month')}-${get('day')}`
+}
+
 /** `2026-08-08` → `8 August 2026`. */
 export function formatDate(date: string): string {
   // The `T00:00:00` suffix keeps a bare `YYYY-MM-DD` from being parsed as UTC

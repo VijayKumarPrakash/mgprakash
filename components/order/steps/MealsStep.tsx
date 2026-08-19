@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
+import { todayInIndia } from '@/lib/format'
 import type { MealDraft } from '@/types'
 
 interface Props {
@@ -70,7 +71,7 @@ function MealCard({
           <input
             type="date"
             value={meal.date}
-            min={new Date().toISOString().split('T')[0]}
+            min={todayInIndia()}
             onChange={e => update({ date: e.target.value })}
             className="form-input"
           />

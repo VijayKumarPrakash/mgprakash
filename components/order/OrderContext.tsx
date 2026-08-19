@@ -26,7 +26,12 @@ function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_n
     id: crypto.randomUUID(),
     name: '',
     date: '',
-    time: '00:00',
+    // Empty rather than '00:00'. A pre-filled midnight passed both the client
+    // check ("time is required" sees a value) and the server's TIME regex, so a
+    // customer who never opened the time picker silently requested a meal at
+    // midnight — a plausible-looking wrong answer, which is worse than a blank
+    // field that fails validation and says so.
+    time: '',
     location: '',
     total_guests: '',
     veg_guests: '',

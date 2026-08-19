@@ -1,3 +1,4 @@
+import { todayInIndia } from '@/lib/format'
 import { EVENT_TYPES } from '@/types'
 import type { EventType, OrderDraft } from '@/types'
 
@@ -115,6 +116,14 @@ export function validateOrderDraft(body: unknown): ValidationResult {
     if (!name || name.length > LIMITS.mealName) return { ok: false, error: `${label} needs a name.` }
     if (!DATE.test(date) || Number.isNaN(Date.parse(date))) {
       return { ok: false, error: `${label} needs a valid date.` }
+    }
+    // The date input carries `min={today}`, but that is a hint to a browser and
+    // nothing more: a stale tab left open overnight, or any request not coming
+    // from the form, could book an event in the past. Compared as strings, which
+    // is safe for zero-padded ISO dates and avoids inventing a timezone for a
+    // value that has none.
+    if (date < todayInIndia()) {
+      return { ok: false, error: `${label} cannot be in the past.` }
     }
     if (!TIME.test(time)) return { ok: false, error: `${label} needs a valid time.` }
     if (!location || location.length > LIMITS.location) {
