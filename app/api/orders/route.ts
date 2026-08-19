@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient, createRequestClient } from '@/lib/supabase/server'
+import { createServiceClient, createReadOnlyRequestClient } from '@/lib/supabase/server'
 import { generateOrderPDF } from '@/lib/pdf/generate'
 import { sendClientConfirmation, sendBusinessNotification, emailConfigError } from '@/lib/email/emails'
 import { validateOrderDraft } from '@/lib/validation'
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     // anonymous quote request is the normal case.
     let userId: string | null = null
     try {
-      const authClient = createRequestClient(req, new Headers())
+      const authClient = createReadOnlyRequestClient(req)
       const { data } = await authClient.auth.getUser()
       userId = data.user?.id ?? null
     } catch {

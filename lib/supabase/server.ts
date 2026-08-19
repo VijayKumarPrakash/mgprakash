@@ -41,15 +41,37 @@ export async function createCookieClient() {
   )
 }
 
-/** Cookie-aware client from a Request object — for use in Route Handlers */
-export function createRequestClient(
-  request: Request,
-  responseHeaders: Headers
-) {
+/**
+ * Read-only auth client from a Request object — for route handlers that need to
+ * know *who* is calling and nothing more.
+ *
+ * Two things here are deliberate.
+ *
+ * `autoRefreshToken: false` is the important one. This used to be a normal
+ * cookie-writing client handed a `new Headers()` that the caller then threw
+ * away. That looks harmless and is not: if the access token had expired,
+ * `getUser()` refreshed it, Supabase rotated the refresh token, and the new
+ * pair was written into headers nobody attached to a response. The browser kept
+ * the old refresh token — which had just been consumed server-side — so a
+ * customer could be silently signed out by the act of submitting an order.
+ *
+ * Nothing is lost by refusing to refresh here. `proxy.ts` already refreshes the
+ * session cookie on every request and persists it properly, so by the time a
+ * route handler runs the cookie is fresh. If it somehow is not, `getUser()`
+ * fails, the caller reads null, and the request is treated as a guest — which
+ * is the normal case for this site anyway.
+ *
+ * `setAll` is therefore a no-op rather than a serialiser. The hand-rolled
+ * `Set-Cookie` string it used to build also silently dropped `Secure`,
+ * `Domain` and `Expires`, so it could not have round-tripped a session
+ * correctly even if the headers had been used.
+ */
+export function createReadOnlyRequestClient(request: Request) {
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: { autoRefreshToken: false, persistSession: false },
       cookies: {
         getAll: () => {
           const cookieHeader = request.headers.get('cookie') ?? ''
@@ -59,12 +81,8 @@ export function createRequestClient(
             return [{ name: name.trim(), value: rest.join('=').trim() }]
           })
         },
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            const cookieStr = `${name}=${value}; Path=${options?.path ?? '/'}${options?.maxAge ? `; Max-Age=${options.maxAge}` : ''}${options?.httpOnly ? '; HttpOnly' : ''}${options?.sameSite ? `; SameSite=${options.sameSite}` : ''}`
-            responseHeaders.append('Set-Cookie', cookieStr)
-          })
-        },
+        // Intentionally empty: this client must never mutate the session. See above.
+        setAll: () => {},
       },
     }
   )
