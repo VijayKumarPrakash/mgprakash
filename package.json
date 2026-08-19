@@ -11,7 +11,9 @@
     "validate:dishes": "tsx scripts/validate-dishes.ts",
     "seed": "npm run validate:dishes && tsx scripts/seed.ts",
     "fetch:images": "tsx scripts/fetch-images.ts",
-    "check:email": "tsx scripts/check-email.ts"
+    "check:email": "tsx scripts/check-email.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
@@ -36,6 +38,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }
