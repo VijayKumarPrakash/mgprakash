@@ -27,6 +27,7 @@ call and a WhatsApp thread, not an ERP.
 | PDF | `@react-pdf/renderer`, rendered server-side |
 | Email | Nodemailer over Gmail SMTP |
 | Auth | Supabase Auth, Google OAuth — **optional**, see below |
+| Tests | Vitest, node environment, over the pure `lib/` modules |
 | Hosting | Vercel, deploys on push to `main` |
 
 ---
@@ -54,6 +55,8 @@ not.
 | `npm run build` | Production build — run before pushing |
 | `npm run lint` | ESLint. Must be clean: 0 errors, 0 warnings |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest, single run |
+| `npm run test:watch` | Vitest in watch mode |
 | `npm run check:email` | Authenticates against Gmail SMTP without sending |
 | `npm run validate:dishes` | Checks `food_db.json5` against `lib/taxonomy.ts` |
 | `npm run seed` | Validates, then upserts every dish into Supabase |
@@ -93,11 +96,13 @@ lib/
   dishes.ts                 Catalogue reads, cache, and the file fallback
   orders.ts                 Order + meals + dishes fan-out, used by page and PDF
   validation.ts             Server-side checks for the submitted order
+  rate-limit.ts             IP rate limiting for the two public POST routes
   format.ts                 Shared date / time / reference formatting
   business.ts               Business details and the brand palette as literals
   email/emails.ts           The two transactional emails
   pdf/generate.ts           React-PDF render entry point
   supabase/                 Clients (browser, anon, service, cookie) + schema.sql
+  *.test.ts                 Vitest specs, beside the modules they cover
 
 scripts/
   validate-dishes.ts        Vocabulary + internal-consistency checks
@@ -106,6 +111,7 @@ scripts/
 
 food_db.json5               The 229-dish source of truth. JSON5 on purpose.
 proxy.ts                    Session-cookie refresh on every request
+vitest.config.mts           Node environment, no jsdom. .mts on purpose
 ```
 
 ---
@@ -157,6 +163,20 @@ write is best-effort: a font host or SMTP failure is logged but never turns a
 saved order into a 500, because a customer who sees an error retries and
 submits twice.
 
+A meal or dish link that fails to insert does not fail the request either, but
+it is not silent: the write phase collects what it could not persist and the
+**business** email carries it as a banner, subject line included, so somebody
+who can ring the customer finds out. The customer's own confirmation is left
+alone — they cannot act on a failed insert.
+
+Both public POST routes are rate-limited by IP (`lib/rate-limit.ts`) and the
+form carries an off-screen honeypot. Every accepted submission sends two
+messages from the business's own Gmail account, which caps at a few hundred a
+day, so an unbounded endpoint drains the quota and real enquiries stop
+arriving. The limiter is per-instance memory and says so in its own header —
+the durable control is a Vercel firewall rule, and these numbers are not a
+substitute for it.
+
 ### Reading orders
 
 `/order/[id]` is a **capability URL** — anyone holding the uuid can read the
@@ -207,6 +227,11 @@ values as literals from `lib/business.ts`. If you change a token in
   `image_licence` / `image_credit` / `image_source_url` are schema columns
   because CC-BY and CC-BY-SA legally require a visible credit, which the dish
   modal renders.
+- **A honeypot trip answers with a 400, not a fake success.** The convention is
+  to fake a 201 so a script learns nothing. If it ever fires on a real customer
+  that sends them to a confirmation page for an order that does not exist —
+  they think the request went in and the business never hears. That costs a
+  booking; an error costs a bot one retry.
 - **`.github/workflows/keep-supabase-alive.yml`** writes to a dedicated
   `keepalive` table twice a week, so a free-tier project is never paused for
   inactivity and never has its real data touched by the ping.
@@ -217,7 +242,8 @@ values as literals from `lib/business.ts`. If you change a token in
 
 - **British / Indian English** everywhere — UI copy, comments, emails, PDF.
   "flavour", "colour", "catalogue", "organise".
-- `npm run lint` and `npm run typecheck` must both be clean before a push.
+- `npm run lint`, `npm run typecheck` and `npm test` must all be clean before a
+  push.
 - Comments explain *why*, not *what*. If a line looks odd, the comment should
   say what breaks without it.
 - Never commit `.env.local` or anything holding a real key. `.env.example` is

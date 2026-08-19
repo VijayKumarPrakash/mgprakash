@@ -24,6 +24,9 @@ npm run dev              # Local dev server at localhost:3000
 npm run build            # Production build (run before deploying)
 npm run lint             # ESLint — must be clean, 0 errors
 npm run typecheck        # tsc --noEmit
+npm test                 # Vitest, run once — lib/validation, lib/format, lib/rate-limit
+npm run test:watch       # Vitest in watch mode
+npm run check:email      # Authenticate against Gmail SMTP without sending
 npm run validate:dishes  # Check food_db.json5 against lib/taxonomy.ts
 npm run seed             # Validate, then upsert dishes into Supabase
 npm run fetch:images     # Source dish photos from Wikimedia Commons (needs network + sharp)
@@ -90,6 +93,33 @@ meals and dish links → render the PDF → send both emails → redirect to `/o
 Everything after the write is best-effort and logged rather than thrown. React-PDF fetches
 its font over the network at render time and Gmail SMTP can rate-limit; either failing must
 not turn a saved order into a 500, because a customer who sees an error submits again.
+
+A meal or dish link that fails to insert does not fail the request either — but it is no
+longer invisible. The write phase collects what it could not persist and the **business**
+email renders it as a banner with the subject changed to "Incomplete quote request", so a
+person who can ring the customer finds out. The customer's confirmation is deliberately left
+alone: they cannot act on a failed insert.
+
+### Abuse protection
+
+Both public POST routes are rate-limited by IP through `lib/rate-limit.ts` — 5/hour for
+`/api/orders`, 10/10min for `/api/orders/draft-pdf` — and the quote form carries an
+off-screen honeypot field.
+
+This matters more than it looks. Every accepted submission sends two messages from the
+business's own Gmail account, which caps at a few hundred a day, so an unbounded endpoint
+does not just fill the orders table — it drains the quota and real enquiries stop arriving,
+with no admin dashboard to clear the junk from.
+
+The limiter's state is in one serverless instance's memory, so the true ceiling is the limit
+times the number of warm instances, and a deploy resets it. It is deliberately the cheap
+half of the answer; the durable control is a rate-limit rule in the Vercel firewall, which
+runs before a function is invoked. Do not raise these numbers as a substitute for that.
+
+A honeypot trip returns an actionable 400 rather than the conventional fake success. If it
+ever fires on a real customer, a fake 201 would send them to a confirmation page for an
+order that does not exist — they would think the request went in and the business would
+never hear about it. That costs a booking; an error costs a bot one retry.
 
 ### Per-dish notes
 
@@ -159,7 +189,7 @@ The name, event title and venue are typed into a public form by anyone on the in
 
 ### Shared modules — check these before writing a helper
 
-Four small modules exist specifically because the same logic had been copied into three or
+Five small modules exist specifically because the same logic had been copied into three or
 four places and then drifted apart. Reach for them rather than reimplementing:
 
 - **`lib/format.ts`** — `formatDate`, `formatTime`, `formatDateTime`, `orderRef`. Pinned to
@@ -174,7 +204,10 @@ four places and then drifted apart. Reach for them rather than reimplementing:
   screen and the attachment to disagree about what was ordered.
 - **`lib/validation.ts`** — server-side checks for the submitted order. `POST /api/orders`
   writes with the service-role key, which bypasses RLS entirely, so the route cannot trust
-  the form to have validated anything.
+  the form to have validated anything. Also rejects a date in the past: the date input's
+  `min` is a browser hint, not a control.
+- **`lib/rate-limit.ts`** — `checkRateLimit`, `clientKey`. Guards both public POST routes;
+  see **Abuse protection** above. Takes `now` as an argument so the window is testable.
 
 ### Row level security
 
