@@ -18,7 +18,7 @@
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.103.3",
+    "@supabase/supabase-js": "^2.112.3",
     "fuse.js": "^7.3.0",
     "json5": "^2.2.3",
     "next": "16.3.1",
@@ -35,10 +35,13 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "sharp@0.35.3": true
   }
 }
