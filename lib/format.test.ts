@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDate, formatTime, formatDateTime, orderRef, todayInIndia } from './format'
+import { formatDate, formatTime, formatDateTime, orderRef, todayInIndia, nowTimeInIndia } from './format'
 
 /**
  * These four functions were copy-pasted across the PDF, both emails, the review
@@ -83,6 +83,27 @@ describe('orderRef', () => {
     // having no reference at all.
     const id = 'aabbccdd-0000-0000-0000-000000000000'
     expect(orderRef(id)).toBe(orderRef(id))
+  })
+})
+
+describe('nowTimeInIndia', () => {
+  it('is a zero-padded hour with zero minutes', () => {
+    // The meal time input steps in hours, so a value with odd minutes would be
+    // one the picker's own arrows could never return to.
+    expect(nowTimeInIndia()).toMatch(/^([01]\d|2[0-3]):00$/)
+  })
+
+  it('reports the Bengaluru hour, not the runtime timezone', () => {
+    const expected = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata', hour: '2-digit', hourCycle: 'h23',
+    }).format(new Date())
+    expect(nowTimeInIndia()).toBe(`${expected.padStart(2, '0')}:00`)
+  })
+
+  it('is a time formatTime can render', () => {
+    // The two are used together — this value is seeded into the draft and then
+    // displayed by formatTime on the review step and in the PDF.
+    expect(formatTime(nowTimeInIndia())).toMatch(/^\d{1,2}:00 (AM|PM)$/)
   })
 })
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
+import { nowTimeInIndia } from '@/lib/format'
 import type { OrderDraft, MealDraft } from '@/types'
 
 type Action =
@@ -26,12 +27,12 @@ function makeMeal(overrides: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_n
     id: crypto.randomUUID(),
     name: '',
     date: '',
-    // Empty rather than '00:00'. A pre-filled midnight passed both the client
-    // check ("time is required" sees a value) and the server's TIME regex, so a
-    // customer who never opened the time picker silently requested a meal at
-    // midnight — a plausible-looking wrong answer, which is worse than a blank
-    // field that fails validation and says so.
-    time: '',
+    // Seeded with the current Bengaluru hour. This was '00:00', which was worse
+    // than useless — a customer who never opened the picker silently booked a
+    // meal at midnight, and it passed every check. "Now" is at least a time
+    // somebody might mean, and it puts the picker within a few arrow presses of
+    // any realistic answer instead of starting at the far end of the clock.
+    time: nowTimeInIndia(),
     location: '',
     total_guests: '',
     veg_guests: '',

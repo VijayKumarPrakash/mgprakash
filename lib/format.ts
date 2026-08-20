@@ -42,6 +42,26 @@ export function todayInIndia(): string {
   return `${get('year')}-${get('month')}-${get('day')}`
 }
 
+/**
+ * The current time in Bengaluru, as `HH:00`.
+ *
+ * Seeds the meal time picker. Rounded down to the hour because the input steps
+ * in hours (`step={3600}`), so an odd number of minutes would show a value the
+ * picker's own arrows could never return to.
+ *
+ * Same reason as `todayInIndia`: the browser's clock is whatever the customer's
+ * laptop says, and a meal time is a Bengaluru time.
+ */
+export function nowTimeInIndia(): string {
+  const hour = new Intl.DateTimeFormat('en-GB', {
+    timeZone: TIME_ZONE,
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date())
+
+  return `${hour.padStart(2, '0')}:00`
+}
+
 /** `2026-08-08` → `8 August 2026`. */
 export function formatDate(date: string): string {
   // The `T00:00:00` suffix keeps a bare `YYYY-MM-DD` from being parsed as UTC

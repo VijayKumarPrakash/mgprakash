@@ -13,6 +13,26 @@ interface Props {
 
 type FieldErrors = Record<string, string>
 
+/**
+ * A guest count from a text field, or '' for empty.
+ *
+ * Non-digits are stripped rather than parsed, which is what stops a negative
+ * count at source. `type="number"` happily holds "-5", and `parseInt` was
+ * happily returning -5 from it — so a customer could enter minus twelve
+ * vegetarian guests and only find out on submit, from a server error. There is
+ * no keystroke that produces a minus sign now.
+ *
+ * No upper bound here on purpose: the kitchen has cooked for well over five
+ * thousand at annadana events, and a field that argues with the customer about
+ * how big their function is helps nobody. The server keeps a cap purely to stop
+ * abuse.
+ */
+function toGuestCount(raw: string): number | '' {
+  const digits = raw.replace(/\D/g, '')
+  if (!digits) return ''
+  return parseInt(digits, 10)
+}
+
 function MealCard({
   meal,
   index,
@@ -101,9 +121,12 @@ function MealCard({
         <FormField label="Total guests" error={errors.total_guests} required>
           <input
             type="number"
+            // A sanity floor, not a booking minimum — there is no smallest
+            // function we will take. See toGuestCount above.
             min={1}
+            inputMode="numeric"
             value={meal.total_guests}
-            onChange={e => update({ total_guests: e.target.value ? parseInt(e.target.value, 10) : '' })}
+            onChange={e => update({ total_guests: toGuestCount(e.target.value) })}
             onDoubleClick={e => (e.target as HTMLInputElement).select()}
             placeholder="100"
             className="form-input"
@@ -128,10 +151,11 @@ function MealCard({
           <input
             type="number"
             min={0}
+            inputMode="numeric"
             max={meal.total_guests || undefined}
             value={meal.veg_guests}
             disabled={allVeg}
-            onChange={e => update({ veg_guests: e.target.value ? parseInt(e.target.value, 10) : '' })}
+            onChange={e => update({ veg_guests: toGuestCount(e.target.value) })}
             onDoubleClick={e => (e.target as HTMLInputElement).select()}
             placeholder="60"
             className={`form-input${allVeg ? ' opacity-60 bg-[var(--surface-2)] cursor-not-allowed' : ''}`}
