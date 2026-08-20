@@ -121,6 +121,21 @@ ever fires on a real customer, a fake 201 would send them to a confirmation page
 order that does not exist — they would think the request went in and the business would
 never hear about it. That costs a booking; an error costs a bot one retry.
 
+### Form input rules
+
+Three fields that were validated only on the server, and so only after the customer had
+finished and left them behind:
+
+- **Phone** — digits only, stripped as typed rather than rejected, held to the national
+  length for the selected country code (exactly 10 for `+91`). Server-side it is a shape
+  check: digits, spaces, dashes and a leading `+`, then 7–15 digits per E.164.
+- **Guest counts** — non-digits are stripped rather than parsed, which is what stops a
+  negative count at source; `type="number"` holds `-5` quite happily and `parseInt` was
+  returning it. `min={1}` on the total is a sanity floor, not a booking minimum.
+- **Meal time** — seeded with the current Bengaluru hour (`nowTimeInIndia`). It was
+  `'00:00'`, so anyone who never opened the picker silently booked a meal at midnight and
+  passed every check on both sides.
+
 ### Per-dish notes
 
 Every selected dish can carry a free-text note — "mild, for the children", "extra crisp",
@@ -145,6 +160,33 @@ the document gets printed and marked up by hand when a menu is settled over the 
 Keep the rule when the note is empty. Note also that the hint line above the dish list
 must not be italic — only Inter regular and semibold are registered, and React-PDF
 throws on an unresolvable font style rather than falling back, failing the whole document.
+
+### Draft survival
+
+The order draft lives in React context, so any navigation out of the form used to
+destroy it. That included the dish modal's own "Open full dish page" link — a customer
+halfway through picking sixty dishes for a wedding lost everything to one click on a
+link that looked helpful, then landed on a page whose button said "add this to a quote"
+and got an empty form.
+
+`lib/order-draft-storage.ts` mirrors the draft and the current step into
+**sessionStorage**: per-tab, gone when the tab closes, which is the right lifetime for a
+half-finished form on a possibly shared computer. localStorage would leave a stranger's
+name and phone number in the browser indefinitely. This is *not* the "save a draft and
+come back tomorrow" item in the backlog — that needs a server, a magic link and
+different consent.
+
+**The quote form is deliberately not server-rendered.** `OrderFormClient` loads it with
+`ssr: false`. Restoring a draft in a state initialiser is the only way to have the values
+present on the first render, and that is only legitimate when there is no server render
+to disagree with — otherwise every input on the form is a hydration mismatch. Restoring in
+an effect instead means rendering empty and then full, and React's lint rules reject
+setting state from an effect to achieve it. Nothing is lost to search engines: the
+indexable content of `/order/new` is the `<h1>` and the copy above the form, which are
+still server-rendered.
+
+Storage is cleared on successful submit, and a draft older than 24 hours is discarded
+rather than restored — it would carry an event date the server now rejects as past.
 
 ### Dish catalogue
 
@@ -189,7 +231,7 @@ The name, event title and venue are typed into a public form by anyone on the in
 
 ### Shared modules — check these before writing a helper
 
-Five small modules exist specifically because the same logic had been copied into three or
+Six small modules exist specifically because the same logic had been copied into three or
 four places and then drifted apart. Reach for them rather than reimplementing:
 
 - **`lib/format.ts`** — `formatDate`, `formatTime`, `formatDateTime`, `orderRef`. Pinned to
@@ -208,6 +250,8 @@ four places and then drifted apart. Reach for them rather than reimplementing:
   `min` is a browser hint, not a control.
 - **`lib/rate-limit.ts`** — `checkRateLimit`, `clientKey`. Guards both public POST routes;
   see **Abuse protection** above. Takes `now` as an argument so the window is testable.
+- **`lib/order-draft-storage.ts`** — mirrors the in-progress draft into sessionStorage so
+  opening a dish page does not destroy it. See **Draft survival** below.
 
 ### Row level security
 
@@ -267,6 +311,42 @@ prefix.
 - **Phone**: +91 98801 93165
 - **Email**: vijaykumar.sb.99@gmail.com
 - **Established**: 2000
+
+## How the business actually works
+
+These are facts about the trade, not copy. Several of them were contradicted by
+the site's own text before they were written down here, so check against this
+list before writing anything customer-facing.
+
+- **No guest minimum.** Meals have been cooked for as few as five people. The
+  services page used to advertise ranges like "50–5,000+ guests" per service,
+  including in the JSON-LD `audience` — a machine-readable minimum is still a
+  minimum. Do not reintroduce a floor anywhere. The *ceiling* is the part worth
+  stating: festival annadana meals for well over five thousand.
+- **One work order a day.** One function, one kitchen, one team, the whole day.
+  This is why notice is weeks at minimum and months for a wedding or festival
+  season, and it is a selling point rather than an apology.
+- **One-off events only.** No PG or hostel meals, no office canteen, no weekly
+  tiffin contract. The corporate service entry used to promise "long-running
+  office meal contracts", which was the opposite of the truth.
+- **Three independent engagement axes**, any combination:
+  1. *Where* — cooked at the venue, or in a godown and brought to the venue hot
+     (a venue with no space, water or gas point is common).
+  2. *How far* — cooking only, or cooking and serving.
+  3. *Groceries* — the customer buys against an itemised list we prepare, or we
+     go end to end: provisions, vessels on rent, gas connection, transport,
+     team, service.
+- **The menu, an itemised provisions list and a vessels list come with every
+  level of engagement**, including "just cook for us", and before anything is
+  committed to. They are what let a customer check the quote makes sense.
+- **Non-vegetarian costs more per plate than vegetarian** — ingredients cost
+  more and the cooking and service have to be kept separate. This is why the
+  form collects the two headcounts separately.
+- **Sourcing is from local markets**, not a wholesaler's catalogue, with
+  long-standing meat vendors and suppliers for ice cream, fresh juice for a
+  welcome counter, curd and sweets in quantity.
+- **Condolence meals are the standing exception** to notice and to the quote
+  form both — they are arranged by phone at short notice.
 
 ## Out of scope (do not build yet)
 

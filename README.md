@@ -86,9 +86,10 @@ app/
 
 components/
   catalogue/                Search, chip filters, card grid, dish modal
-  order/                    Form context + the five steps
+  order/                    Form context + the five steps, client-only (see below)
   layout/                   Nav (server) + NavClient, Footer
   pdf/OrderPDF.tsx          The quote document
+  HeroMandala.tsx           The drawn mandala on the hero — pure SVG, no client JS
   Reveal.tsx                Scroll-reveal wrapper
 
 lib/
@@ -97,6 +98,7 @@ lib/
   orders.ts                 Order + meals + dishes fan-out, used by page and PDF
   validation.ts             Server-side checks for the submitted order
   rate-limit.ts             IP rate limiting for the two public POST routes
+  order-draft-storage.ts    Mirrors an in-progress draft into sessionStorage
   format.ts                 Shared date / time / reference formatting
   business.ts               Business details and the brand palette as literals
   email/emails.ts           The two transactional emails
@@ -227,6 +229,12 @@ values as literals from `lib/business.ts`. If you change a token in
   `image_licence` / `image_credit` / `image_source_url` are schema columns
   because CC-BY and CC-BY-SA legally require a visible credit, which the dish
   modal renders.
+- **The quote form is not server-rendered** (`OrderFormClient`, `ssr: false`). It
+  restores an in-progress draft from sessionStorage in a state initialiser, which
+  is the only way to have the values on the first render — and only safe with no
+  server render to disagree with, or every input is a hydration mismatch. The
+  indexable content of /order/new is the heading and copy above the form, which
+  still render on the server.
 - **A honeypot trip answers with a 400, not a fake success.** The convention is
   to fake a 201 so a script learns nothing. If it ever fires on a real customer
   that sends them to a confirmation page for an order that does not exist —
