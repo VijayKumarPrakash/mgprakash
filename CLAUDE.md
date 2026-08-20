@@ -286,6 +286,11 @@ calculate against.
 - **Real photography** — `npm run fetch:images` covers what Commons has. The dishes still showing
   a placeholder tile are the shortlist worth photographing properly; the tile is a deliberate
   design, not a missing asset
+- **Durable rate limiting** — `lib/rate-limit.ts` counts in one serverless instance's memory,
+  so the real ceiling is the limit times the number of warm instances and a deploy resets it.
+  Replace with a Vercel firewall rule (counts once, rejects at the edge before a function is
+  invoked — check whether custom rules need a paid plan) or a shared counter in Upstash. See
+  **Abuse protection** above for why this matters more than the traffic suggests.
 - **Recoleta licence** — see `app/fonts.ts`
 
 <!-- BEGIN:nextjs-agent-rules -->

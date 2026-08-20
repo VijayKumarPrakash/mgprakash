@@ -264,7 +264,21 @@ quantities, allergen tracking, service-style fields, popularity flags.
   for now
 - A real logo — text placeholder in the nav and PDF header until one arrives
 - Migrating email off Gmail SMTP to a proper provider once a custom domain is
-  bought, for deliverability and an `orders@` from-address
+  bought, for deliverability and an `orders@` from-address. That also clears the
+  last outstanding advisory in the production tree, which needs nodemailer 9.x
+- **A durable rate limit on the two public POST routes.** `lib/rate-limit.ts`
+  counts in one serverless instance's memory, so the real ceiling is the limit
+  times however many instances are warm, and a deploy resets every counter. It
+  stops the casual case — a bored person with `curl`, a form-spam bot walking
+  the web — and not a deliberate one. The fix is a rate-limit rule in the Vercel
+  firewall, which counts in one place and rejects at the edge before a function
+  is invoked, so a flood costs no compute; check whether that needs a paid plan
+  first. Failing that, a shared counter in Upstash Redis gives the same single
+  tally across instances. Worth doing because the consequence is out of
+  proportion to the effort: every accepted submission sends two emails from the
+  business's own Gmail account, which caps in the low hundreds a day, so someone
+  could quietly stop real enquiries arriving — and with no admin dashboard,
+  clearing the junk means hand-written SQL
 - Saving a draft request to return to later
 - Real photography for the dishes still on a placeholder tile
 - A Recoleta webfont licence — see `app/fonts.ts`
