@@ -161,8 +161,18 @@ export function NavClient({ user }: { user: User | null }) {
             </Link>
           )}
 
+          {/*
+            The same left margin the CTA gets, for the opposite reason.
+
+            Every other item in this row is a pill carrying `px-3`, so the gap
+            you actually see between two of them is the container's 6px plus
+            12px of padding on each side. The avatar is a bare 32px circle with
+            no padding at all, so it sat 6px from the quote button while
+            everything else read as roughly 18px apart — which is why it looked
+            cramped against the CTA rather than evenly spaced with the rest.
+          */}
           {user ? (
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative ml-1 sm:ml-2" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setOpen(o => !o)}
