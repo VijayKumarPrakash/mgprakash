@@ -6,6 +6,7 @@ import { DishImage } from '@/components/catalogue/DishImage'
 import { COURSE_LABELS } from '@/lib/taxonomy'
 import { BUSINESS, yearsTrading } from '@/lib/business'
 import { faqSchema, graph, jsonLdScript, SITE_URL } from '@/lib/seo'
+import { HeroMandala } from '@/components/HeroMandala'
 import type { Course } from '@/lib/taxonomy'
 import type { Dish } from '@/types'
 
@@ -191,33 +192,11 @@ export default async function HomePage() {
         />
 
         {/* Ornament. Until there is real photography the right half of a hero
-            this size reads as an accident, so it gets the same thali line-art
-            language as the placeholder tiles — one large plate, drawn not
-            photographed. Pure SVG, no request, and hidden below lg where the
-            text needs the full width anyway. */}
-        <div
-          aria-hidden="true"
-          className="hidden lg:block absolute right-[-6%] top-1/2 -translate-y-1/2 w-[560px] h-[560px] pointer-events-none"
-        >
-          <svg viewBox="0 0 200 200" className="w-full h-full" fill="none" stroke="#D9853F" strokeLinecap="round">
-            <g opacity="0.20">
-              <circle cx="100" cy="100" r="94" strokeWidth="0.7" />
-              <circle cx="100" cy="100" r="80" strokeWidth="0.5" opacity="0.7" />
-              <circle cx="100" cy="100" r="34" strokeWidth="0.9" />
-              <circle cx="100" cy="100" r="26" strokeWidth="0.5" opacity="0.7" />
-              {/* Katoris around the rim, the way a banquet thali is actually laid. */}
-              {Array.from({ length: 7 }, (_, i) => {
-                const a = (i / 7) * Math.PI * 2 - Math.PI / 2
-                return (
-                  <g key={i}>
-                    <circle cx={100 + Math.cos(a) * 57} cy={100 + Math.sin(a) * 57} r="14" strokeWidth="0.8" />
-                    <circle cx={100 + Math.cos(a) * 57} cy={100 + Math.sin(a) * 57} r="9" strokeWidth="0.45" opacity="0.65" />
-                  </g>
-                )
-              })}
-            </g>
-          </svg>
-        </div>
+            this size reads as an accident, so it gets a drawn mandala in the
+            same copper line-art language as the placeholder tiles. Pure SVG,
+            no request, no client JS, and hidden below lg where the text needs
+            the full width anyway. */}
+        <HeroMandala className="hidden lg:block absolute right-[-8%] top-1/2 -translate-y-1/2 w-[620px] h-[620px] pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-24 sm:py-32 lg:py-40">
           <div className="max-w-3xl">
