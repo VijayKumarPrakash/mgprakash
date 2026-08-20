@@ -35,7 +35,8 @@ const faqs = (dishCount: number) => [
     a:
       'In Bengaluru, a cooking contractor cooks your food for the occasion rather than delivering it ' +
       'from a central kitchen — the team, the vessels and the burners come to you, and the meal is ' +
-      'made on site and served fresh. M G Prakash has worked this way since 2000. Where a venue has ' +
+      `made on site and served fresh. M G Prakash has worked this way since ${BUSINESS.established}. ` +
+      'Where a venue has ' +
       'no room, no water or no gas point, we cook in a godown instead and bring the food to you hot.',
   },
   {
@@ -85,8 +86,9 @@ const faqs = (dishCount: number) => [
     q: 'How many guests can you cater for?',
     a:
       'There is no minimum — we have cooked for as few as five people. At the other end, festival ' +
-      'annadana meals for well over five thousand have gone out of this kitchen. Most weddings fall ' +
-      'between two hundred and six hundred guests, and the kitchen scales well past that.',
+      'annadana meals for well over five thousand have gone out of this kitchen. Tell us the ' +
+      'headcount and we will say honestly whether we can do it justice — any kind of function, at ' +
+      'any size we can reasonably reach.',
   },
   {
     q: 'Which areas of Bangalore do you serve?',
@@ -200,7 +202,9 @@ export default async function HomePage() {
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-24 sm:py-32 lg:py-40">
           <div className="max-w-3xl">
-            <p className="eyebrow text-[var(--dark-ink-3)] mb-7">Established 2000 · Bengaluru</p>
+            <p className="eyebrow text-[var(--dark-ink-3)] mb-7">
+              Established {BUSINESS.established} · Bengaluru
+            </p>
 
             <h1 className="font-display text-[clamp(38px,7vw,74px)] text-balance mb-7" style={{ fontWeight: 500 }}>
               Catering crafted for every occasion

@@ -58,7 +58,7 @@ export const SITE_NAME = 'M G Prakash Catering'
 export const SITE_TAGLINE = 'Cooking Contractor & Caterer in Bengaluru'
 
 export const SITE_DESCRIPTION =
-  'M G Prakash Catering — cooking contractor and caterer in Rajajinagar, Bengaluru since 2000. ' +
+  `${BUSINESS.name} — cooking contractor and caterer in Rajajinagar, Bengaluru since ${BUSINESS.established}. ` +
   'South Indian, Karnataka and North Indian food for weddings, namakarana, gruha pravesha and ' +
   'corporate events. Pure veg, Jain and no onion-garlic menus. Travels across South India.'
 

@@ -310,7 +310,12 @@ prefix.
 - **Address**: 611, 10th Cross Rd, Indiranagar Rajajinagar, Bengaluru, Karnataka 560079
 - **Phone**: +91 98801 93165
 - **Email**: vijaykumar.sb.99@gmail.com
-- **Established**: 2000
+- **Established**: 1999
+
+  Recorded as 2000 for a long time and wrong. `BUSINESS.established` in
+  `lib/business.ts` is the only place it may appear as a literal — `yearsTrading()`
+  and every "since …" in the copy derive from it. Four pages had the year typed in
+  rather than interpolated, so correcting the constant did not correct the site.
 
 ## How the business actually works
 
@@ -318,11 +323,15 @@ These are facts about the trade, not copy. Several of them were contradicted by
 the site's own text before they were written down here, so check against this
 list before writing anything customer-facing.
 
-- **No guest minimum.** Meals have been cooked for as few as five people. The
-  services page used to advertise ranges like "50–5,000+ guests" per service,
-  including in the JSON-LD `audience` — a machine-readable minimum is still a
-  minimum. Do not reintroduce a floor anywhere. The *ceiling* is the part worth
-  stating: festival annadana meals for well over five thousand.
+- **No guest ranges, per service or anywhere else.** Meals have been cooked for
+  as few as five people, so there is no floor; and a per-service ceiling implies
+  some occasions are capped lower than others, which is not how it works — any
+  type of function can be catered at any size we can reasonably reach. The
+  services page used to carry a range on every entry ("30–300 guests" for
+  namakarana, "50–5,000+" for weddings), including in the JSON-LD `audience`,
+  where a machine-readable minimum is still a minimum. State the overall scale in
+  prose once — no minimum, annadana meals for well over five thousand — and let
+  the customer give their headcount.
 - **One work order a day.** One function, one kitchen, one team, the whole day.
   This is why notice is weeks at minimum and months for a wedding or festival
   season, and it is a selling point rather than an apology.

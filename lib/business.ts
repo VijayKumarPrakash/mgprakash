@@ -28,7 +28,7 @@ export const BUSINESS = {
    * structured data via `alternateName`, so the two records reconcile.
    */
   gmbName: 'M G Prakash - Cooking Contractor',
-  established: 2000,
+  established: 1999,
   email: 'vijaykumar.sb.99@gmail.com',
   phone: '+91 98801 93165',
   /** Digits only — what `tel:` and `wa.me` links need. */
@@ -65,9 +65,14 @@ export const WHATSAPP_HREF = `https://wa.me/${BUSINESS.phoneDigits}`
  * Years trading, computed rather than written down.
  *
  * The home page read "Twenty-five years" for long enough that it stopped being
- * true — the business was established in 2000. Any copy that states an age has
- * to derive it, or it quietly ages into a false claim on a page written
- * specifically to be indexed.
+ * true — the business was established in 1999. Any copy that states an age, or
+ * the founding year itself, has to derive it from `established` above, or it
+ * quietly ages into a false claim on a page written specifically to be indexed.
+ *
+ * That is not hypothetical twice over: the year was recorded as 2000 for a long
+ * time and was wrong, and four pieces of copy had "since 2000" typed into them
+ * rather than interpolated, so correcting the constant did not correct the
+ * site. They all read from here now.
  */
 export function yearsTrading(): number {
   return new Date().getFullYear() - BUSINESS.established

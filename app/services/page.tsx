@@ -21,19 +21,22 @@ import { absoluteUrl, breadcrumbSchema, graph, jsonLdScript, ID } from '@/lib/se
  * helpful-content update; the defence is that every paragraph here tells a
  * customer something they needed to know.
  *
- * NO GUEST MINIMUMS ANYWHERE ON THIS PAGE. Each service used to carry a range
- * like "50–5,000+ guests", which advertised a floor that does not exist — the
- * kitchen has cooked for as few as five people. The ceiling is the part worth
- * stating, and it is stated in prose where it belongs.
+ * NO GUEST RANGES ANYWHERE ON THIS PAGE. Each service used to carry one — the
+ * namakarana entry said "30–300 guests" and the wedding entry "50–5,000+" — and
+ * both ends were wrong. There is no floor: the kitchen has cooked for five
+ * people. And a per-service ceiling implies some occasions are capped lower
+ * than others, which is not how it works; any type of function can be catered
+ * at any size we can reasonably reach. State the overall scale in prose, once,
+ * and let the customer tell us their headcount.
  */
 
 export const metadata: Metadata = {
   title: 'Catering Services — Cooking Contractor in Bengaluru',
   description:
     'Wedding catering, namakarana, gruha pravesha, corporate, festival and funeral catering in ' +
-    'Bengaluru. M G Prakash has worked as a cooking contractor from Rajajinagar since 2000 — ' +
-    'cooked at your venue or brought to it, pure veg, Jain and satvik menus, five guests to five ' +
-    'thousand and more.',
+    `Bengaluru. M G Prakash has worked as a cooking contractor from Rajajinagar since ${BUSINESS.established} — ` +
+    'cooked at your venue or brought to it, pure veg, Jain and satvik menus, no guest minimum and ' +
+    'annadana meals for well over five thousand.',
   alternates: { canonical: '/services' },
   openGraph: {
     url: absoluteUrl('/services'),

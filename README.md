@@ -1,7 +1,7 @@
 # M G Prakash Catering
 
 A self-serve quote-request site for **M G Prakash Catering**, a cooking
-contractor operating in Bengaluru since 2000.
+contractor operating in Bengaluru since 1999.
 
 A customer browses a catalogue of 229 dishes, filters it down to what their
 event actually needs — pure veg, Jain, no onion or garlic, a particular course
@@ -235,6 +235,11 @@ values as literals from `lib/business.ts`. If you change a token in
   server render to disagree with, or every input is a hydration mismatch. The
   indexable content of /order/new is the heading and copy above the form, which
   still render on the server.
+- **No guest ranges in any copy.** Not "30–300 guests" per service, not in the
+  JSON-LD `audience`. There is no minimum — five people is a real booking — and a
+  per-service ceiling wrongly implies some occasions are capped lower than
+  others. The founding year is the same kind of rule: `BUSINESS.established` is
+  the only literal, everything else interpolates.
 - **A honeypot trip answers with a 400, not a fake success.** The convention is
   to fake a 201 so a script learns nothing. If it ever fires on a real customer
   that sends them to a confirmation page for an order that does not exist —
