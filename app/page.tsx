@@ -32,24 +32,45 @@ const faqs = (dishCount: number) => [
   {
     q: 'What is a cooking contractor?',
     a:
-      'In Bengaluru, a cooking contractor cooks at your venue rather than delivering food from a ' +
-      'central kitchen — the team, the vessels and the burners come to you, and the meal is made ' +
-      'on site and served fresh. M G Prakash has worked this way since 2000, and we still do it ' +
-      'wherever the venue has the space. Where it does not, we cook at our Rajajinagar kitchen.',
+      'In Bengaluru, a cooking contractor cooks your food for the occasion rather than delivering it ' +
+      'from a central kitchen — the team, the vessels and the burners come to you, and the meal is ' +
+      'made on site and served fresh. M G Prakash has worked this way since 2000. Where a venue has ' +
+      'no room, no water or no gas point, we cook in a godown instead and bring the food to you hot.',
+  },
+  {
+    q: 'Can we buy the groceries ourselves, or do you handle everything?',
+    a:
+      'Either. Many families prefer to buy the provisions themselves, and some traditions expect it — ' +
+      'in that case we give you an itemised list with quantities worked out for your headcount and ' +
+      'cook with what you have bought. Or we take the whole thing end to end: groceries, vessels on ' +
+      'rent, the gas connection, transport, the team and the serving. You can also choose to have us ' +
+      'cook and nothing more, or cook and serve. Whichever you pick, you get the menu, the itemised ' +
+      'provisions list and the vessels list.',
   },
   {
     q: 'How much does catering cost per plate?',
     a:
-      'It depends on the menu, the headcount and the venue, so we quote rather than publish a rate ' +
-      'card. Pick your dishes on the site and we will send a written quote the same day, with a PDF ' +
-      'of the menu exactly as you chose it. There is no charge for the quote and no obligation.',
+      'It depends on the menu, the headcount, the venue and how much of the work you are handing ' +
+      'over, so we quote rather than publish a rate card. A non-vegetarian menu costs more per plate ' +
+      'than a vegetarian one, because the ingredients cost more and the cooking and service have to ' +
+      'be kept separate. Pick your dishes on the site and the quote is written, free and comes with ' +
+      'a PDF of the menu exactly as you chose it.',
   },
   {
     q: 'How much notice do you need?',
     a:
-      'Two to three weeks is comfortable for a wedding. Smaller functions we can often take on a ' +
-      'few days notice, and condolence meals we will always try to accommodate at short notice — ' +
-      'call rather than use the form for those.',
+      'A few weeks at minimum, and months rather than weeks for a wedding or anything in festival ' +
+      'season — the dates go early. We accept only one work order a day, so once a date is taken it ' +
+      'is taken: one function, one kitchen, one team, the whole day. Condolence meals are the ' +
+      'exception and always will be — call rather than use the form for those.',
+  },
+  {
+    q: 'Do you do regular or daily catering?',
+    a:
+      'No. We cater one-off events — a wedding, a naming ceremony, a housewarming, a festival ' +
+      'annadana, a company lunch. We do not take on running contracts: no daily meals for a paying ' +
+      'guest house or hostel, no office canteen, no weekly tiffin. That needs a kitchen organised ' +
+      'around repetition, and this one is organised around getting a single occasion exactly right.',
   },
   {
     q: 'Do you cater pure vegetarian, Jain and satvik menus?',
@@ -62,14 +83,14 @@ const faqs = (dishCount: number) => [
   {
     q: 'How many guests can you cater for?',
     a:
-      'From about thirty people at a house function up to gatherings where more than five thousand ' +
-      'have eaten. Most of our weddings fall between two hundred and six hundred guests, but the ' +
-      'kitchen scales well past that and has done so many times since 2000.',
+      'There is no minimum — we have cooked for as few as five people. At the other end, festival ' +
+      'annadana meals for well over five thousand have gone out of this kitchen. Most weddings fall ' +
+      'between two hundred and six hundred guests, and the kitchen scales well past that.',
   },
   {
     q: 'Which areas of Bangalore do you serve?',
     a:
-      'All of Bengaluru, from our kitchen in Rajajinagar — Malleshwaram, Basaveshwaranagar, ' +
+      'All of Bengaluru, from our base in Rajajinagar — Malleshwaram, Basaveshwaranagar, ' +
       'Vijayanagar, Jayanagar, Basavanagudi, Indiranagar, Koramangala, Whitefield, Hebbal and ' +
       'everywhere between. We also travel across Karnataka and South India for weddings and ' +
       'larger functions.',
@@ -78,7 +99,9 @@ const faqs = (dishCount: number) => [
     q: 'Do you serve both vegetarian and non-vegetarian at the same event?',
     a:
       'Yes. We ask for a veg and non-veg headcount separately when you request a quote, and the two ' +
-      'are cooked and served separately at the venue, with every dish clearly labelled.',
+      'are cooked and served separately at the venue, with every dish clearly labelled. The two ' +
+      'headcounts also matter to the price, since a non-vegetarian plate costs more than a ' +
+      'vegetarian one.',
   },
   {
     q: 'Do I need an account to request a quote?',
