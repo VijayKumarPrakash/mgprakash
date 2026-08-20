@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getDishById, getRelatedDishes } from '@/lib/dishes'
 import { DishImage } from '@/components/catalogue/DishImage'
+import { AddToQuoteButton } from '@/components/catalogue/AddToQuoteButton'
 import { DietBadge } from '@/components/catalogue/DietBadge'
 import { COURSE_LABELS, OCCASION_LABELS, LICENCES_REQUIRING_CREDIT } from '@/lib/taxonomy'
 import { absoluteUrl, breadcrumbSchema, graph, jsonLdScript } from '@/lib/seo'
@@ -208,9 +209,9 @@ export default async function DishPage({ params }: Props) {
             </dl>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/order/new" className="btn btn-primary px-6 py-3">
+              <AddToQuoteButton dishId={dish.id} className="btn btn-primary px-6 py-3">
                 Add this to a quote
-              </Link>
+              </AddToQuoteButton>
               <Link href="/menu" className="btn btn-secondary px-6 py-3">
                 Browse all dishes
               </Link>

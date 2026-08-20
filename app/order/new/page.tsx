@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getAllDishes, getDishCount } from '@/lib/dishes'
 import { createCookieClient } from '@/lib/supabase/server'
-import { OrderForm } from '@/components/order/OrderForm'
+import { OrderFormClient } from '@/components/order/OrderFormClient'
 import { absoluteUrl } from '@/lib/seo'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -62,7 +62,7 @@ export default async function NewOrderPage() {
         </p>
       </div>
 
-      <OrderForm
+      <OrderFormClient
         dishes={dishes}
         initialName={user?.user_metadata?.name as string | undefined}
         initialEmail={user?.email ?? undefined}

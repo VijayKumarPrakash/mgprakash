@@ -1,7 +1,9 @@
 'use client'
 
-import { createContext, useContext, useReducer, useCallback } from 'react'
+import { createContext, useContext, useReducer, useCallback, useEffect, useState } from 'react'
+
 import { nowTimeInIndia } from '@/lib/format'
+import { loadStoredDraft, saveStoredDraft, clearStoredDraft } from '@/lib/order-draft-storage'
 import type { OrderDraft, MealDraft } from '@/types'
 
 type Action =
@@ -14,6 +16,7 @@ type Action =
   | { type: 'ADD_DISH_TO_MEAL'; mealId: string; dishId: string }
   | { type: 'REMOVE_DISH_FROM_MEAL'; mealId: string; dishId: string }
   | { type: 'SET_DISH_NOTE'; mealId: string; dishId: string; note: string }
+  | { type: 'HYDRATE'; draft: OrderDraft }
 
 /**
  * These ids never leave the browser — the database generates its own uuid for
@@ -54,6 +57,11 @@ const INITIAL: OrderDraft = {
 
 function reducer(state: OrderDraft, action: Action): OrderDraft {
   switch (action.type) {
+    // Replaces the whole draft with one restored from sessionStorage. Applied
+    // through the reducer rather than by reaching into state so there is still
+    // exactly one place the draft changes.
+    case 'HYDRATE':
+      return action.draft
     case 'SET_CONTACT':
       return { ...state, ...action.payload }
     case 'SET_EVENT':
@@ -128,6 +136,15 @@ function reducer(state: OrderDraft, action: Action): OrderDraft {
 interface OrderContextValue {
   draft: OrderDraft
   activeMeal: MealDraft | null
+  /**
+   * The step the customer was on when they navigated away, so the form can jump
+   * back to it. Null on a fresh start.
+   */
+  restoredStep: string | null
+  /** Called after a successful submit, so a fresh visit starts clean. */
+  discardStoredDraft: () => void
+  /** Records the current step, so a restore lands where the customer left. */
+  noteStep: (step: string) => void
   setContact: (payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'>) => void
   setEvent: (payload: Pick<OrderDraft, 'event_name' | 'event_type'>) => void
   addMeal: () => void
@@ -153,11 +170,48 @@ export function OrderProvider({
   // effect version rendered the contact step with empty inputs and then
   // re-rendered with them filled, which reads as a flicker and, worse, meant
   // any keystroke landing in that window was overwritten.
-  const [draft, dispatch] = useReducer(reducer, INITIAL, init => ({
-    ...init,
-    client_name: initialContact?.name ?? '',
-    client_email: initialContact?.email ?? '',
-  }))
+  /**
+   * Read once, synchronously, before the first render.
+   *
+   * This is only safe because the form is never server-rendered — see
+   * `OrderFormClient`, which loads it with `ssr: false` precisely so that
+   * sessionStorage can be read in an initialiser like this one. Reading it in
+   * an effect instead would mean a render with empty inputs followed by a
+   * render with full ones, and React's own lint rules rightly object to
+   * setting state from an effect to achieve it.
+   */
+  const [stored] = useState(loadStoredDraft)
+
+  const [draft, dispatch] = useReducer(reducer, INITIAL, init =>
+    stored?.draft ?? {
+      ...init,
+      client_name: initialContact?.name ?? '',
+      client_email: initialContact?.email ?? '',
+    }
+  )
+
+  /** The step the customer left from, so the form can resume there. */
+  const restoredStep = stored?.step ?? null
+
+  /** Reported by the form whenever the customer moves between steps. */
+  const [step, setStepState] = useState<string | null>(null)
+  const noteStep = useCallback((next: string) => setStepState(next), [])
+
+  /**
+   * Persisted on every change.
+   *
+   * Safe to run from the first render because the draft was seeded from storage
+   * synchronously above — there is no window in which an empty draft could
+   * overwrite the stored one, which is the classic way this pattern eats the
+   * very data it exists to protect.
+   */
+  useEffect(() => {
+    saveStoredDraft(draft, step)
+  }, [draft, step])
+
+  const discardStoredDraft = useCallback(() => {
+    clearStoredDraft()
+  }, [])
 
   const activeMeal = draft.meals.find(m => m.id === draft.active_meal_id) ?? null
 
@@ -206,6 +260,9 @@ export function OrderProvider({
       value={{
         draft,
         activeMeal,
+        restoredStep,
+        discardStoredDraft,
+        noteStep,
         setContact,
         setEvent,
         addMeal,

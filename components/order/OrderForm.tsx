@@ -91,9 +91,23 @@ function StepIndicator({
 }
 
 function OrderFormInner({ dishes }: { dishes: Dish[] }) {
-  const [step, setStep] = useState<StepId>('contact')
-  const [highestReached, setHighestReached] = useState(0)
-  const { draft } = useOrder()
+  const { draft, restoredStep, discardStoredDraft, noteStep } = useOrder()
+
+  /**
+   * Opens on the step the customer left from, when there was one.
+   *
+   * Seeded in the initialiser rather than corrected afterwards: the draft it
+   * belongs to was restored synchronously too, so there is no frame in which
+   * the form shows step one holding a fully populated order.
+   */
+  const [step, setStep] = useState<StepId>(() => {
+    const resumed = STEPS.find(s => s.id === restoredStep)
+    return resumed?.id ?? 'contact'
+  })
+  const [highestReached, setHighestReached] = useState(() => {
+    const i = STEPS.findIndex(s => s.id === restoredStep)
+    return i > 0 ? i : 0
+  })
   const router = useRouter()
 
   /**
@@ -113,7 +127,11 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
   if (draft.meals.length === 0 && highestReached >= 3) setHighestReached(2)
 
   function goToStep(targetIndex: number) {
-    setStep(STEPS[targetIndex].id)
+    const next = STEPS[targetIndex].id
+    setStep(next)
+    // Told to the provider so it is saved with the draft — this is what lets a
+    // customer come back to dish selection rather than to the contact step.
+    noteStep(next)
     if (targetIndex > highestReached) setHighestReached(targetIndex)
   }
 
@@ -128,8 +146,12 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
       throw new Error(body.error ?? 'Failed to submit order')
     }
     const { id } = await res.json()
+    // The draft is now an order. Cleared before navigating, so returning to
+    // /order/new later offers a fresh form rather than resurrecting a request
+    // that has already been sent.
+    discardStoredDraft()
     router.push(`/order/${id}`)
-  }, [draft, router])
+  }, [draft, router, discardStoredDraft])
 
   return (
     // pt-6 rather than py-12: the page now renders its own <h1> block above,
@@ -164,19 +186,19 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
 
       <div className="bg-[var(--paper)] rounded-3xl">
         {step === 'contact' && <ContactStep onNext={() => goToStep(1)} />}
-        {step === 'event' && <EventStep onNext={() => goToStep(2)} onBack={() => setStep('contact')} />}
-        {step === 'meals' && <MealsStep onNext={() => goToStep(3)} onBack={() => setStep('event')} />}
+        {step === 'event' && <EventStep onNext={() => goToStep(2)} onBack={() => goToStep(0)} />}
+        {step === 'meals' && <MealsStep onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
         {step === 'dishes' && (
           <DishSelectionStep
             dishes={dishes}
             onNext={() => goToStep(4)}
-            onBack={() => setStep('meals')}
+            onBack={() => goToStep(2)}
           />
         )}
         {step === 'review' && (
           <ReviewStep
             dishes={dishes}
-            onBack={() => setStep('dishes')}
+            onBack={() => goToStep(3)}
             onSubmit={handleSubmit}
           />
         )}
