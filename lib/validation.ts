@@ -23,6 +23,9 @@ const LIMITS = {
   name: 120,
   email: 254,
   phone: 32,
+  /** Digit counts, country code included. 15 is the E.164 maximum. */
+  phoneDigitsMin: 7,
+  phoneDigitsMax: 15,
   eventName: 160,
   location: 300,
   mealName: 120,
@@ -82,8 +85,26 @@ export function validateOrderDraft(body: unknown): ValidationResult {
     return { ok: false, error: 'That email address does not look valid.' }
   }
 
-  // The phone number is optional in the form, so it is optional here too.
-  if (client_phone.length > LIMITS.phone) return { ok: false, error: 'That phone number is too long.' }
+  // The phone number is optional in the form, so it is optional here too — but
+  // anything present has to look like a number somebody could ring. The field
+  // used to accept any string under 32 characters, so a hand-rolled request
+  // could store a sentence, and the business would find it in the notification
+  // email with nothing to call.
+  if (client_phone) {
+    if (client_phone.length > LIMITS.phone) {
+      return { ok: false, error: 'That phone number is too long.' }
+    }
+    // Digits, spaces, dashes and a leading + only.
+    if (!/^\+?[\d\s-]+$/.test(client_phone)) {
+      return { ok: false, error: 'A phone number can only contain digits.' }
+    }
+    // E.164 allows at most 15 digits including the country code; below about
+    // seven there is no national number long enough to be real.
+    const digits = client_phone.replace(/\D/g, '')
+    if (digits.length < LIMITS.phoneDigitsMin || digits.length > LIMITS.phoneDigitsMax) {
+      return { ok: false, error: 'That phone number does not look valid.' }
+    }
+  }
 
   if (!event_name) return { ok: false, error: 'An event name is required.' }
   if (event_name.length > LIMITS.eventName) return { ok: false, error: 'That event name is too long.' }

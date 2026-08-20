@@ -104,6 +104,24 @@ describe('validateOrderDraft — contact and event', () => {
     expect(result).toMatchObject({ ok: false, error: 'Please choose an event type.' })
   })
 
+  it('accepts a normal Indian mobile, however it is spaced', () => {
+    for (const good of ['+91 9880193165', '+919880193165', '+91 98801-93165']) {
+      expect(validateOrderDraft(validDraft({ client_phone: good })).ok).toBe(true)
+    }
+  })
+
+  it('rejects a phone number containing letters', () => {
+    // The form now strips non-digits as they are typed, so this is the backstop
+    // for anything that did not come from the form.
+    const result = validateOrderDraft(validDraft({ client_phone: 'call me maybe' }))
+    expect(result).toMatchObject({ ok: false, error: 'A phone number can only contain digits.' })
+  })
+
+  it('rejects a phone number that is too short or too long to dial', () => {
+    expect(validateOrderDraft(validDraft({ client_phone: '+91 988' })).ok).toBe(false)
+    expect(validateOrderDraft(validDraft({ client_phone: '+91 98801931651234' })).ok).toBe(false)
+  })
+
   it('caps the fields that are free text', () => {
     expect(validateOrderDraft(validDraft({ client_name: 'a'.repeat(121) })).ok).toBe(false)
     expect(validateOrderDraft(validDraft({ event_name: 'a'.repeat(161) })).ok).toBe(false)
