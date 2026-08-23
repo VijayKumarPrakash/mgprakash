@@ -279,19 +279,35 @@ quantities, allergen tracking, service-style fields, popularity flags.
 - Migrating email off Gmail SMTP to a proper provider once a custom domain is
   bought, for deliverability and an `orders@` from-address. That also clears the
   last outstanding advisory in the production tree, which needs nodemailer 9.x
-- **A durable rate limit on the two public POST routes.** `lib/rate-limit.ts`
-  counts in one serverless instance's memory, so the real ceiling is the limit
-  times however many instances are warm, and a deploy resets every counter. It
-  stops the casual case — a bored person with `curl`, a form-spam bot walking
-  the web — and not a deliberate one. The fix is a rate-limit rule in the Vercel
-  firewall, which counts in one place and rejects at the edge before a function
-  is invoked, so a flood costs no compute; check whether that needs a paid plan
-  first. Failing that, a shared counter in Upstash Redis gives the same single
-  tally across instances. Worth doing because the consequence is out of
-  proportion to the effort: every accepted submission sends two emails from the
-  business's own Gmail account, which caps in the low hundreds a day, so someone
-  could quietly stop real enquiries arriving — and with no admin dashboard,
-  clearing the junk means hand-written SQL
+- **A Vercel WAF rate-limit rule on `/api/orders`.** `lib/rate-limit.ts` counts
+  in one serverless instance's memory, so the real ceiling is the limit times
+  however many instances are warm, and a deploy resets every counter. It stops
+  the casual case — a bored person with `curl`, a form-spam bot walking the web —
+  and not a deliberate one. A WAF rule counts at the edge and rejects before a
+  function is invoked, so a flood costs no compute. **Available on the Hobby
+  plan** (1 rule per project, IP key, fixed window, 1M allowed requests/month
+  included). Set it up in the dashboard under Firewall → Configure → New Rule:
+
+  ```
+  If    request path  equals  /api/orders
+        request method equals POST
+  Then  Rate Limit — Fixed Window
+        Window 600s · Limit 5 · Key: IP · Action: Deny (429)
+  ```
+
+  600s because 10 minutes is the maximum window on Hobby, so the app-level
+  5-per-hour cannot be expressed at the edge — the two layers do different jobs
+  and both stay. One rule is also the Hobby limit, which is why it targets the
+  expensive endpoint (rows written, two emails sent) rather than `draft-pdf`,
+  which only costs CPU and is still covered in-app. On Pro (40 rules) add a
+  second for `/api/orders/draft-pdf` at 10 per 600s. Note WAF counters are
+  per-region, so a globally distributed flood can still exceed the number.
+
+  Worth doing because the consequence is out of proportion to the effort: every
+  accepted submission sends two emails from the business's own Gmail account,
+  which caps in the low hundreds a day, so someone could quietly stop real
+  enquiries arriving — and with no admin dashboard, clearing the junk means
+  hand-written SQL
 - Saving a draft request to return to later
 - Real photography for the dishes still on a placeholder tile
 - A Recoleta webfont licence — see `app/fonts.ts`

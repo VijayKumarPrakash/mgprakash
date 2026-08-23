@@ -113,8 +113,12 @@ with no admin dashboard to clear the junk from.
 
 The limiter's state is in one serverless instance's memory, so the true ceiling is the limit
 times the number of warm instances, and a deploy resets it. It is deliberately the cheap
-half of the answer; the durable control is a rate-limit rule in the Vercel firewall, which
-runs before a function is invoked. Do not raise these numbers as a substitute for that.
+half of the answer; the durable control is a Vercel WAF rate-limit rule, which runs before a
+function is invoked. Do not raise these numbers as a substitute for that.
+
+The two are complements, not alternatives. A WAF window maxes out at 10 minutes on the Hobby
+plan, so "5 submissions an hour" can only be enforced in the application; the edge rule is
+what makes a flood cost nothing. Keep both.
 
 A honeypot trip returns an actionable 400 rather than the conventional fake success. If it
 ever fires on a real customer, a fake 201 would send them to a confirmation page for an
@@ -377,9 +381,12 @@ calculate against.
   design, not a missing asset
 - **Durable rate limiting** — `lib/rate-limit.ts` counts in one serverless instance's memory,
   so the real ceiling is the limit times the number of warm instances and a deploy resets it.
-  Replace with a Vercel firewall rule (counts once, rejects at the edge before a function is
-  invoked — check whether custom rules need a paid plan) or a shared counter in Upstash. See
-  **Abuse protection** above for why this matters more than the traffic suggests.
+  Add a Vercel WAF rate-limit rule, which counts at the edge and rejects before a function is
+  invoked. It *is* available on Hobby: one rule per project, IP key, fixed window, maximum
+  window 10 minutes, 1M allowed requests a month included. Spec and rationale are in the
+  README backlog. The edge rule does not replace the in-app one — a 10-minute maximum window
+  cannot express "5 an hour", so the two layers stay. See **Abuse protection** above for why
+  this matters more than the traffic suggests.
 - **Recoleta licence** — see `app/fonts.ts`
 
 <!-- BEGIN:nextjs-agent-rules -->
