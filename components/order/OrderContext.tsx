@@ -9,6 +9,7 @@ import type { OrderDraft, MealDraft } from '@/types'
 type Action =
   | { type: 'SET_CONTACT'; payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'> }
   | { type: 'SET_EVENT'; payload: Pick<OrderDraft, 'event_name' | 'event_type'> }
+  | { type: 'SET_NOTES'; notes: string }
   | { type: 'ADD_MEAL' }
   | { type: 'UPDATE_MEAL'; id: string; payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>> }
   | { type: 'REMOVE_MEAL'; id: string }
@@ -51,6 +52,7 @@ const INITIAL: OrderDraft = {
   client_phone: '',
   event_name: '',
   event_type: '',
+  notes: '',
   meals: [],
   active_meal_id: null,
 }
@@ -66,6 +68,8 @@ function reducer(state: OrderDraft, action: Action): OrderDraft {
       return { ...state, ...action.payload }
     case 'SET_EVENT':
       return { ...state, ...action.payload }
+    case 'SET_NOTES':
+      return { ...state, notes: action.notes }
     case 'ADD_MEAL': {
       const first = state.meals[0]
       const meal = makeMeal(first ? {
@@ -147,6 +151,8 @@ interface OrderContextValue {
   noteStep: (step: string) => void
   setContact: (payload: Pick<OrderDraft, 'client_name' | 'client_email' | 'client_phone'>) => void
   setEvent: (payload: Pick<OrderDraft, 'event_name' | 'event_type'>) => void
+  /** Order-level free text — a requirement that spans every dish, not one of them. */
+  setNotes: (notes: string) => void
   addMeal: () => void
   updateMeal: (id: string, payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>>) => void
   removeMeal: (id: string) => void
@@ -225,6 +231,10 @@ export function OrderProvider({
       dispatch({ type: 'SET_EVENT', payload: p }),
     []
   )
+  const setNotes = useCallback(
+    (notes: string) => dispatch({ type: 'SET_NOTES', notes }),
+    []
+  )
   const addMeal = useCallback(() => dispatch({ type: 'ADD_MEAL' }), [])
   const updateMeal = useCallback(
     (id: string, p: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>>) =>
@@ -265,6 +275,7 @@ export function OrderProvider({
         noteStep,
         setContact,
         setEvent,
+        setNotes,
         addMeal,
         updateMeal,
         removeMeal,

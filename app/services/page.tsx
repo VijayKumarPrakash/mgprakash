@@ -44,8 +44,14 @@ export const metadata: Metadata = {
   },
 }
 
-/** A function of the dish count, so the catalogue size is never typed in. */
-const services = (dishCount: number) => [
+/**
+ * A plain array again. It used to be a function of the dish count, because the
+ * festive entry quoted the catalogue size while claiming onion and garlic were
+ * a field on every dish — that claim is gone and nothing else here needs the
+ * number. If an entry ever does, pass it in rather than typing the figure into
+ * the prose: see getDishCount() in lib/dishes.ts and the note on it.
+ */
+const SERVICES = [
   {
     slug: 'wedding',
     title: 'Wedding & reception catering',
@@ -63,8 +69,8 @@ const services = (dishCount: number) => [
     lede: 'Naming ceremonies and baby showers, usually at home or in a small hall.',
     body:
       'These run early and they run to a strict muhurtha, so the food has to be ready before the ' +
-      'priest is. Menus are typically satvik — no onion, no garlic — and we filter the catalogue ' +
-      'that way as standard rather than treating it as a special request. Expect payasam, ' +
+      'priest is. Menus are typically satvik — no onion, no garlic — which is how we cook for these ' +
+      'as standard rather than treating it as a special request. Expect payasam, ' +
       'kosambari, a couple of palyas, huli and rice, with tiffin for the guests arriving early.',
   },
   {
@@ -93,11 +99,12 @@ const services = (dishCount: number) => [
     title: 'Festival, annadana & temple prasad',
     lede: 'Ugadi, Ganesha Chaturthi, Deepavali, annadana and satvik meals.',
     body:
-      `Onion and garlic are tracked as a separate field on every one of our ${dishCount} dishes, ` +
-      'apart from the Jain flag, because a temple-adjacent meal excludes alliums without necessarily ' +
-      'applying Jain rules on root vegetables. That distinction is built into the catalogue, so a ' +
-      'satvik menu is filtered rather than remembered. Annadana at a festival is where the numbers ' +
-      'get largest — meals for well over five thousand people have gone out of this kitchen.',
+      'Satvik cooking is routine here, not a special request: for a temple prasad or a festival ' +
+      'meal the whole menu is made without onion and garlic, and to Jain rules where the occasion ' +
+      'asks for it. Say so when you request the quote and it is cooked that way throughout — it is ' +
+      'a decision about the occasion, not about which dishes are allowed. Annadana at a festival ' +
+      'is where the numbers get largest — meals for well over five thousand people have gone out ' +
+      'of this kitchen.',
   },
   {
     slug: 'funeral',
@@ -178,7 +185,6 @@ const ENGAGEMENT = [
 
 export default async function ServicesPage() {
   const dishCount = await getDishCount()
-  const SERVICES = services(dishCount)
 
   const pageGraph = graph(
     {

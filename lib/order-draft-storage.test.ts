@@ -59,6 +59,7 @@ function draft(overrides: Partial<OrderDraft> = {}): OrderDraft {
     client_phone: '+91 9880193165',
     event_name: 'Rao Reception',
     event_type: 'wedding',
+    notes: '',
     meals: [meal()],
     active_meal_id: 'meal-1',
     ...overrides,
@@ -107,6 +108,22 @@ describe('save and load', () => {
   it('survives a corrupted entry rather than throwing', () => {
     store().setItem('mgp.order-draft.v1', '{not json')
     expect(loadStoredDraft()).toBeNull()
+  })
+
+  it('backfills a note onto a draft saved before the field existed', () => {
+    // Written by hand rather than through saveStoredDraft, because this is
+    // exactly what a draft written by the previous deploy looks like: no
+    // `notes` key at all. The review step binds it straight to a textarea, so
+    // restoring `undefined` would flip that input from uncontrolled to
+    // controlled on the customer's first keystroke.
+    const stale = draft()
+    delete (stale as Partial<OrderDraft>).notes
+    store().setItem(
+      'mgp.order-draft.v1',
+      JSON.stringify({ draft: stale, step: 'review', savedAt: Date.now() })
+    )
+
+    expect(loadStoredDraft()?.draft.notes).toBe('')
   })
 
   it('is a no-op when there is no window at all', () => {

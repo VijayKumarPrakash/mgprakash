@@ -19,8 +19,6 @@ const DIET_OPTIONS = [
   { value: 'vegetarian', label: 'Vegetarian' },
   { value: 'non-vegetarian', label: 'Non-veg' },
   { value: 'vegan', label: 'Vegan' },
-  { value: 'jain', label: 'Jain' },
-  { value: 'no-onion-garlic', label: 'No onion or garlic' },
 ] as const
 
 function Row({

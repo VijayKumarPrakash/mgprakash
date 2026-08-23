@@ -16,7 +16,7 @@ export interface CatalogueFilters {
   course: Course[]
   cuisine_group: CuisineGroup[]
   occasion: Occasion[]
-  diet: ('vegetarian' | 'non-vegetarian' | 'vegan' | 'jain' | 'no-onion-garlic')[]
+  diet: ('vegetarian' | 'non-vegetarian' | 'vegan')[]
 }
 
 export const EMPTY_FILTERS: CatalogueFilters = {
@@ -104,9 +104,7 @@ export function CatalogueClient({ dishes, orderContext, initialQuery = '' }: Pro
         filters.diet.every(f =>
           f === 'vegetarian' ? d.diet === 'vegetarian'
           : f === 'non-vegetarian' ? d.diet === 'non-vegetarian'
-          : f === 'vegan' ? d.is_vegan
-          : f === 'jain' ? d.is_jain
-          : !d.contains_onion_garlic
+          : d.is_vegan
         )
       )
     }

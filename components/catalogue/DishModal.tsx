@@ -156,10 +156,6 @@ export function DishModal({ dish, onClose, orderContext }: Props) {
               value={<span className="capitalize">{dish.cooking_method.join(', ').replace(/-/g, ' ')}</span>}
             />
             {dish.region_of_origin && <Field label="Region" value={dish.region_of_origin} />}
-            <Field
-              label="Onion &amp; garlic"
-              value={dish.contains_onion_garlic ? 'Contains' : 'None'}
-            />
           </div>
 
           {dish.flavour_profile.length > 0 && (

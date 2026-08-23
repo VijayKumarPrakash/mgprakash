@@ -44,8 +44,6 @@ function checkOne(id: string, field: string, value: unknown, allowed: readonly s
 }
 
 const DAIRY = ['ghee', 'butter', 'milk', 'curd', 'yoghurt', 'paneer', 'khoya', 'cream', 'malai', 'honey', 'mawa', 'cheese']
-const ALLIUM = ['onion', 'garlic', 'shallot', 'leek']
-const ROOTS = ['potato', 'carrot', 'radish', 'beetroot', 'yam', 'sweet potato', 'turnip', 'onion', 'garlic']
 const MEAT = ['chicken', 'mutton', 'lamb', 'fish', 'prawn', 'pork', 'crab', 'beef', 'keema', 'mince']
 
 function main() {
@@ -73,9 +71,8 @@ function main() {
     checkOne(id, 'diet', d.diet, DIETS)
     checkOne(id, 'image_licence', d.image_licence ?? 'placeholder', IMAGE_LICENCES)
 
-    for (const f of ['is_vegan', 'is_jain', 'contains_onion_garlic'] as const) {
-      if (typeof d[f] !== 'boolean') fail(id, `${f} must be true or false, got ${JSON.stringify(d[f])}`)
-    }
+    if (typeof d.is_vegan !== 'boolean')
+      fail(id, `is_vegan must be true or false, got ${JSON.stringify(d.is_vegan)}`)
 
     const ing = (Array.isArray(d.ingredients) ? d.ingredients : []).map(String)
     if (ing.length < 3) fail(id, `only ${ing.length} ingredients listed`)
@@ -87,15 +84,6 @@ function main() {
 
     if (d.is_vegan && DAIRY.some(x => new RegExp(`\\b${x}`).test(blob)))
       fail(id, `marked vegan but lists ${DAIRY.filter(x => new RegExp(`\\b${x}`).test(blob)).join(', ')}`)
-
-    if (ALLIUM.some(x => new RegExp(`\\b${x}`).test(blob)) && !d.contains_onion_garlic)
-      fail(id, 'lists an allium but contains_onion_garlic is false')
-
-    if (d.is_jain && d.contains_onion_garlic)
-      fail(id, 'cannot be Jain and contain onion or garlic')
-
-    if (d.is_jain && ROOTS.some(x => new RegExp(`\\b${x}`).test(blob)))
-      fail(id, `marked Jain but lists root vegetables: ${ROOTS.filter(x => new RegExp(`\\b${x}`).test(blob)).join(', ')}`)
 
     if (d.diet === 'vegetarian' && MEAT.some(x => new RegExp(`\\b${x}`).test(blob)))
       fail(id, `marked vegetarian but lists ${MEAT.filter(x => new RegExp(`\\b${x}`).test(blob)).join(', ')}`)

@@ -71,6 +71,10 @@ export async function POST(req: Request) {
       client_phone: draft.client_phone,
       event_name: draft.event_name,
       event_type: draft.event_type,
+      // Carried into the preview for the same reason the dish notes are: the
+      // PDF downloaded before submitting must not disagree with the one that
+      // arrives after it.
+      notes: draft.notes || null,
       status: 'submitted',
       created_at: new Date().toISOString(),
       user_id: null,

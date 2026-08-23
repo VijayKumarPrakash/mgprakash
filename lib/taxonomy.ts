@@ -40,14 +40,21 @@ export const BROWSE_ORDER: readonly Course[] = [
 /* ------------------------------------------------------------------ *
  * Diet
  *
- * Modelled as one base category plus orthogonal boolean flags, because the
- * previous single enum could not express the truth: Chitranna is vegetarian
- * AND vegan AND Jain-safe simultaneously. With a flat enum you had to pick one,
- * so it never surfaced under a vegan or Jain filter.
+ * Modelled as one base category plus an orthogonal boolean flag, because a
+ * single enum could not express the truth: Chitranna is vegetarian AND vegan
+ * at once. With a flat enum you had to pick one, so it never surfaced under a
+ * vegan filter.
  *
- * `contains_onion_garlic` is tracked separately from `is_jain` — satvik and
- * temple-adjacent events (naming ceremonies, religious functions, some funerals)
- * exclude onion and garlic without requiring full Jain rules on root vegetables.
+ * `is_jain` and `contains_onion_garlic` used to sit alongside `is_vegan` and
+ * have been removed — do not helpfully reintroduce them. They recorded a
+ * customisation as though it were a property of the dish: nearly anything in
+ * the catalogue can be cooked without onion and garlic, or to Jain rules, so a
+ * fixed per-dish answer was wrong in both directions and turned an ordinary
+ * request into a filter that quietly hid dishes the kitchen would happily have
+ * adapted. The kitchen still cooks satvik and Jain menus; the customer states
+ * the requirement as a note on the order, where it belongs — it is a property
+ * of the occasion, not of the sambar. This is the same argument that retired
+ * the spice level.
  * ------------------------------------------------------------------ */
 export const DIETS = ['vegetarian', 'non-vegetarian', 'egg'] as const
 export type Diet = (typeof DIETS)[number]

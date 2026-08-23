@@ -82,6 +82,38 @@ function dishListHtml(meal: Meal): string {
     .join('')
 }
 
+/**
+ * The order-level note, rendered for both emails.
+ *
+ * Escaped first and given its line breaks second. The other order would run
+ * `esc()` across the `<br>` tags this inserts and print them as literal text —
+ * and the escaping is not optional either way, because this is free text typed
+ * into a public form and these templates are hand-built HTML strings. A
+ * customer who typed three lines meant three lines, which is the one thing a
+ * collapsed run of HTML whitespace will not give them.
+ *
+ * The business copy is ruled down the accent edge and placed above the menu:
+ * "no onion, garlic or root vegetables" governs every dish below it and is no
+ * use discovered afterwards. The customer's copy is a quieter read-back, so
+ * they can see we have it.
+ */
+function orderNotesHtml(notes: string | null, variant: 'client' | 'business'): string {
+  if (!notes) return ''
+  const body = esc(notes).replace(/\r?\n/g, '<br>')
+  const heading = variant === 'business' ? 'Notes from the customer' : 'Your notes to us'
+  const border =
+    variant === 'business'
+      ? `border:1px solid ${BRAND.line};border-left:3px solid ${BRAND.accent};`
+      : `border:1px solid ${BRAND.line};`
+  return `
+    <div style="margin:0 0 20px;padding:16px;background:${BRAND.surface};${border}border-radius:6px;">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:${BRAND.muted};text-transform:uppercase;letter-spacing:.05em;">
+        ${heading}
+      </p>
+      <p style="margin:0;font-size:13px;color:${BRAND.ink};line-height:1.55;">${body}</p>
+    </div>`
+}
+
 /** Shared sign-off. Table-free and inline-styled — Outlook strips the rest. */
 const signature = `
   <hr style="border:none;border-top:1px solid ${BRAND.line};margin:28px 0;">
@@ -133,6 +165,8 @@ export async function sendClientConfirmation(
         </p>
 
         ${mealsHtml}
+
+        ${orderNotesHtml(order.notes, 'client')}
 
         <div style="margin-top:28px;text-align:center;">
           <a href="${esc(orderUrl)}" style="display:inline-block;padding:12px 28px;background:${BRAND.accent};color:#fff;border-radius:999px;text-decoration:none;font-size:14px;font-weight:600;">
@@ -238,6 +272,8 @@ export async function sendBusinessNotification(
           ${row('Phone', esc(order.client_phone))}
           ${row('Event', `${esc(order.event_name)} (${esc(order.event_type)})`)}
         </table>
+
+        ${orderNotesHtml(order.notes, 'business')}
 
         ${mealsHtml}
 

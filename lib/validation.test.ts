@@ -245,3 +245,49 @@ describe('validateOrderDraft — dishes and notes', () => {
     expect(validateOrderDraft(validDraft({ meals: [validMeal({ dish_notes: 'mild' })] })).ok).toBe(true)
   })
 })
+
+/**
+ * The order-level note. Optional, so most of what matters here is that its
+ * absence is not an error — `validDraft` above deliberately does not set it,
+ * which is also how a client built before the field existed would post.
+ */
+describe('validateOrderDraft — the order note', () => {
+  it('keeps a note, trimmed', () => {
+    const draft = expectOk(validateOrderDraft(validDraft({
+      notes: '  We are a Jain family — no onion, garlic or root vegetables.  ',
+    })))
+    expect(draft.notes).toBe('We are a Jain family — no onion, garlic or root vegetables.')
+  })
+
+  it('preserves the line breaks the customer typed', () => {
+    // The emails turn these into <br> and the confirmation page renders them
+    // with whitespace-pre-line, so trimming the ends must not touch the middle.
+    const draft = expectOk(validateOrderDraft(validDraft({
+      notes: 'No onion or garlic.\nTwo guests are allergic to peanuts.',
+    })))
+    expect(draft.notes).toBe('No onion or garlic.\nTwo guests are allergic to peanuts.')
+  })
+
+  it('treats an absent note as an empty string rather than an error', () => {
+    expect(expectOk(validateOrderDraft(validDraft())).notes).toBe('')
+  })
+
+  it('treats a blank note as empty', () => {
+    expect(expectOk(validateOrderDraft(validDraft({ notes: '   ' }))).notes).toBe('')
+  })
+
+  it('survives a note that is not a string', () => {
+    expect(expectOk(validateOrderDraft(validDraft({ notes: 42 }))).notes).toBe('')
+    expect(expectOk(validateOrderDraft(validDraft({ notes: null }))).notes).toBe('')
+    expect(expectOk(validateOrderDraft(validDraft({ notes: { a: 1 } }))).notes).toBe('')
+  })
+
+  it('accepts a note at exactly the cap', () => {
+    expect(expectOk(validateOrderDraft(validDraft({ notes: 'a'.repeat(1000) }))).notes.length).toBe(1000)
+  })
+
+  it('rejects a note over the cap', () => {
+    const result = validateOrderDraft(validDraft({ notes: 'a'.repeat(1001) }))
+    expect(result.ok).toBe(false)
+  })
+})

@@ -70,6 +70,17 @@ export function loadStoredDraft(): StoredDraft | null {
     if (!parsed.draft.client_name && !parsed.draft.client_email && !parsed.draft.meals?.length) {
       return null
     }
+
+    // Backfill fields added to `OrderDraft` after this draft was written.
+    //
+    // Bumping KEY is the blunt answer to a shape change and it is the wrong one
+    // for an additive field: it would throw away a half-finished wedding order
+    // the moment a deploy landed. `notes` is a string the review step binds
+    // straight to a textarea, so an older draft leaving it `undefined` would
+    // flip that input from uncontrolled to controlled on the first keystroke.
+    // Reserve the version bump for a change that genuinely breaks the reducer.
+    parsed.draft.notes ??= ''
+
     return parsed
   } catch {
     return null

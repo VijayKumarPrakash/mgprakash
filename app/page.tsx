@@ -77,10 +77,11 @@ const faqs = (dishCount: number) => [
   {
     q: 'Do you cater pure vegetarian, Jain and satvik menus?',
     a:
-      'Yes, and they are treated as first-class filters rather than special requests. Every one of ' +
-      `our ${dishCount} dishes is tagged for vegetarian, vegan and Jain suitability, and onion and ` +
-      'garlic are tracked separately — so a satvik menu for a naming ceremony or temple event can ' +
-      'exclude alliums without applying full Jain rules on root vegetables.',
+      'Yes — pure vegetarian, Jain and satvik menus are ordinary work here rather than a special ' +
+      `request. We do not tag which of the ${dishCount} dishes qualify, because that is not a ` +
+      'property of the dish: almost anything on the list can be cooked without onion and garlic, ' +
+      'or to Jain rules, and the same sambar is made either way. Tell us when you request a quote ' +
+      'and the menu is built to it.',
   },
   {
     q: 'How many guests can you cater for?',
@@ -133,7 +134,7 @@ const PILLARS = [
   {
     label: 'Every table',
     title: 'Pure veg, Jain and satvik, without fuss',
-    body: 'Filter the whole catalogue by diet, or by dishes made without onion and garlic.',
+    body: 'Tell us what the occasion needs and the whole menu is cooked to it — no onion, no garlic, Jain rules.',
   },
 ]
 

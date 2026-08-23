@@ -80,6 +80,10 @@ export async function POST(req: NextRequest) {
         client_phone: draft.client_phone,
         event_name: draft.event_name,
         event_type: draft.event_type,
+        // Empty means the customer wrote nothing, which is `null` in the
+        // column rather than an empty string — every reader downstream tests
+        // for absence, and two ways to spell "nothing" is one too many.
+        notes: draft.notes || null,
         status: 'submitted',
         user_id: userId,
       })

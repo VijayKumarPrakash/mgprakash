@@ -137,6 +137,21 @@ export default async function OrderConfirmationPage({ params }: Props) {
         </section>
       ))}
 
+      {/* Read back to the customer for the same reason the per-dish notes are:
+          this page is the record they were sent a link to, and a requirement
+          they cannot see here is one they have no way of knowing we hold.
+          `whitespace-pre-line` because they typed the line breaks on purpose. */}
+      {!!order.notes && (
+        <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-6 space-y-2">
+          <h2 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide">
+            Your notes
+          </h2>
+          <p className="text-[15px] leading-[1.6] text-[var(--ink-2)] whitespace-pre-line">
+            {order.notes}
+          </p>
+        </section>
+      )}
+
       <div className="text-center pt-4 space-y-3">
         <p className="text-sm text-[var(--ink-3)]">
           We&rsquo;ll be in touch soon to confirm the details.

@@ -56,9 +56,6 @@ function fromFile(): Dish[] {
       region_of_origin: (d.region_of_origin as string) ?? null,
       diet: d.diet as Dish['diet'],
       is_vegan: Boolean(d.is_vegan),
-      is_jain: Boolean(d.is_jain),
-      // Absent means unknown, and unknown must not read as "safe" — see hydrate().
-      contains_onion_garlic: d.contains_onion_garlic !== false,
       flavour_profile: (d.flavour_profile as Dish['flavour_profile']) ?? [],
       cooking_method: (d.cooking_method as Dish['cooking_method']) ?? [],
       ingredients: (d.ingredients as string[]) ?? [],
@@ -71,16 +68,15 @@ function fromFile(): Dish[] {
 }
 
 /**
- * Rows written before the schema migration may be missing the newer columns.
+ * Rows written before a schema migration may be missing the newer columns.
  *
- * The defaults here have to match `fromFile` exactly, or the same dish reads
- * differently depending on whether Supabase happened to answer. They did not:
- * this function defaulted a missing `contains_onion_garlic` to `true` while
- * `fromFile` defaulted it to `false`, so a dish with the column unset appeared
- * under the "no onion or garlic" filter from the file and vanished from it
- * when the database was reachable. `true` is the correct default — assuming a
- * dish is allium-free when nobody has said so is the failure that puts onion
- * on a satvik table — so `fromFile` now agrees with this one.
+ * Every default here has to match `fromFile` exactly, or the same dish reads
+ * differently depending on whether Supabase happened to answer. That is not a
+ * hypothetical: the two once defaulted the same missing boolean in opposite
+ * directions, so a dish appeared under a diet filter while the file was being
+ * read and vanished from it the moment the database was reachable. Add or
+ * change a default in one of these functions and change it in the other in the
+ * same edit.
  */
 function hydrate(row: Record<string, unknown>): Dish {
   const cuisine = String(row.cuisine ?? 'Pan-Indian') as Cuisine
@@ -94,8 +90,6 @@ function hydrate(row: Record<string, unknown>): Dish {
     image_credit: (row.image_credit as string) ?? null,
     image_source_url: (row.image_source_url as string) ?? null,
     is_vegan: Boolean(row.is_vegan),
-    is_jain: Boolean(row.is_jain),
-    contains_onion_garlic: row.contains_onion_garlic !== false,
     course: (row.course as Dish['course']) ?? [],
     flavour_profile: (row.flavour_profile as Dish['flavour_profile']) ?? [],
     cooking_method: (row.cooking_method as Dish['cooking_method']) ?? [],

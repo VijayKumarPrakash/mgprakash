@@ -32,8 +32,26 @@ const LIMITS = {
   meals: 20,
   dishesPerMeal: 200,
   dishNote: 300,
+  /**
+   * Longer than a dish note by design. A per-dish note is an aside — "extra
+   * crisp". This one carries a dietary rule for a whole family, an allergy
+   * list and a line about venue access, and truncating that mid-sentence
+   * loses exactly the detail it exists to capture.
+   */
+  orderNote: 1000,
   guests: 100_000,
 } as const
+
+/**
+ * The two note caps, exported because the review step needs the same numbers
+ * for its `maxLength` attributes.
+ *
+ * The dish cap was previously written out twice — here, and as a bare `300` in
+ * `ReviewStep` — so a customer could be stopped by the browser at one length
+ * and by the server at another. One source, two readers.
+ */
+export const ORDER_NOTE_MAX = LIMITS.orderNote
+export const DISH_NOTE_MAX = LIMITS.dishNote
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -111,6 +129,14 @@ export function validateOrderDraft(body: unknown): ValidationResult {
 
   if (!(EVENT_TYPES as readonly string[]).includes(event_type)) {
     return { ok: false, error: 'Please choose an event type.' }
+  }
+
+  // Optional, so nothing written is not an error — but it is free text typed
+  // into a public form, so it is trimmed and capped like every other string
+  // here, and it reaches the emails through `esc()` on the far side.
+  const notes = str(raw.notes)
+  if (notes.length > LIMITS.orderNote) {
+    return { ok: false, error: `That note is too long — please keep it under ${LIMITS.orderNote} characters.` }
   }
 
   if (!Array.isArray(raw.meals) || raw.meals.length === 0) {
@@ -202,6 +228,7 @@ export function validateOrderDraft(body: unknown): ValidationResult {
       client_phone,
       event_name,
       event_type: event_type as EventType,
+      notes,
       meals,
     },
   }

@@ -13,10 +13,12 @@
 //                 side | accompaniment | dessert          (array, in menu order)
 //   diet          vegetarian | non-vegetarian | egg
 //   is_vegan      false if it contains ghee, butter, milk, curd, paneer or honey
-//   is_jain       true only if there is no onion, no garlic and no root vegetable
-//   contains_onion_garlic
-//                 tracked separately from is_jain — satvik events exclude onion
-//                 and garlic without the full Jain rules on root vegetables
+//
+// There is deliberately no is_jain or contains_onion_garlic here — do not add
+// them back. Nearly any dish on this list can be cooked without onion and
+// garlic or to Jain rules, so a fixed per-dish answer was wrong in both
+// directions; the customer states the requirement as a note on their order
+// instead. See the Diet block in lib/taxonomy.ts.
 //
 // Dish ids are permanent. `meal_dishes.dish_id` is a foreign key onto them, so
 // renaming an id will break every past order that referenced that dish.
@@ -35,8 +37,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["ground", "simmered"],
       "ingredients": ["full-fat milk", "almonds", "sugar", "saffron", "cardamom", "pistachios"],
@@ -57,8 +57,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "bitter"],
       "cooking_method": ["roasted", "ground"],
       "ingredients": ["coffee powder", "chicory", "full-fat milk", "sugar", "water"],
@@ -79,8 +77,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sour", "savoury", "herby"],
       "cooking_method": ["no-cook"],
       "ingredients": [
@@ -110,8 +106,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "tangy"],
       "cooking_method": ["no-cook", "ground"],
       "ingredients": ["mango pulp", "curd", "sugar", "cardamom", "full-fat milk", "ice"],
@@ -132,8 +126,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "spicy"],
       "cooking_method": ["simmered", "ground"],
       "ingredients": ["tea leaves", "full-fat milk", "sugar", "ginger", "cardamom", "cloves", "water"],
@@ -154,8 +146,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sour", "tangy", "sweet"],
       "cooking_method": ["no-cook"],
       "ingredients": ["limes", "sugar", "water", "salt", "roasted cumin powder", "mint leaves", "ice"],
@@ -176,8 +166,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "tangy", "spicy"],
       "cooking_method": ["no-cook"],
       "ingredients": [
@@ -206,8 +194,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy"],
       "cooking_method": ["no-cook"],
       "ingredients": ["full-fat milk", "rose syrup", "sugar", "basil seeds", "ice"],
@@ -228,8 +214,6 @@
       "region_of_origin": "Konkan",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["sour", "coconutty", "tangy"],
       "cooking_method": ["no-cook", "ground"],
       "ingredients": [
@@ -258,8 +242,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "coconutty"],
       "cooking_method": ["no-cook"],
       "ingredients": ["tender coconut", "coconut water", "tender coconut malai", "lime juice", "ice"],
@@ -282,8 +264,6 @@
       "region_of_origin": "Uttar Pradesh",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["shallow-fried", "griddled"],
       "ingredients": [
@@ -314,8 +294,6 @@
       "region_of_origin": "Amritsar",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["deep-fried", "shallow-fried"],
       "ingredients": [
@@ -345,8 +323,6 @@
       "region_of_origin": "Karaikudi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "smoky"],
       "cooking_method": ["pan-fried", "roasted", "ground"],
       "ingredients": [
@@ -377,8 +353,6 @@
       "region_of_origin": "Chennai",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["deep-fried", "tempered"],
       "ingredients": [
@@ -409,8 +383,6 @@
       "region_of_origin": "Dakshina Kannada",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "coconutty", "savoury"],
       "cooking_method": ["roasted", "ground", "pan-fried"],
       "ingredients": [
@@ -440,8 +412,6 @@
       "region_of_origin": "Punjab",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "spicy", "tangy"],
       "cooking_method": ["tandoor", "roasted"],
       "ingredients": [
@@ -471,8 +441,6 @@
       "region_of_origin": "Kolkata",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "tangy"],
       "cooking_method": ["deep-fried", "pan-fried"],
       "ingredients": [
@@ -503,8 +471,6 @@
       "region_of_origin": "Kolkata",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["deep-fried", "pan-fried"],
       "ingredients": [
@@ -535,8 +501,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "sweet"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -567,8 +531,6 @@
       "region_of_origin": "Gujarat",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "sweet", "savoury"],
       "cooking_method": ["steamed", "fermented", "tempered"],
       "ingredients": [
@@ -599,8 +561,6 @@
       "region_of_origin": "Lucknow",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "smoky", "buttery"],
       "cooking_method": ["griddled", "shallow-fried", "ground"],
       "ingredients": [
@@ -631,8 +591,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "tangy"],
       "cooking_method": ["deep-fried", "pan-fried"],
       "ingredients": [
@@ -663,8 +621,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "sour", "spicy"],
       "cooking_method": ["deep-fried", "fermented"],
       "ingredients": [
@@ -694,8 +650,6 @@
       "region_of_origin": "North India",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["herby", "savoury", "creamy"],
       "cooking_method": ["shallow-fried", "ground"],
       "ingredients": [
@@ -726,8 +680,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["herby", "smoky", "creamy"],
       "cooking_method": ["ground", "tandoor"],
       "ingredients": [
@@ -758,8 +710,6 @@
       "region_of_origin": "Delhi",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["sweet", "spicy", "tangy"],
       "cooking_method": ["deep-fried", "pan-fried"],
       "ingredients": [
@@ -790,8 +740,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["shallow-fried"],
       "ingredients": [
@@ -821,8 +769,6 @@
       "region_of_origin": "Gujarat",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "savoury", "coconutty"],
       "cooking_method": ["simmered", "tempered", "steamed"],
       "ingredients": [
@@ -853,8 +799,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "savoury", "coconutty"],
       "cooking_method": ["deep-fried", "ground"],
       "ingredients": [
@@ -884,8 +828,6 @@
       "region_of_origin": "Karaikudi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "nutty"],
       "cooking_method": ["ground", "deep-fried"],
       "ingredients": [
@@ -917,8 +859,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "tangy", "coconutty"],
       "cooking_method": ["no-cook", "tempered"],
       "ingredients": [
@@ -948,8 +888,6 @@
       "region_of_origin": "Coastal Andhra",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -979,8 +917,6 @@
       "region_of_origin": "Chettinad",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["pan-fried", "tempered"],
       "ingredients": [
@@ -1010,8 +946,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy", "nutty"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -1041,8 +975,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -1072,8 +1004,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "spicy", "creamy"],
       "cooking_method": ["tandoor", "roasted"],
       "ingredients": [
@@ -1103,8 +1033,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "coconutty", "tangy"],
       "cooking_method": ["steamed", "ground", "pan-fried"],
       "ingredients": [
@@ -1134,8 +1062,6 @@
       "region_of_origin": "Kundapura",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "buttery"],
       "cooking_method": ["roasted", "ground", "pan-fried"],
       "ingredients": [
@@ -1165,8 +1091,6 @@
       "region_of_origin": "Coastal Andhra",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "tangy"],
       "cooking_method": ["pan-fried", "simmered", "roasted"],
       "ingredients": [
@@ -1198,8 +1122,6 @@
       "region_of_origin": "North India",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "savoury", "tangy"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -1230,8 +1152,6 @@
       "region_of_origin": "Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "spicy", "savoury"],
       "cooking_method": ["ground", "tandoor"],
       "ingredients": [
@@ -1261,8 +1181,6 @@
       "region_of_origin": "Lucknow",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "nutty", "spicy"],
       "cooking_method": ["shallow-fried", "ground", "pressure-cooked"],
       "ingredients": [
@@ -1293,8 +1211,6 @@
       "region_of_origin": "West Bengal",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["bitter", "creamy", "savoury"],
       "cooking_method": ["simmered", "tempered", "ground"],
       "ingredients": [
@@ -1325,8 +1241,6 @@
       "region_of_origin": "Punjab",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "spicy", "tangy"],
       "cooking_method": ["tandoor", "roasted"],
       "ingredients": [
@@ -1356,8 +1270,6 @@
       "region_of_origin": "Kolkata",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["deep-fried", "simmered"],
       "ingredients": [
@@ -1388,8 +1300,6 @@
       "region_of_origin": "Kolkata",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "umami"],
       "cooking_method": ["pan-fried", "deep-fried"],
       "ingredients": [
@@ -1420,8 +1330,6 @@
       "region_of_origin": "Anglo-Indian kitchens",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy"],
       "cooking_method": ["shallow-fried", "ground"],
       "ingredients": [
@@ -1454,8 +1362,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "savoury", "nutty"],
       "cooking_method": ["ground", "griddled"],
       "ingredients": [
@@ -1485,8 +1391,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "herby", "spicy"],
       "cooking_method": ["griddled", "pan-fried"],
       "ingredients": [
@@ -1516,8 +1420,6 @@
       "region_of_origin": "Central Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "savoury", "sweet"],
       "cooking_method": ["fermented", "ground", "griddled"],
       "ingredients": [
@@ -1546,8 +1448,6 @@
       "region_of_origin": "Gujarat",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "tangy", "nutty"],
       "cooking_method": ["fermented", "roasted", "tempered"],
       "ingredients": [
@@ -1578,8 +1478,6 @@
       "region_of_origin": "Central Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "coconutty"],
       "cooking_method": ["steamed", "ground"],
       "ingredients": ["rice flour", "fresh coconut", "coconut oil", "salt", "water"],
@@ -1600,8 +1498,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "sour"],
       "cooking_method": ["fermented", "ground", "steamed"],
       "ingredients": ["parboiled rice", "urad dal", "fenugreek seeds", "flattened rice", "salt"],
@@ -1622,8 +1518,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "buttery"],
       "cooking_method": ["roasted", "tempered", "simmered"],
       "ingredients": [
@@ -1653,8 +1547,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery", "nutty"],
       "cooking_method": ["pressure-cooked", "tempered"],
       "ingredients": [
@@ -1693,8 +1585,6 @@
       "region_of_origin": "Udupi",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "herby"],
       "cooking_method": ["fermented", "steamed", "ground"],
       "ingredients": ["idli rice", "urad dal", "fenugreek seeds", "jackfruit leaves", "salt"],
@@ -1715,8 +1605,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "savoury", "buttery"],
       "cooking_method": ["fermented", "deep-fried"],
       "ingredients": [
@@ -1746,8 +1634,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "buttery"],
       "cooking_method": ["fermented", "griddled", "tempered"],
       "ingredients": [
@@ -1778,8 +1664,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "nutty"],
       "cooking_method": ["ground", "deep-fried"],
       "ingredients": [
@@ -1809,8 +1693,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy", "nutty"],
       "cooking_method": ["ground", "deep-fried"],
       "ingredients": [
@@ -1840,8 +1722,6 @@
       "region_of_origin": "Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy"],
       "cooking_method": ["deep-fried", "fermented"],
       "ingredients": [
@@ -1870,8 +1750,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "buttery"],
       "cooking_method": ["fermented", "griddled", "ground"],
       "ingredients": [
@@ -1901,8 +1779,6 @@
       "region_of_origin": "Dakshina Kannada",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "savoury"],
       "cooking_method": ["ground", "griddled"],
       "ingredients": ["raw rice", "coconut", "water", "salt", "coconut oil"],
@@ -1931,8 +1807,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "sour"],
       "cooking_method": ["fermented", "griddled"],
       "ingredients": [
@@ -1961,8 +1835,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "sour"],
       "cooking_method": ["fermented", "shallow-fried"],
       "ingredients": [
@@ -1992,8 +1864,6 @@
       "region_of_origin": "Coastal Andhra",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "herby", "spicy"],
       "cooking_method": ["ground", "griddled"],
       "ingredients": [
@@ -2024,8 +1894,6 @@
       "region_of_origin": "Western Maharashtra",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "tangy", "nutty"],
       "cooking_method": ["tempered", "steamed"],
       "ingredients": [
@@ -2056,8 +1924,6 @@
       "region_of_origin": "Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "savoury", "nutty"],
       "cooking_method": ["steamed"],
       "ingredients": ["rice flour", "grated coconut", "water", "salt", "cumin"],
@@ -2078,8 +1944,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy", "buttery"],
       "cooking_method": ["griddled", "tempered"],
       "ingredients": [
@@ -2110,8 +1974,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "nutty", "buttery"],
       "cooking_method": ["steamed", "tempered"],
       "ingredients": [
@@ -2141,8 +2003,6 @@
       "region_of_origin": "Bengaluru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "sour", "buttery"],
       "cooking_method": ["fermented", "griddled"],
       "ingredients": ["dosa rice", "urad dal", "flattened rice", "curd", "ghee", "salt", "fenugreek seeds"],
@@ -2163,8 +2023,6 @@
       "region_of_origin": "Bidadi, Ramanagara",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery", "sour"],
       "cooking_method": ["fermented", "steamed"],
       "ingredients": ["parboiled rice", "urad dal", "flattened rice", "fenugreek seeds", "ghee", "salt"],
@@ -2187,8 +2045,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "sour", "umami"],
       "cooking_method": ["simmered"],
       "ingredients": [
@@ -2219,8 +2075,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["simmered", "deep-fried"],
       "ingredients": [
@@ -2251,8 +2105,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -2283,8 +2135,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "tangy", "spicy"],
       "cooking_method": ["pressure-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -2315,8 +2165,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "savoury", "creamy"],
       "cooking_method": ["simmered"],
       "ingredients": [
@@ -2346,8 +2194,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -2377,8 +2223,6 @@
       "region_of_origin": "North India",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["tangy", "savoury", "herby"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -2408,8 +2252,6 @@
       "region_of_origin": "Krishna District",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "tangy", "savoury", "bitter"],
       "cooking_method": ["slow-cooked", "pressure-cooked", "tempered"],
       "ingredients": [
@@ -2442,8 +2284,6 @@
       "region_of_origin": "Guntur",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "nutty"],
       "cooking_method": ["roasted", "ground", "simmered"],
       "ingredients": [
@@ -2475,8 +2315,6 @@
       "region_of_origin": "Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "buttery", "tangy"],
       "cooking_method": ["tandoor", "simmered", "roasted"],
       "ingredients": [
@@ -2507,8 +2345,6 @@
       "region_of_origin": "Karaikudi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "coconutty"],
       "cooking_method": ["roasted", "ground", "simmered"],
       "ingredients": [
@@ -2540,8 +2376,6 @@
       "region_of_origin": "Chettinad",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["roasted", "ground", "simmered"],
       "ingredients": [
@@ -2573,8 +2407,6 @@
       "region_of_origin": "Punjab",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "smoky", "tangy"],
       "cooking_method": ["tandoor", "simmered"],
       "ingredients": ["chicken", "curd", "tomatoes", "onion", "garlic", "ginger", "cream", "kasuri methi"],
@@ -2595,8 +2427,6 @@
       "region_of_origin": "Kolkata",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "coconutty", "sweet"],
       "cooking_method": ["shallow-fried", "simmered", "ground"],
       "ingredients": [
@@ -2627,8 +2457,6 @@
       "region_of_origin": "West Bengal",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "coconutty"],
       "cooking_method": ["pressure-cooked", "tempered", "shallow-fried"],
       "ingredients": [
@@ -2659,8 +2487,6 @@
       "region_of_origin": "Rawalpindi and Amritsar",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["pressure-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -2691,8 +2517,6 @@
       "region_of_origin": "Kodagu",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "sour", "savoury"],
       "cooking_method": ["roasted", "ground", "slow-cooked"],
       "ingredients": [
@@ -2722,8 +2546,6 @@
       "region_of_origin": "Marwar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "sweet", "nutty"],
       "cooking_method": ["roasted", "pressure-cooked", "tempered"],
       "ingredients": [
@@ -2754,8 +2576,6 @@
       "region_of_origin": "Amritsar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "savoury", "buttery"],
       "cooking_method": ["slow-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -2786,8 +2606,6 @@
       "region_of_origin": "Marwar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["steamed", "simmered", "tempered"],
       "ingredients": [
@@ -2818,8 +2636,6 @@
       "region_of_origin": "Rayalaseema",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "sour", "savoury"],
       "cooking_method": ["slow-cooked", "pressure-cooked", "ground"],
       "ingredients": [
@@ -2851,8 +2667,6 @@
       "region_of_origin": "Kolkata",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["umami", "savoury", "spicy"],
       "cooking_method": ["pan-fried", "griddled"],
       "ingredients": [
@@ -2883,8 +2697,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "creamy", "spicy", "umami"],
       "cooking_method": ["slow-cooked", "ground", "deep-fried"],
       "ingredients": [
@@ -2916,8 +2728,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "tangy"],
       "cooking_method": ["pan-fried", "ground", "simmered"],
       "ingredients": [
@@ -2948,8 +2758,6 @@
       "region_of_origin": "Kashmir Valley",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "creamy", "savoury"],
       "cooking_method": ["deep-fried", "dum", "simmered"],
       "ingredients": [
@@ -2980,8 +2788,6 @@
       "region_of_origin": "Kashmir Valley",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy", "creamy"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": [
@@ -3012,8 +2818,6 @@
       "region_of_origin": "Kochi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["coconutty", "creamy", "tangy"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -3045,8 +2849,6 @@
       "region_of_origin": "Dakshina Kannada",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "coconutty", "tangy"],
       "cooking_method": ["ground", "roasted", "simmered"],
       "ingredients": [
@@ -3076,8 +2878,6 @@
       "region_of_origin": "Dakshina Kannada",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "coconutty", "savoury"],
       "cooking_method": ["ground", "simmered", "roasted"],
       "ingredients": [
@@ -3107,8 +2907,6 @@
       "region_of_origin": "Kolkata",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "umami"],
       "cooking_method": ["slow-cooked", "pressure-cooked", "ground"],
       "ingredients": [
@@ -3139,8 +2937,6 @@
       "region_of_origin": "Mewar",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "smoky", "savoury"],
       "cooking_method": ["slow-cooked", "simmered", "ground"],
       "ingredients": [
@@ -3170,8 +2966,6 @@
       "region_of_origin": "West Bengal",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "tangy"],
       "cooking_method": ["shallow-fried", "simmered", "tempered"],
       "ingredients": [
@@ -3202,8 +2996,6 @@
       "region_of_origin": "Malabar",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "coconutty", "savoury"],
       "cooking_method": ["roasted", "simmered", "tempered"],
       "ingredients": [
@@ -3235,8 +3027,6 @@
       "region_of_origin": "Delhi",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "nutty", "sweet"],
       "cooking_method": ["deep-fried", "simmered", "ground"],
       "ingredients": [
@@ -3267,8 +3057,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "coconutty"],
       "cooking_method": ["ground", "roasted", "simmered"],
       "ingredients": [
@@ -3298,8 +3086,6 @@
       "region_of_origin": "Kolhapur",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["pressure-cooked", "tempered", "simmered"],
       "ingredients": [
@@ -3330,8 +3116,6 @@
       "region_of_origin": "Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "nutty", "savoury"],
       "cooking_method": ["slow-cooked", "simmered", "ground"],
       "ingredients": [
@@ -3362,8 +3146,6 @@
       "region_of_origin": "Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "nutty", "savoury"],
       "cooking_method": ["slow-cooked", "dum", "ground"],
       "ingredients": [
@@ -3394,8 +3176,6 @@
       "region_of_origin": "Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "creamy"],
       "cooking_method": ["slow-cooked", "simmered", "dum"],
       "ingredients": [
@@ -3426,8 +3206,6 @@
       "region_of_origin": "Kashmir Valley",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["creamy", "savoury", "herby"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": [
@@ -3458,8 +3236,6 @@
       "region_of_origin": "Lucknow",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "creamy", "spicy"],
       "cooking_method": ["deep-fried", "simmered", "ground"],
       "ingredients": [
@@ -3490,8 +3266,6 @@
       "region_of_origin": "Delhi",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "sweet", "nutty"],
       "cooking_method": ["simmered", "ground", "shallow-fried"],
       "ingredients": [
@@ -3522,8 +3296,6 @@
       "region_of_origin": "Old Delhi",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": [
@@ -3554,8 +3326,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "herby", "savoury"],
       "cooking_method": ["simmered", "ground"],
       "ingredients": [
@@ -3585,8 +3355,6 @@
       "region_of_origin": "Kodagu",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "sour", "smoky"],
       "cooking_method": ["slow-cooked", "roasted", "ground"],
       "ingredients": [
@@ -3616,8 +3384,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "smoky", "spicy"],
       "cooking_method": ["tandoor", "simmered", "roasted"],
       "ingredients": [
@@ -3648,8 +3414,6 @@
       "region_of_origin": "Mumbai",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["buttery", "spicy", "tangy"],
       "cooking_method": ["griddled", "pressure-cooked", "simmered"],
       "ingredients": [
@@ -3680,8 +3444,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["tangy", "savoury", "sour"],
       "cooking_method": ["deep-fried", "simmered", "tempered"],
       "ingredients": [
@@ -3711,8 +3473,6 @@
       "region_of_origin": "Southern Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "bitter"],
       "cooking_method": ["simmered"],
       "ingredients": ["ragi flour", "broken rice", "rice flour", "water", "salt", "coconut oil"],
@@ -3733,8 +3493,6 @@
       "region_of_origin": "Jammu and Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "creamy", "spicy"],
       "cooking_method": ["pressure-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -3765,8 +3523,6 @@
       "region_of_origin": "Rural Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "bitter", "buttery"],
       "cooking_method": ["slow-cooked", "ground", "tempered"],
       "ingredients": [
@@ -3796,8 +3552,6 @@
       "region_of_origin": "Delhi",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["creamy", "nutty", "sweet"],
       "cooking_method": ["simmered", "ground", "slow-cooked"],
       "ingredients": [
@@ -3828,8 +3582,6 @@
       "region_of_origin": "Surat",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "herby", "spicy"],
       "cooking_method": ["slow-cooked", "deep-fried", "ground"],
       "ingredients": [
@@ -3860,8 +3612,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "nutty", "tangy"],
       "cooking_method": ["roasted", "ground", "simmered"],
       "ingredients": [
@@ -3893,8 +3643,6 @@
       "region_of_origin": "Lucknow",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "creamy", "nutty"],
       "cooking_method": ["dum", "slow-cooked", "deep-fried"],
       "ingredients": [
@@ -3925,8 +3673,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "tangy", "savoury"],
       "cooking_method": ["pressure-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -3956,8 +3702,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "savoury", "nutty"],
       "cooking_method": ["tempered", "no-cook"],
       "ingredients": [
@@ -3987,8 +3731,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "creamy"],
       "cooking_method": ["dum", "slow-cooked", "deep-fried"],
       "ingredients": [
@@ -4020,8 +3762,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "creamy", "savoury"],
       "cooking_method": ["dum", "slow-cooked", "deep-fried"],
       "ingredients": [
@@ -4053,8 +3793,6 @@
       "region_of_origin": "North India",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["buttery", "nutty", "savoury"],
       "cooking_method": ["tempered", "steamed"],
       "ingredients": [
@@ -4083,8 +3821,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "nutty"],
       "cooking_method": ["steamed", "pressure-cooked"],
       "ingredients": ["sona masuri rice", "water", "salt", "cooking oil", "lemon juice"],
@@ -4105,8 +3841,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "nutty"],
       "cooking_method": ["ground", "tempered", "simmered"],
       "ingredients": [
@@ -4136,8 +3870,6 @@
       "region_of_origin": "Kolkata",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "umami", "savoury"],
       "cooking_method": ["pan-fried", "griddled"],
       "ingredients": [
@@ -4168,8 +3900,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["creamy", "sour", "savoury"],
       "cooking_method": ["no-cook", "tempered"],
       "ingredients": [
@@ -4208,8 +3938,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "nutty", "tangy"],
       "cooking_method": ["ground", "tempered", "simmered"],
       "ingredients": [
@@ -4239,8 +3967,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "savoury", "creamy"],
       "cooking_method": ["dum", "slow-cooked"],
       "ingredients": [
@@ -4271,8 +3997,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "nutty", "buttery"],
       "cooking_method": ["pressure-cooked", "tempered"],
       "ingredients": [
@@ -4304,8 +4028,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "buttery"],
       "cooking_method": ["griddled", "pan-fried"],
       "ingredients": [
@@ -4335,8 +4057,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "sour", "buttery"],
       "cooking_method": ["fermented", "deep-fried"],
       "ingredients": ["plain flour", "curd", "semolina", "sugar", "baking soda", "groundnut oil", "salt"],
@@ -4357,8 +4077,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["buttery", "savoury", "creamy"],
       "cooking_method": ["tandoor", "fermented"],
       "ingredients": ["plain flour", "curd", "milk", "butter", "sugar", "baking powder", "salt"],
@@ -4379,8 +4097,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "nutty"],
       "cooking_method": ["griddled"],
       "ingredients": ["wholemeal flour", "plain flour", "groundnut oil", "salt", "water"],
@@ -4401,8 +4117,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["buttery", "savoury", "herby"],
       "cooking_method": ["tandoor", "fermented"],
       "ingredients": [
@@ -4432,8 +4146,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "nutty"],
       "cooking_method": ["griddled"],
       "ingredients": ["jowar flour", "hot water", "rice flour", "salt", "groundnut oil"],
@@ -4454,8 +4166,6 @@
       "region_of_origin": "Kodagu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "coconutty"],
       "cooking_method": ["steamed", "simmered"],
       "ingredients": ["broken rice", "coconut", "water", "salt", "coconut oil"],
@@ -4476,8 +4186,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "buttery", "nutty"],
       "cooking_method": ["griddled", "ground", "simmered"],
       "ingredients": ["maida", "chana dal", "jaggery", "cardamom", "ghee", "nutmeg", "turmeric"],
@@ -4498,8 +4206,6 @@
       "region_of_origin": "Malabar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["buttery", "savoury"],
       "cooking_method": ["griddled", "shallow-fried"],
       "ingredients": ["refined flour", "ghee", "oil", "sugar", "salt", "water"],
@@ -4520,8 +4226,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["buttery", "savoury", "nutty"],
       "cooking_method": ["griddled", "pan-fried"],
       "ingredients": ["wholemeal flour", "ghee", "milk", "sugar", "salt", "water"],
@@ -4542,8 +4246,6 @@
       "region_of_origin": "Malabar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery"],
       "cooking_method": ["griddled", "pan-fried"],
       "ingredients": ["plain flour", "ghee", "groundnut oil", "sugar", "milk", "salt", "water"],
@@ -4564,8 +4266,6 @@
       "region_of_origin": "Rajasthan",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "nutty"],
       "cooking_method": ["griddled"],
       "ingredients": [
@@ -4595,8 +4295,6 @@
       "region_of_origin": "Kodagu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "coconutty"],
       "cooking_method": ["steamed", "ground"],
       "ingredients": ["raw rice", "coconut", "water", "salt", "coconut oil"],
@@ -4617,8 +4315,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery", "smoky"],
       "cooking_method": ["tandoor", "fermented"],
       "ingredients": ["plain flour", "curd", "milk", "sugar", "baking powder", "nigella seeds", "salt"],
@@ -4639,8 +4335,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "nutty"],
       "cooking_method": ["deep-fried"],
       "ingredients": ["wholemeal flour", "semolina", "groundnut oil", "salt", "water"],
@@ -4661,8 +4355,6 @@
       "region_of_origin": "Maharashtra",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["griddled", "pressure-cooked", "ground"],
       "ingredients": [
@@ -4691,8 +4383,6 @@
       "region_of_origin": "Delhi",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery"],
       "cooking_method": ["griddled"],
       "ingredients": ["plain flour", "wholemeal flour", "milk", "groundnut oil", "baking soda", "salt"],
@@ -4713,8 +4403,6 @@
       "region_of_origin": "Lucknow",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "buttery", "creamy"],
       "cooking_method": ["tandoor", "fermented"],
       "ingredients": ["plain flour", "milk", "ghee", "sugar", "saffron", "cardamom", "yeast", "salt"],
@@ -4735,8 +4423,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "smoky", "nutty"],
       "cooking_method": ["tandoor"],
       "ingredients": ["wholemeal flour", "water", "salt", "carom seeds", "baking powder"],
@@ -4759,8 +4445,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "herby", "spicy"],
       "cooking_method": ["pan-fried", "tempered", "simmered"],
       "ingredients": [
@@ -4791,8 +4475,6 @@
       "region_of_origin": "West Bengal",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["nutty", "savoury", "herby"],
       "cooking_method": ["ground", "shallow-fried", "simmered"],
       "ingredients": [
@@ -4821,8 +4503,6 @@
       "region_of_origin": "Udupi",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "tangy", "spicy", "coconutty"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -4852,8 +4532,6 @@
       "region_of_origin": "Central Kerala",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "sour", "savoury"],
       "cooking_method": ["steamed", "ground", "simmered"],
       "ingredients": [
@@ -4885,8 +4563,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["nutty", "tangy", "spicy"],
       "cooking_method": ["deep-fried", "ground", "simmered"],
       "ingredients": [
@@ -4918,8 +4594,6 @@
       "region_of_origin": "Kodagu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["sour", "coconutty", "spicy", "bitter"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -4949,8 +4623,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["smoky", "savoury", "spicy"],
       "cooking_method": ["roasted", "ground", "tempered"],
       "ingredients": [
@@ -4980,8 +4652,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "coconutty", "herby"],
       "cooking_method": ["steamed", "tempered", "pan-fried"],
       "ingredients": [
@@ -5011,8 +4681,6 @@
       "region_of_origin": "Vidarbha",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["nutty", "spicy", "tangy"],
       "cooking_method": ["ground", "simmered", "roasted"],
       "ingredients": [
@@ -5043,8 +4711,6 @@
       "region_of_origin": "North India",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["creamy", "tangy", "savoury"],
       "cooking_method": ["no-cook"],
       "ingredients": [
@@ -5073,8 +4739,6 @@
       "region_of_origin": "Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["coconutty", "savoury", "herby"],
       "cooking_method": ["ground", "pan-fried", "tempered"],
       "ingredients": [
@@ -5105,8 +4769,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "non-vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["tangy", "savoury", "spicy"],
       "cooking_method": ["pressure-cooked", "simmered", "tempered"],
       "ingredients": [
@@ -5138,8 +4800,6 @@
       "region_of_origin": "Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "nutty", "sweet"],
       "cooking_method": ["pressure-cooked", "ground", "roasted"],
       "ingredients": [
@@ -5170,8 +4830,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "herby"],
       "cooking_method": ["no-cook"],
       "ingredients": [
@@ -5201,8 +4859,6 @@
       "region_of_origin": "Kashmir Valley",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["bitter", "herby", "savoury"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -5230,8 +4886,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "buttery"],
       "cooking_method": ["pressure-cooked", "tempered"],
       "ingredients": [
@@ -5260,8 +4914,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "nutty", "savoury"],
       "cooking_method": ["ground", "pressure-cooked", "tempered"],
       "ingredients": [
@@ -5291,8 +4943,6 @@
       "region_of_origin": "Thar Desert",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["shallow-fried", "tempered", "simmered"],
       "ingredients": [
@@ -5322,8 +4972,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sour", "coconutty", "creamy"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -5353,8 +5001,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["bitter", "coconutty", "savoury"],
       "cooking_method": ["tempered", "pan-fried"],
       "ingredients": [
@@ -5384,8 +5030,6 @@
       "region_of_origin": "Kerala",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "creamy", "savoury"],
       "cooking_method": ["simmered"],
       "ingredients": [
@@ -5414,8 +5058,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["no-cook"],
       "ingredients": ["onion", "lemon juice", "green chilli", "chaat masala", "coriander leaves", "salt"],
@@ -5436,8 +5078,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["savoury", "spicy", "smoky"],
       "cooking_method": ["deep-fried", "roasted"],
       "ingredients": ["urad dal flour", "asafoetida", "black pepper", "cumin seeds", "salt", "oil"],
@@ -5458,8 +5098,6 @@
       "region_of_origin": "Marwar",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["roasted", "simmered", "tempered"],
       "ingredients": [
@@ -5490,8 +5128,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "savoury", "nutty"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -5522,8 +5158,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "herby"],
       "cooking_method": ["tempered", "pressure-cooked"],
       "ingredients": [
@@ -5553,8 +5187,6 @@
       "region_of_origin": "Kathiawar",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "sweet", "spicy"],
       "cooking_method": ["tempered", "simmered"],
       "ingredients": [
@@ -5585,8 +5217,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["savoury", "spicy", "nutty"],
       "cooking_method": ["tempered", "pan-fried"],
       "ingredients": [
@@ -5618,8 +5248,6 @@
       "region_of_origin": "Dharwad",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["nutty", "spicy", "bitter"],
       "cooking_method": ["roasted", "ground"],
       "ingredients": ["flaxseed", "garlic", "dry red chillies", "cumin seeds", "salt", "groundnut oil"],
@@ -5640,8 +5268,6 @@
       "region_of_origin": "Thanjavur",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "savoury", "coconutty"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -5673,8 +5299,6 @@
       "region_of_origin": "Coastal Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["coconutty", "savoury", "spicy"],
       "cooking_method": ["ground", "tempered"],
       "ingredients": [
@@ -5705,8 +5329,6 @@
       "region_of_origin": "Rayalaseema",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["sour", "spicy", "savoury"],
       "cooking_method": ["ground", "shallow-fried", "tempered"],
       "ingredients": [
@@ -5737,8 +5359,6 @@
       "region_of_origin": "Gujarat",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "tangy", "savoury"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -5769,8 +5389,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["spicy", "sour", "tangy"],
       "cooking_method": ["no-cook", "fermented"],
       "ingredients": [
@@ -5800,8 +5418,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["herby", "spicy", "tangy"],
       "cooking_method": ["ground", "no-cook"],
       "ingredients": [
@@ -5830,8 +5446,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["spicy", "tangy", "nutty"],
       "cooking_method": ["roasted", "ground", "simmered"],
       "ingredients": [
@@ -5863,8 +5477,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "coconutty"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -5894,8 +5506,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["nutty", "spicy", "savoury"],
       "cooking_method": ["roasted", "ground"],
       "ingredients": [
@@ -5924,8 +5534,6 @@
       "region_of_origin": "North Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": true,
       "flavour_profile": ["nutty", "spicy", "savoury"],
       "cooking_method": ["roasted", "ground"],
       "ingredients": ["groundnuts", "dry red chillies", "garlic", "cumin seeds", "salt", "groundnut oil"],
@@ -5946,8 +5554,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "sweet", "spicy"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -5977,8 +5583,6 @@
       "region_of_origin": "Southern Karnataka",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["simmered", "tempered"],
       "ingredients": [
@@ -6008,8 +5612,6 @@
       "region_of_origin": "Udupi",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "coconutty", "sweet", "spicy"],
       "cooking_method": ["ground", "simmered", "tempered"],
       "ingredients": [
@@ -6039,8 +5641,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["shallow-fried", "simmered", "tempered"],
       "ingredients": [
@@ -6071,8 +5671,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["tangy", "spicy", "savoury"],
       "cooking_method": ["pressure-cooked", "tempered"],
       "ingredients": [
@@ -6104,8 +5702,6 @@
       "region_of_origin": "Kerala",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "coconutty", "nutty"],
       "cooking_method": ["simmered", "slow-cooked"],
       "ingredients": [
@@ -6135,8 +5731,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "creamy"],
       "cooking_method": ["ground", "slow-cooked"],
       "ingredients": ["almonds", "milk", "sugar", "ghee", "saffron", "cardamom"],
@@ -6157,8 +5751,6 @@
       "region_of_origin": "Maharashtra",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": ["full-fat milk", "sugar", "saffron", "cardamom", "almonds", "pistachios", "charoli"],
@@ -6179,8 +5771,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["griddled", "ground", "slow-cooked"],
       "ingredients": ["chana dal", "jaggery", "plain flour", "ghee", "cardamom", "nutmeg", "oil"],
@@ -6201,8 +5791,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["roasted", "ground"],
       "ingredients": ["gram flour", "ghee", "powdered sugar", "cardamom", "almonds", "semolina"],
@@ -6223,8 +5811,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["deep-fried", "simmered"],
       "ingredients": [
@@ -6254,8 +5840,6 @@
       "region_of_origin": "Belgaum",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "buttery", "nutty"],
       "cooking_method": ["deep-fried"],
       "ingredients": [
@@ -6284,8 +5868,6 @@
       "region_of_origin": "Dharwad",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["slow-cooked", "roasted"],
       "ingredients": ["milk", "khoya", "sugar", "ghee", "cardamom"],
@@ -6314,8 +5896,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["deep-fried", "simmered"],
       "ingredients": [
@@ -6346,8 +5926,6 @@
       "region_of_origin": "Punjab",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": false,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": [
@@ -6377,8 +5955,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["deep-fried", "simmered"],
       "ingredients": ["khoya", "plain flour", "sugar", "ghee", "cardamom", "rose water", "milk", "saffron"],
@@ -6399,8 +5975,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "tangy", "buttery"],
       "cooking_method": ["fermented", "deep-fried", "simmered"],
       "ingredients": ["plain flour", "curd", "sugar", "saffron", "ghee", "cardamom", "lemon juice"],
@@ -6421,8 +5995,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["ground", "deep-fried", "simmered"],
       "ingredients": ["urad dal", "sugar", "saffron", "ghee", "cardamom", "rice flour", "food colouring"],
@@ -6443,8 +6015,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "creamy"],
       "cooking_method": ["ground", "simmered"],
       "ingredients": ["cashew nuts", "sugar", "water", "ghee", "cardamom", "edible silver leaf"],
@@ -6465,8 +6035,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "buttery", "nutty"],
       "cooking_method": ["roasted", "simmered"],
       "ingredients": [
@@ -6496,8 +6064,6 @@
       "region_of_origin": "Konkan",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "coconutty", "buttery"],
       "cooking_method": ["steamed"],
       "ingredients": ["rice flour", "fresh coconut", "jaggery", "cardamom", "ghee", "poppy seeds", "salt"],
@@ -6518,8 +6084,6 @@
       "region_of_origin": "Rajasthan",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["ground", "roasted", "slow-cooked"],
       "ingredients": ["moong dal", "ghee", "sugar", "milk", "saffron", "cardamom", "almonds"],
@@ -6540,8 +6104,6 @@
       "region_of_origin": "Mysuru",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "buttery", "nutty"],
       "cooking_method": ["simmered", "roasted"],
       "ingredients": ["gram flour", "sugar", "ghee", "cardamom", "water"],
@@ -6570,8 +6132,6 @@
       "region_of_origin": "Ambalappuzha",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy"],
       "cooking_method": ["slow-cooked", "simmered"],
       "ingredients": ["raw rice", "full-fat milk", "sugar", "ghee", "cardamom"],
@@ -6592,8 +6152,6 @@
       "region_of_origin": "Hyderabad",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "tangy", "creamy"],
       "cooking_method": ["slow-cooked", "simmered", "no-cook"],
       "ingredients": ["dried apricots", "sugar", "fresh cream", "apricot kernels", "lemon juice", "water"],
@@ -6614,8 +6172,6 @@
       "region_of_origin": "Bengal",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy"],
       "cooking_method": ["simmered", "ground"],
       "ingredients": ["chhena", "sugar", "water", "semolina", "cardamom", "rose water", "lemon juice"],
@@ -6636,8 +6192,6 @@
       "region_of_origin": "Bengal",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["simmered", "slow-cooked"],
       "ingredients": ["chhena", "full-fat milk", "sugar", "saffron", "cardamom", "pistachios", "almonds"],
@@ -6658,8 +6212,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "coconutty", "nutty"],
       "cooking_method": ["roasted", "simmered"],
       "ingredients": [
@@ -6689,8 +6241,6 @@
       "region_of_origin": "Old Mysore",
       "diet": "vegetarian",
       "is_vegan": true,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "herby"],
       "cooking_method": ["simmered"],
       "ingredients": ["sugar", "water", "cardamom", "edible camphor", "food colouring"],
@@ -6711,8 +6261,6 @@
       "region_of_origin": "Tamil Nadu",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "nutty"],
       "cooking_method": ["roasted", "simmered"],
       "ingredients": ["vermicelli", "full-fat milk", "sugar", "ghee", "cardamom", "cashew nuts", "raisins"],
@@ -6733,8 +6281,6 @@
       "region_of_origin": "Gujarat",
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "creamy", "tangy"],
       "cooking_method": ["no-cook"],
       "ingredients": ["hung curd", "sugar", "saffron", "cardamom", "pistachios", "nutmeg", "mango pulp"],
@@ -6755,8 +6301,6 @@
       "region_of_origin": null,
       "diet": "vegetarian",
       "is_vegan": false,
-      "is_jain": true,
-      "contains_onion_garlic": false,
       "flavour_profile": ["sweet", "nutty", "buttery"],
       "cooking_method": ["pressure-cooked", "simmered"],
       "ingredients": [

@@ -74,6 +74,21 @@ const s = StyleSheet.create({
    * rather than falling back — which fails the whole document, not one line.
    */
   notesHint: { fontSize: 7.5, color: MUTED, marginBottom: 8 },
+  /**
+   * The order-level note, boxed and ruled down the accent edge.
+   *
+   * This is where a rule covering the whole menu lands — "no onion, garlic or
+   * root vegetables", an allergy, a gate that shuts at nine. Set as another
+   * grey paragraph it would be skimmed past by someone reading this sheet in a
+   * kitchen, which is the one place it must not be. Deliberately not wrapped in
+   * `wrap={false}`: the note is capped at 1,000 characters and will normally
+   * fit, but breaking across a page is far better than overflowing one.
+   */
+  orderNote: {
+    backgroundColor: SURFACE, borderWidth: 1, borderColor: LINE, borderRadius: 6,
+    borderLeftWidth: 3, borderLeftColor: ACCENT, padding: 12,
+  },
+  orderNoteText: { fontSize: 9.5, color: DARK, lineHeight: 1.5 },
   footer: { position: 'absolute', bottom: 28, left: 52, right: 52, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: LINE, paddingTop: 12 },
   footerText: { fontSize: 8, color: MUTED },
 })
@@ -204,6 +219,18 @@ export function OrderPDF({ order, meals, isDraft = false }: Props) {
             </View>
           ))}
         </View>
+
+        {/* Printed after the meals because it qualifies all of them, and only
+            when there is something to print — an empty heading reads as a
+            section somebody forgot to fill in. */}
+        {!!order.notes && (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Notes for the kitchen</Text>
+            <View style={s.orderNote}>
+              <Text style={s.orderNoteText}>{order.notes}</Text>
+            </View>
+          </View>
+        )}
 
         {/* Footer */}
         <View style={s.footer} fixed>

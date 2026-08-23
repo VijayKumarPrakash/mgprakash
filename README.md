@@ -4,10 +4,11 @@ A self-serve quote-request site for **M G Prakash Catering**, a cooking
 contractor operating in Bengaluru since 1999.
 
 A customer browses a catalogue of 229 dishes, filters it down to what their
-event actually needs — pure veg, Jain, no onion or garlic, a particular course
-or cuisine — assembles one or more meals, and submits a request. The business
-gets an email with the full menu; the customer gets a confirmation with a PDF
-quote attached and a shareable link back to their order.
+event actually needs — vegetarian, vegan, a particular course or cuisine —
+assembles one or more meals, adds any notes for the kitchen, and submits a
+request. The business gets an email with the full menu; the customer gets a
+confirmation with a PDF quote attached and a shareable link back to their
+order.
 
 There is no pricing, no payment and no admin dashboard. It replaces a phone
 call and a WhatsApp thread, not an ERP.
@@ -138,13 +139,19 @@ Masala Dosa, `dal-makhni` is Dal Makhani). Leave them.
 
 ### Diet is not one field
 
-`diet` is `vegetarian | non-vegetarian | egg`, with **orthogonal** `is_vegan`
-and `is_jain` booleans and a separate `contains_onion_garlic`. A flat enum
-could not express that Chitranna is vegetarian *and* vegan *and* Jain at once —
-and `contains_onion_garlic` is tracked apart from `is_jain` because satvik and
-temple-adjacent events exclude alliums without applying Jain rules on root
-vegetables. `npm run validate:dishes` cross-checks all of this against the
-ingredient list.
+`diet` is `vegetarian | non-vegetarian | egg`, with an **orthogonal** `is_vegan`
+boolean, because a flat enum could not express that Chitranna is vegetarian
+*and* vegan at once. `npm run validate:dishes` cross-checks it against the
+ingredient list — a dish marked vegan that lists ghee fails the build.
+
+There used to be `is_jain` and `contains_onion_garlic` alongside it. They are
+gone and should not come back: they recorded a *customisation* as though it
+were a property of the dish. Nearly anything on the list can be cooked without
+onion and garlic, or to Jain rules, so a fixed per-dish answer was wrong in
+both directions — and it hid dishes behind a filter chip that the kitchen would
+happily have adapted. The kitchen still cooks satvik and Jain menus; the
+customer says so in the order note. Same argument that retired the spice
+level.
 
 ### Data model
 
@@ -153,7 +160,12 @@ orders ──< meals ──< meal_dishes >── dishes
 ```
 
 No quantities, no line-item pricing. `orders.user_id` is null for guest
-requests, which is the common case.
+requests, which is the common case. Two free-text fields carry everything the
+catalogue deliberately does not model: `meal_dishes.note` for one dish on one
+meal ("mild, for the children"), and `orders.notes` for the whole request ("we
+are a Jain family — no onion, garlic or root vegetables"). A rule governing
+sixty dishes has nowhere to live in a per-dish note without being typed sixty
+times.
 
 ### The order flow
 

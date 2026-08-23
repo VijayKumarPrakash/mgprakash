@@ -36,6 +36,13 @@ create table if not exists dishes (
 alter table dishes add column if not exists alt_names             jsonb   not null default '[]';
 alter table dishes add column if not exists cuisine_group         text;
 alter table dishes add column if not exists is_vegan              boolean not null default false;
+-- Retired, and kept for the same reason as spice_level above: nothing reads or
+-- writes these two any more, but dropping a column is irreversible and this
+-- file is add-only. They recorded a customisation as though it were a property
+-- of the dish — nearly anything on the list can be cooked without onion and
+-- garlic, or to Jain rules — so the requirement is now stated by the customer
+-- as a note on the order (orders.notes). Safe to drop by hand once you are
+-- sure. Do not start writing them again.
 alter table dishes add column if not exists is_jain               boolean not null default false;
 alter table dishes add column if not exists contains_onion_garlic boolean not null default true;
 alter table dishes add column if not exists blur_data_url         text;
@@ -77,6 +84,16 @@ create table if not exists orders (
 -- this file alone rejected every order insert. Keep the two in step.
 alter table orders add column if not exists user_id uuid references auth.users(id) on delete set null;
 alter table orders alter column client_phone set default '';
+
+-- Free text about the order as a whole — a dietary rule that governs the whole
+-- menu ("we are a Jain family"), an allergy, venue access, a timing.
+--
+-- Nullable rather than defaulted to '', unlike client_phone above: this one has
+-- a genuine difference between "said nothing" and "said something", and the
+-- renderers all test for absence to decide whether to draw the block at all.
+-- Distinct from meal_dishes.note, which is about one dish on one meal.
+alter table orders add column if not exists notes text;
+
 create index if not exists orders_user_id_idx on orders (user_id);
 
 create table if not exists meals (

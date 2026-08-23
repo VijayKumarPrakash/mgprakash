@@ -202,10 +202,6 @@ export default async function DishPage({ params }: Props) {
                 value={<span className="capitalize">{dish.cooking_method.join(', ').replace(/-/g, ' ')}</span>}
               />
               {dish.region_of_origin && <Fact label="Region" value={dish.region_of_origin} />}
-              <Fact
-                label="Onion &amp; garlic"
-                value={dish.contains_onion_garlic ? 'Contains' : 'None'}
-              />
             </dl>
 
             <div className="flex flex-wrap gap-3">

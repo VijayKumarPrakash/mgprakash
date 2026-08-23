@@ -23,8 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description:
       `The full M G Prakash Catering menu — ${count} Karnataka, Udupi, South Indian, North Indian, ` +
-      'Mughlai and Indo-Chinese dishes for weddings and events in Bengaluru. Filter by course, diet, ' +
-      'cuisine and occasion, including pure veg, Jain and no onion-garlic.',
+      'Mughlai and Indo-Chinese dishes for weddings and events in Bengaluru. Filter by course, ' +
+      'cuisine, occasion and diet — vegetarian, non-vegetarian or vegan. Jain and satvik menus ' +
+      'cooked to order.',
     alternates: { canonical: '/menu' },
     openGraph: { url: absoluteUrl('/menu'), title },
   }
@@ -91,7 +92,8 @@ export default async function MenuPage({ searchParams }: Props) {
           <p className="text-[16px] leading-[1.62] text-[var(--ink-2)]">
             {dishes.length} dishes across Karnataka, the wider South, the North, and a little
             Indo-Chinese. Search by name or ingredient, or filter down to exactly what your
-            event needs — including pure veg, Jain, and dishes made without onion or garlic.
+            event needs — by course, cuisine, occasion, and vegetarian, non-vegetarian or vegan.
+            Jain and satvik menus are cooked to order; tell us on the request.
           </p>
         </header>
 

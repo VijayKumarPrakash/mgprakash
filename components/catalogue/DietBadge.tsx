@@ -44,8 +44,8 @@ const VARIANTS = {
 } as const
 
 interface Props {
-  dish: Pick<Dish, 'diet' | 'is_vegan' | 'is_jain'>
-  /** Adds Vegan/Jain pills alongside the base mark. Used in the detail panel. */
+  dish: Pick<Dish, 'diet' | 'is_vegan'>
+  /** Adds a Vegan pill alongside the base mark. Used in the detail panel. */
   detailed?: boolean
   variant?: keyof typeof VARIANTS
 }
@@ -62,7 +62,6 @@ export function DietBadge({ dish, detailed = false, variant = 'surface' }: Props
       </span>
 
       {detailed && dish.is_vegan && <span className={pill}>Vegan</span>}
-      {detailed && dish.is_jain && <span className={pill}>Jain</span>}
     </span>
   )
 }

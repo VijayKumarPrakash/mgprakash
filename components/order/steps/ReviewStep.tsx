@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { formatDate, formatTime } from '@/lib/format'
 import { EVENT_TYPE_LABELS } from '@/types'
+import { ORDER_NOTE_MAX, DISH_NOTE_MAX } from '@/lib/validation'
 import type { Dish, EventType } from '@/types'
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 }
 
 export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
-  const { draft, setDishNote } = useOrder()
+  const { draft, setDishNote, setNotes } = useOrder()
   const [submitting, setSubmitting] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [error, setError] = useState('')
@@ -150,7 +151,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
                       type="text"
                       value={meal.dish_notes[id] ?? ''}
                       onChange={e => setDishNote(meal.id, id, e.target.value)}
-                      maxLength={300}
+                      maxLength={DISH_NOTE_MAX}
                       placeholder="Add a note (optional)"
                       aria-label={`Note for ${dishMap.get(id)?.name ?? id}`}
                       className="form-input mt-1.5 ml-3.5 py-2 text-[13px]"
@@ -165,6 +166,41 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
           )}
         </section>
       ))}
+
+      {/* Anything true of the order as a whole rather than of one dish.
+          The per-dish inputs above cannot carry "we are a Jain family"
+          without the customer typing it against all sixty dishes — and a rule
+          stated once is also the form the kitchen wants to read it in. It sits
+          last because it is the question you can only answer once you have
+          seen the whole order. */}
+      <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-2">
+        <label
+          htmlFor="order-notes"
+          className="block text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide"
+        >
+          Anything else for the chef?
+        </label>
+        <p className="text-[12px] text-[var(--ink-3)]">
+          Dietary rules that apply across the menu, allergies, venue access, timings — anything
+          we should know. Optional.
+        </p>
+        <textarea
+          id="order-notes"
+          value={draft.notes}
+          onChange={e => setNotes(e.target.value)}
+          maxLength={ORDER_NOTE_MAX}
+          rows={4}
+          placeholder="We are a Jain family — no onion, garlic or root vegetables. Two guests are allergic to peanuts. The venue gate shuts at 9pm."
+          className="form-input w-full resize-y text-[14px] leading-relaxed"
+        />
+        {/* Only once it is nearly full. A counter sitting at "1000 left" from
+            the first render is noise on a field most people leave empty. */}
+        {draft.notes.length > ORDER_NOTE_MAX - 200 && (
+          <p className="text-[12px] text-[var(--ink-3)] text-right tabular-nums">
+            {ORDER_NOTE_MAX - draft.notes.length} characters left
+          </p>
+        )}
+      </section>
 
       {error && (
         <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">

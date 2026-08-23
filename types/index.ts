@@ -63,11 +63,8 @@ export interface Dish {
   region_of_origin: string | null
 
   diet: Diet
-  /** Orthogonal to `diet` — a dish can be vegetarian, vegan and Jain at once. */
+  /** Orthogonal to `diet` — a dish can be vegetarian and vegan at once. */
   is_vegan: boolean
-  is_jain: boolean
-  /** Tracked apart from `is_jain`: satvik events exclude alliums without full Jain rules. */
-  contains_onion_garlic: boolean
   flavour_profile: Flavour[]
   cooking_method: CookingMethod[]
   ingredients: string[]
@@ -82,6 +79,15 @@ export interface Order {
   client_phone: string
   event_name: string
   event_type: EventType
+  /**
+   * Free text about the order as a whole — a dietary rule that spans every
+   * dish ("we are a Jain family"), an allergy, venue access, timing.
+   *
+   * Distinct from `MealDish.note`, which is about one dish on one meal. A
+   * requirement that applies to the entire order has nowhere to live in a
+   * per-dish note without being retyped against sixty dishes.
+   */
+  notes: string | null
   status: OrderStatus
   created_at: string
   /** Set when the request was placed while signed in; null for guest orders. */
@@ -135,6 +141,8 @@ export interface OrderDraft {
   client_phone: string
   event_name: string
   event_type: EventType | ''
+  /** Order-level free text. Empty string means the customer wrote nothing. */
+  notes: string
   meals: MealDraft[]
   active_meal_id: string | null
 }

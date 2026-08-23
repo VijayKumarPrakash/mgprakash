@@ -24,7 +24,8 @@ npm run dev              # Local dev server at localhost:3000
 npm run build            # Production build (run before deploying)
 npm run lint             # ESLint — must be clean, 0 errors
 npm run typecheck        # tsc --noEmit
-npm test                 # Vitest, run once — lib/validation, lib/format, lib/rate-limit
+npm test                 # Vitest, run once — lib/validation, lib/format, lib/rate-limit,
+                         # lib/order-draft-storage. One file: npx vitest run lib/format.test.ts
 npm run test:watch       # Vitest in watch mode
 npm run check:email      # Authenticate against Gmail SMTP without sending
 npm run validate:dishes  # Check food_db.json5 against lib/taxonomy.ts
@@ -46,8 +47,8 @@ Seed the `dishes` table using the `json5` npm package to parse `food_db.json5` �
 orders → meals → meal_dishes ← dishes
 ```
 
-- **orders**: client contact info, event name/type, status (`"submitted"`), and `user_id`
-  (null for guest requests, which is the common case)
+- **orders**: client contact info, event name/type, status (`"submitted"`), `user_id`
+  (null for guest requests, which is the common case) and `notes` — see **Order notes**
 - **meals**: one or more per order; date, time, location, guest counts
 - **meal_dishes**: junction table — links meals to selected dishes (no quantities)
 - **dishes**: 229 rows seeded from `food_db.json5`
@@ -64,14 +65,19 @@ referenced it. Some ids are historical and slightly wrong (`dosa-1` is Masala Do
 
 `lib/taxonomy.ts` is the single source of truth for every enumerated value.
 `npm run validate:dishes` enforces it and runs automatically before `npm run seed`,
-so a value outside the vocabulary can never reach the database. Two modelling notes:
+so a value outside the vocabulary can never reach the database. Three modelling notes:
 
-- **Diet is not one enum.** `diet` is `vegetarian | non-vegetarian | egg`, with
-  orthogonal `is_vegan` and `is_jain` booleans. A flat enum could not express that
-  Chitranna is vegetarian *and* vegan *and* Jain at once.
-- **`contains_onion_garlic` is separate from `is_jain`.** Satvik and temple-adjacent
-  events exclude alliums without applying Jain rules on root vegetables. It cannot be
-  derived from the other flags.
+- **Diet is not one enum.** `diet` is `vegetarian | non-vegetarian | egg`, with an
+  orthogonal `is_vegan` boolean. A flat enum could not express that Chitranna is
+  vegetarian *and* vegan at once.
+- **`is_jain` and `contains_onion_garlic` were removed. Do not reintroduce them.**
+  They recorded a *customisation* as though it were a property of the dish: nearly
+  anything in the catalogue can be cooked without onion and garlic, or to Jain rules,
+  so a fixed per-dish answer was wrong in both directions — and worse than wrong, it
+  hid dishes the kitchen would happily have adapted behind a filter chip. The kitchen
+  still cooks satvik and Jain menus; the customer states the requirement in the order
+  note instead. Same argument as the spice level below. The two columns still exist in
+  the database, unread, because dropping a column is irreversible.
 - **There is no spice level, deliberately.** Dishes used to carry a fixed
   `mild | medium | hot` classification, a filter chip and a field in the modal. It was
   removed: how hot a dish should be is a property of the customer, not of the dish, and
@@ -140,7 +146,13 @@ finished and left them behind:
   `'00:00'`, so anyone who never opened the picker silently booked a meal at midnight and
   passed every check on both sides.
 
-### Per-dish notes
+### Notes — per dish, and per order
+
+Two free-text fields, at two different scopes. Both exist because the catalogue
+deliberately does not model preferences that are properties of the customer rather
+than of the food.
+
+#### Per-dish notes
 
 Every selected dish can carry a free-text note — "mild, for the children", "extra crisp",
 "no onion". It is the replacement for the spice classification that used to live on the
@@ -158,6 +170,34 @@ dish, and the mechanism for any per-dish preference generally.
   route cannot trust the form.
 - In the emails it goes through `esc()` like every other interpolation. It is free text
   typed into a public form.
+
+#### Order notes
+
+One free-text field for the whole request — `orders.notes`, nullable. It is where
+a requirement that governs the entire menu goes: "we are a Jain family — no onion,
+garlic or root vegetables", an allergy, venue access, a timing. It is the
+replacement for the `is_jain` / `contains_onion_garlic` filters.
+
+- **Not a per-dish note repeated.** A rule that applies to sixty dishes has nowhere
+  to live in a per-dish note without being typed sixty times, and the kitchen wants
+  to read it once.
+- Captured at the foot of **`ReviewStep`**, above Submit — the same reasoning as the
+  per-dish notes, and it is the question a customer can only answer once they have
+  seen the whole order.
+- Capped at 1,000 characters, against 300 for a dish note: this one carries a
+  dietary rule, an allergy list and a line about access, and truncating that
+  mid-sentence loses exactly what it exists to capture. `ORDER_NOTE_MAX` and
+  `DISH_NOTE_MAX` are exported from `lib/validation.ts` so the textarea's
+  `maxLength` and the server cap cannot drift apart.
+- Empty is written as `null`, not `''` — every renderer tests for absence to decide
+  whether to draw the block at all, and two ways to spell "nothing" is one too many.
+- In the emails it is escaped **before** its newlines become `<br>`. The other order
+  escapes the tags this inserts and prints them as text. The business copy is ruled
+  in the accent colour and sits *above* the menu it governs; the customer's copy is a
+  quieter read-back, as is `/order/[id]`.
+- `lib/order-draft-storage.ts` backfills it onto a draft saved before the field
+  existed, rather than bumping `KEY`. A version bump would bin a half-finished
+  wedding order on deploy; reserve it for a change that actually breaks the reducer.
 
 **The PDF prints a dashed rule under every dish, note or not.** That is not decoration:
 the document gets printed and marked up by hand when a menu is settled over the phone.
@@ -366,7 +406,11 @@ list before writing anything customer-facing.
 Order editing, admin dashboard, per-dish quantities, allergen tracking, service style fields,
 popularity/featured flags, pricing and payment.
 
-Per-dish *notes* are built and in scope — see **Per-dish notes**. Quantities are not:
+"Allergen tracking" means allergens as structured data on a dish — a field, a filter,
+something that could be queried or promised against. A customer writing "two guests are
+allergic to peanuts" in the order note is not that and is exactly what the note is for.
+
+Per-dish and per-order *notes* are built and in scope — see **Notes**. Quantities are not:
 a note is free text the kitchen reads, a quantity is a number something would have to
 calculate against.
 
