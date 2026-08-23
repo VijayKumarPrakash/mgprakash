@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 import { formatDate, formatTime, formatDateTime, orderRef } from '@/lib/format'
-import { BUSINESS, ADDRESS_LINE, TEL_HREF, WHATSAPP_HREF, BRAND } from '@/lib/business'
+import { BUSINESS, NOTIFY_CC, ADDRESS_LINE, TEL_HREF, WHATSAPP_HREF, BRAND } from '@/lib/business'
 import type { Order, Meal } from '@/types'
 
 /**
@@ -217,6 +217,7 @@ export async function sendBusinessNotification(
     // replying to itself — this is the whole point of the notification.
     replyTo: order.client_email,
     to: BUSINESS.email,
+    cc: [...NOTIFY_CC],
     // Flagged in the subject too. The banner is no use if the mail reads as
     // routine and sits unopened until the evening.
     subject: issues.length

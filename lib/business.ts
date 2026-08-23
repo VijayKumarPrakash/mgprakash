@@ -62,6 +62,22 @@ export const TEL_HREF = `tel:+${BUSINESS.phoneDigits}`
 export const WHATSAPP_HREF = `https://wa.me/${BUSINESS.phoneDigits}`
 
 /**
+ * Copied on the business notification for every quote request.
+ *
+ * A second person reads the enquiries, and an inbox only one person watches is
+ * one that goes unanswered while that person is standing in a kitchen at an
+ * event. This lives here rather than in the environment because it is not a
+ * secret and not a per-deployment setting — it is part of who the business is,
+ * like the phone number two lines above it.
+ *
+ * CC rather than BCC, deliberately. Both addresses are the business, and
+ * seeing who else already has the enquiry is what stops a customer being rung
+ * twice about the same request. `replyTo` is still the customer, so "Reply
+ * all" reaches them with both inboxes kept in the thread.
+ */
+export const NOTIFY_CC = ['vinuthaprakash27@gmail.com'] as const
+
+/**
  * Years trading, computed rather than written down.
  *
  * The home page read "Twenty-five years" for long enough that it stopped being
