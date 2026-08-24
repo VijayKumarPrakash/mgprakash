@@ -157,12 +157,14 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
     // pt-6 rather than py-12: the page now renders its own <h1> block above,
     // which owns the top spacing. A second py-12 here left a gap between the
     // heading and the step indicator big enough to read as a mistake.
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-12">
-      <StepIndicator
-        currentStep={step}
-        highestReached={highestReached}
-        onStepClick={goToStep}
-      />
+    <div className="pt-6 pb-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <StepIndicator
+          currentStep={step}
+          highestReached={highestReached}
+          onStepClick={goToStep}
+        />
+      </div>
 
       {/*
         Off-screen rather than `display:none` — some bots skip anything they can
@@ -184,24 +186,35 @@ function OrderFormInner({ dishes }: { dishes: Dish[] }) {
         />
       </div>
 
-      <div className="bg-[var(--paper)] rounded-3xl">
-        {step === 'contact' && <ContactStep onNext={() => goToStep(1)} />}
-        {step === 'event' && <EventStep onNext={() => goToStep(2)} onBack={() => goToStep(0)} />}
-        {step === 'meals' && <MealsStep onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
-        {step === 'dishes' && (
-          <DishSelectionStep
-            dishes={dishes}
-            onNext={() => goToStep(4)}
-            onBack={() => goToStep(2)}
-          />
-        )}
-        {step === 'review' && (
-          <ReviewStep
-            dishes={dishes}
-            onBack={() => goToStep(3)}
-            onSubmit={handleSubmit}
-          />
-        )}
+      {/*
+        Every other step stays at the form's usual 672px column. The dish
+        step alone widens to match /menu (max-w-6xl) — it renders the same
+        card grid, and at 672px that grid drew three ~200px cards with
+        150px-tall photos, the most cramped this catalogue ever looks, for
+        the one step where a customer is picking dishes for an entire
+        wedding. The step indicator above stays fixed-width regardless, so
+        only the content below it shifts.
+      */}
+      <div className={`mx-auto px-4 sm:px-6 ${step === 'dishes' ? 'max-w-6xl' : 'max-w-2xl'}`}>
+        <div className="bg-[var(--paper)] rounded-3xl">
+          {step === 'contact' && <ContactStep onNext={() => goToStep(1)} />}
+          {step === 'event' && <EventStep onNext={() => goToStep(2)} onBack={() => goToStep(0)} />}
+          {step === 'meals' && <MealsStep onNext={() => goToStep(3)} onBack={() => goToStep(1)} />}
+          {step === 'dishes' && (
+            <DishSelectionStep
+              dishes={dishes}
+              onNext={() => goToStep(4)}
+              onBack={() => goToStep(2)}
+            />
+          )}
+          {step === 'review' && (
+            <ReviewStep
+              dishes={dishes}
+              onBack={() => goToStep(3)}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
