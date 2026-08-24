@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import type { Dish } from '@/types'
 import type { OrderContextShape } from './CatalogueClient'
 import { DietBadge } from './DietBadge'
 import { DishImage } from './DishImage'
 import { COURSE_LABELS, OCCASION_LABELS, LICENCES_REQUIRING_CREDIT } from '@/lib/taxonomy'
+import { useDialog } from '../useDialog'
 
 interface Props {
   dish: Dish
@@ -29,46 +29,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 export function DishModal({ dish, onClose, orderContext }: Props) {
   const isSelected = orderContext?.selectedDishIds.includes(dish.id) ?? false
   const hasActiveMeal = !!orderContext?.activeMealId
-  const panelRef = useRef<HTMLDivElement>(null)
-  const restoreFocus = useRef<HTMLElement | null>(null)
-
-  const trapFocus = useCallback((e: KeyboardEvent) => {
-    if (e.key !== 'Tab' || !panelRef.current) return
-    const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'
-    )
-    if (!focusable.length) return
-    const first = focusable[0]
-    const last = focusable[focusable.length - 1]
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
-  }, [])
-
-  useEffect(() => {
-    restoreFocus.current = document.activeElement as HTMLElement
-
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-      trapFocus(e)
-    }
-    document.addEventListener('keydown', onKey)
-
-    // Locking overflow alone shifts the whole page left by the scrollbar width
-    // the instant the modal opens. Compensating with padding keeps it still.
-    const scrollbar = window.innerWidth - document.documentElement.clientWidth
-    const { overflow, paddingRight } = document.body.style
-    document.body.style.overflow = 'hidden'
-    if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`
-
-    panelRef.current?.focus()
-
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = overflow
-      document.body.style.paddingRight = paddingRight
-      restoreFocus.current?.focus?.()
-    }
-  }, [onClose, trapFocus])
+  const panelRef = useDialog(onClose)
 
   const needsCredit =
     dish.image_credit && LICENCES_REQUIRING_CREDIT.includes(dish.image_licence)
