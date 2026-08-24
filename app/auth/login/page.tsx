@@ -37,7 +37,7 @@ export default function LoginPage() {
 
         <div className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-8 space-y-4">
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-xs text-[var(--ink)] bg-[var(--danger-soft)] border-l-2 border-[var(--danger)] rounded-r-lg px-3 py-2">{error}</p>
           )}
 
           <button

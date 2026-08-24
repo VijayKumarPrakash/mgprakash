@@ -58,7 +58,11 @@ export default async function MyOrdersPage() {
                   </p>
                 </div>
                 <div className="text-right space-y-1 flex-shrink-0">
-                  <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  {/* "Submitted" is a state, not a success — a green pill
+                      reads as a completed transaction, which this isn't yet:
+                      it's confirmed by phone before anything is settled. */}
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--surface-2)] text-[var(--ink-2)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] flex-shrink-0" aria-hidden="true" />
                     {order.status}
                   </span>
                   <p className="text-xs text-[var(--ink-3)]">

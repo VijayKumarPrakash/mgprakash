@@ -34,10 +34,25 @@ function StepIndicator({
   onStepClick: (index: number) => void
 }) {
   const currentIndex = STEPS.findIndex(s => s.id === currentStep)
+  // The current step's ring colour, built once rather than per-step — it
+  // used to be set via an inline style carrying a raw --tw-ring-color
+  // custom property, purely to reach a color-mix() Tailwind's ring-* scale
+  // has no token for. An arbitrary-value class does the same thing without
+  // the style prop.
+  const ringClass = 'ring-4 ring-offset-2 ring-[color-mix(in_srgb,var(--accent)_25%,transparent)] ring-offset-[var(--paper)]'
+
   return (
     <div className="flex items-center gap-0 mb-8">
       {STEPS.map((step, i) => {
         const isClickable = i <= highestReached
+        const done = i < currentIndex
+        const current = i === currentIndex
+        const circleClass = `w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+          done || current
+            ? `bg-[var(--accent)] text-white ${current ? ringClass : ''}`
+            : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
+        }`
+
         return (
           <div key={step.id} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1">
@@ -45,44 +60,29 @@ function StepIndicator({
                 <button
                   type="button"
                   onClick={() => onStepClick(i)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all cursor-pointer hover:opacity-80 ${
-                    i < currentIndex
-                      ? 'text-white'
-                      : i === currentIndex
-                      ? 'text-white ring-4 ring-offset-2'
-                      : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
-                  }`}
-                  style={
-                    i <= currentIndex
-                      ? { background: 'var(--accent)', ...(i === currentIndex ? { '--tw-ring-color': 'color-mix(in srgb, var(--accent) 25%, transparent)' } as React.CSSProperties : {}) }
-                      : {}
-                  }
+                  aria-current={current ? 'step' : undefined}
+                  className={`${circleClass} cursor-pointer hover:opacity-80`}
                 >
-                  {i < currentIndex ? '✓' : i + 1}
+                  {done ? (
+                    // Same tick DishCard draws for "Added" — one glyph for
+                    // "done" across the site rather than a text "✓" here and
+                    // an SVG everywhere else.
+                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true">
+                      <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
                 </button>
               ) : (
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                    i === currentIndex ? 'text-white ring-4 ring-offset-2' : 'bg-[var(--surface-2)] text-[var(--ink-3)]'
-                  }`}
-                  style={
-                    i === currentIndex
-                      ? { background: 'var(--accent)', '--tw-ring-color': 'color-mix(in srgb, var(--accent) 25%, transparent)' } as React.CSSProperties
-                      : {}
-                  }
-                >
-                  {i + 1}
-                </div>
+                <div className={circleClass}>{i + 1}</div>
               )}
-              <span className={`text-xs hidden sm:block ${i === currentIndex ? 'font-medium text-[var(--ink)]' : 'text-[var(--ink-3)]'}`}>
+              <span className={`text-xs hidden sm:block ${current ? 'font-medium text-[var(--ink)]' : 'text-[var(--ink-3)]'}`}>
                 {step.label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
-              <div
-                className="flex-1 h-0.5 mx-2 mb-4 transition-all"
-                style={{ background: i < currentIndex ? 'var(--accent)' : 'var(--line)' }}
-              />
+              <div className={`flex-1 h-0.5 mx-2 mb-4 transition-all ${done ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'}`} />
             )}
           </div>
         )

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
+import { StepHeader } from '../StepHeader'
 
 /**
  * `digits` is the national number length, as a [min, max] pair — most of these
@@ -109,10 +110,12 @@ export function ContactStep({ onNext }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Your contact details</h2>
-        <p className="text-[var(--ink-3)] mt-1">We&rsquo;ll use these to send your quote summary.</p>
-      </div>
+      <StepHeader
+        step={1}
+        totalSteps={5}
+        title="Your contact details"
+        subtitle="We’ll use these to send your quote summary."
+      />
 
       <div className="space-y-4">
         <FormField label="Full name" error={errors.client_name} required>

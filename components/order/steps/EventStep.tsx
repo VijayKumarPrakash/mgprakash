@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { FormField } from '../FormField'
+import { StepHeader } from '../StepHeader'
 import { EVENT_TYPES, EVENT_TYPE_LABELS } from '@/types'
 
 interface Props {
@@ -29,10 +30,12 @@ export function EventStep({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">About your event</h2>
-        <p className="text-[var(--ink-3)] mt-1">Give your event a name and tell us what kind it is.</p>
-      </div>
+      <StepHeader
+        step={2}
+        totalSteps={5}
+        title="About your event"
+        subtitle="Give your event a name and tell us what kind it is."
+      />
 
       <div className="space-y-4">
         <FormField label="Event name" error={errors.event_name} required>

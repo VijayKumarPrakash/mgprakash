@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useOrder } from '../OrderContext'
 import { useToast } from '../Toast'
 import { FormField } from '../FormField'
+import { StepHeader } from '../StepHeader'
 import { todayInIndia } from '@/lib/format'
 import type { MealDraft } from '@/types'
 
@@ -71,7 +72,7 @@ function MealCard({
         <button
           type="button"
           onClick={onRemove}
-          className="text-[var(--ink-3)] hover:text-red-600 transition-colors text-sm"
+          className="text-[var(--ink-3)] hover:text-[var(--danger)] transition-colors text-sm"
         >
           Remove
         </button>
@@ -241,15 +242,15 @@ export function MealsStep({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Add your meals</h2>
-        <p className="text-[var(--ink-3)] mt-1">
-          Each meal can have its own date, time, location, and dish selection.
-        </p>
-      </div>
+      <StepHeader
+        step={3}
+        totalSteps={5}
+        title="Add your meals"
+        subtitle="Each meal can have its own date, time, location, and dish selection."
+      />
 
       {topError && (
-        <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+        <p role="alert" className="text-sm text-[var(--ink)] bg-[var(--danger-soft)] border-l-2 border-[var(--danger)] rounded-r-lg px-4 py-3">
           {topError}
         </p>
       )}

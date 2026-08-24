@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useOrder } from '../OrderContext'
+import { StepHeader } from '../StepHeader'
 import { formatDate, formatTime } from '@/lib/format'
 import { EVENT_TYPE_LABELS } from '@/types'
 import { ORDER_NOTE_MAX, DISH_NOTE_MAX } from '@/lib/validation'
@@ -72,14 +73,16 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Review your order</h2>
-        <p className="text-[var(--ink-3)] mt-1">Please check everything before submitting.</p>
-      </div>
+      <StepHeader
+        step={5}
+        totalSteps={5}
+        title="Review your order"
+        subtitle="Please check everything before submitting."
+      />
 
       {/* Contact */}
       <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-2">
-        <h3 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide">Contact</h3>
+        <h3 className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)]">Contact</h3>
         <p className="font-semibold text-[var(--ink)]">{draft.client_name}</p>
         <p className="text-sm text-[var(--ink-2)]">{draft.client_email}</p>
         <p className="text-sm text-[var(--ink-2)]">{draft.client_phone}</p>
@@ -87,7 +90,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
 
       {/* Event */}
       <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-2">
-        <h3 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide">Event</h3>
+        <h3 className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)]">Event</h3>
         <p className="font-semibold text-[var(--ink)]">{draft.event_name}</p>
         <p className="text-sm text-[var(--ink-2)]">
           {EVENT_TYPE_LABELS[draft.event_type as EventType] ?? draft.event_type}
@@ -98,7 +101,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       {draft.meals.map((meal, i) => (
         <section key={meal.id} className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-4">
           <div>
-            <h3 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide mb-1">Meal {i + 1}</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)] mb-1">Meal {i + 1}</h3>
             <p className="font-semibold text-[var(--ink)]">{meal.name}</p>
           </div>
 
@@ -129,7 +132,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
 
           {meal.dish_ids.length > 0 ? (
             <div>
-              <p className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)] mb-1">
                 Selected dishes ({meal.dish_ids.length})
               </p>
               {/* Notes are collected here rather than in the dish-selection
@@ -144,7 +147,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
                 {meal.dish_ids.map(id => (
                   <li key={id}>
                     <div className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--line-strong)] flex-shrink-0" />
                       {dishMap.get(id)?.name ?? id}
                     </div>
                     <input
@@ -176,7 +179,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-5 space-y-2">
         <label
           htmlFor="order-notes"
-          className="block text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide"
+          className="block text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)]"
         >
           Anything else for the chef?
         </label>
@@ -203,7 +206,7 @@ export function ReviewStep({ dishes, onBack, onSubmit }: Props) {
       </section>
 
       {error && (
-        <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+        <p role="alert" className="text-sm text-[var(--ink)] bg-[var(--danger-soft)] border-l-2 border-[var(--danger)] rounded-r-lg px-4 py-3">
           {error}
         </p>
       )}

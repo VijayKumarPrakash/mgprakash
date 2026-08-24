@@ -47,11 +47,17 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="font-display text-3xl font-semibold text-[var(--ink)]">Request Received</h1>
+        <h1 className="font-display text-[clamp(28px,4vw,40px)] text-[var(--ink)]">Request Received</h1>
         <p className="text-[var(--ink-3)]">
           Thank you, <strong>{order.client_name}</strong>. We&rsquo;ve received your catering request
-          and will be in touch shortly to confirm availability and pricing. A summary has been sent
-          to <strong>{order.client_email}</strong>.
+          and sent a summary to <strong>{order.client_email}</strong>.
+        </p>
+        {/* The one place the funnel says what actually happens next, rather
+            than the vague "we'll be in touch" this page used to say twice —
+            once here and once again at the foot of the page. */}
+        <p className="text-[15px] text-[var(--ink-2)]">
+          We read every request today, ring to confirm availability, and send the written
+          quote the same day.
         </p>
         <p className="text-xs text-[var(--ink-3)] font-mono">Ref: #{orderRef(order.id)}</p>
         <a
@@ -68,7 +74,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
       {/* Event summary */}
       <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-6 space-y-4">
-        <h2 className="text-xs font-semibold text-[var(--ink-3)] uppercase tracking-widest">Event</h2>
+        <h2 className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)]">Event</h2>
         <div>
           <p className="font-semibold text-lg text-[var(--ink)]">{order.event_name}</p>
           <p className="text-[var(--ink-3)] text-sm">
@@ -88,7 +94,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
       {meals.map((meal, i) => (
         <section key={meal.id} className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-6 space-y-4">
           <div>
-            <p className="text-xs font-semibold text-[var(--ink-3)] uppercase tracking-widest mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)] mb-1">
               Meal {i + 1}
             </p>
             <h3 className="font-semibold text-lg text-[var(--ink)]">{meal.name}</h3>
@@ -113,7 +119,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
           {!!meal.dishes?.length && (
             <div className="pt-4 border-t border-[var(--line)]">
-              <p className="text-xs font-semibold text-[var(--ink-3)] uppercase tracking-widest mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)] mb-3">
                 Selected Dishes ({meal.dishes.length})
               </p>
               <ul className="space-y-2">
@@ -143,7 +149,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
           `whitespace-pre-line` because they typed the line breaks on purpose. */}
       {!!order.notes && (
         <section className="bg-[var(--surface)] border border-[var(--line)] rounded-2xl p-6 space-y-2">
-          <h2 className="text-xs font-medium text-[var(--ink-3)] uppercase tracking-wide">
+          <h2 className="text-[10px] font-bold uppercase tracking-[.15em] text-[var(--ink-3)]">
             Your notes
           </h2>
           <p className="text-[15px] leading-[1.6] text-[var(--ink-2)] whitespace-pre-line">
@@ -152,10 +158,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
         </section>
       )}
 
-      <div className="text-center pt-4 space-y-3">
-        <p className="text-sm text-[var(--ink-3)]">
-          We&rsquo;ll be in touch soon to confirm the details.
-        </p>
+      <div className="text-center pt-4">
         <Link
           href="/"
           className="inline-flex items-center text-sm font-medium hover:opacity-80 transition-opacity"

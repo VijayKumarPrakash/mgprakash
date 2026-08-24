@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { useOrder } from '../OrderContext'
 import { SelectionBar } from '../SelectionBar'
+import { StepHeader } from '../StepHeader'
 import { CatalogueClient } from '@/components/catalogue/CatalogueClient'
 import type { Dish } from '@/types'
 
@@ -38,10 +39,12 @@ export function DishSelectionStep({ dishes, onNext, onBack }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-semibold text-[var(--ink)]">Select dishes</h2>
-        <p className="text-[var(--ink-3)] mt-1">Choose which dishes to include for each meal.</p>
-      </div>
+      <StepHeader
+        step={4}
+        totalSteps={5}
+        title="Select dishes"
+        subtitle="Choose which dishes to include for each meal."
+      />
 
       {/*
         Only shown with more than one meal — with a single meal there is

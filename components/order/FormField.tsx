@@ -19,12 +19,12 @@ export function FormField({ label, error, required, action, children }: Props) {
       <div className="flex items-center justify-between gap-3 min-h-[22px]">
         <label className="block text-sm font-medium text-[var(--ink)]">
           {label}
-          {required && <span className="text-red-600 ml-0.5" aria-hidden="true">*</span>}
+          {required && <span className="text-[var(--danger)] ml-0.5" aria-hidden="true">*</span>}
         </label>
         {action}
       </div>
       {children}
-      {error && <p className="text-xs text-red-700">{error}</p>}
+      {error && <p className="text-xs text-[var(--danger)]">{error}</p>}
     </div>
   )
 }
