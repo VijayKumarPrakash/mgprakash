@@ -533,11 +533,13 @@ calculate against.
 - **Durable rate limiting** — `lib/rate-limit.ts` counts in one serverless instance's memory,
   so the real ceiling is the limit times the number of warm instances and a deploy resets it.
   Add a Vercel WAF rate-limit rule, which counts at the edge and rejects before a function is
-  invoked. It *is* available on Hobby: one rule per project, IP key, fixed window, maximum
-  window 10 minutes, 1M allowed requests a month included. Spec and rationale are in the
-  README backlog. The edge rule does not replace the in-app one — a 10-minute maximum window
-  cannot express "5 an hour", so the two layers stay. See **Abuse protection** above for why
-  this matters more than the traffic suggests.
+  invoked. It *is* available on Hobby: one rate-limit rule per project (of three custom
+  firewall rules), IP key, fixed window, counting window capped at 10 minutes, 1M allowed
+  requests a month included. Spec and rationale are in the README backlog — note the action
+  must be left at the **default 429**, not set to Deny, which answers 403. The edge rule does
+  not replace the in-app one: a 10-minute maximum window cannot express "5 an hour", so the
+  two layers stay. See **Abuse protection** above for why this matters more than the traffic
+  suggests.
 - **Recoleta licence** — see `app/fonts.ts`
 
 <!-- BEGIN:nextjs-agent-rules -->

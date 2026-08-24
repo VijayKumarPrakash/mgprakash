@@ -309,19 +309,31 @@ quantities, allergen tracking, service-style fields, popularity flags.
   included). Set it up in the dashboard under Firewall → Configure → New Rule:
 
   ```
-  If    request path  equals  /api/orders
-        request method equals POST
+  If    request path   equals  /api/orders
+        request method equals  POST
   Then  Rate Limit — Fixed Window
-        Window 600s · Limit 5 · Key: IP · Action: Deny (429)
+        Window 600s · Limit 5 · Key: IP · Action: Default (429)
   ```
 
-  600s because 10 minutes is the maximum window on Hobby, so the app-level
-  5-per-hour cannot be expressed at the edge — the two layers do different jobs
-  and both stay. One rule is also the Hobby limit, which is why it targets the
-  expensive endpoint (rows written, two emails sent) rather than `draft-pdf`,
-  which only costs CPU and is still covered in-app. On Pro (40 rules) add a
-  second for `/api/orders/draft-pdf` at 10 per 600s. Note WAF counters are
-  per-region, so a globally distributed flood can still exceed the number.
+  **Action: Default, not Deny.** Deny answers 403, which says "you may not do
+  this" — wrong, and it tells a bot nothing useful. The default rate-limit
+  action answers 429 with the retry semantics a client should actually see, and
+  it is what the in-app limiter already returns, so the two layers agree.
+
+  600s because 10 minutes is the maximum counting window on Hobby *and* Pro
+  (Enterprise gets an hour), so the app-level 5-per-hour cannot be expressed at
+  the edge at all — the two layers do different jobs and both stay.
+
+  Hobby allows **one rate-limit rule per project** (out of three custom firewall
+  rules total), which is why the one rule goes on the endpoint that does the
+  damage — rows written, two emails sent — rather than `draft-pdf`, which only
+  burns CPU and is still covered in-app. On Pro that cap rises to 40 rules; add
+  a second there for `/api/orders/draft-pdf` at 10 per 600s.
+
+  Note WAF counters are per-region, so a globally distributed flood can still
+  exceed the number by roughly the region count. Vercel does not bill for
+  requests the WAF rejects, which is the entire point of pushing this to the
+  edge.
 
   Worth doing because the consequence is out of proportion to the effort: every
   accepted submission sends two emails from the business's own Gmail account,
