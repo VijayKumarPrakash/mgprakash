@@ -22,7 +22,7 @@ and the quote form must keep working with Supabase unconfigured or unreachable.
 ```bash
 npm run dev              # Local dev server at localhost:3000
 npm run build            # Production build (run before deploying)
-npm run lint             # ESLint — must be clean, 0 errors
+npm run lint             # ESLint — must be clean: 0 errors AND 0 warnings
 npm run typecheck        # tsc --noEmit
 npm test                 # Vitest, run once — lib/validation, lib/format, lib/rate-limit,
                          # lib/order-draft-storage. One file: npx vitest run lib/format.test.ts
@@ -38,6 +38,33 @@ npm run fetch:images     # Source dish photos from Wikimedia Commons (needs netw
 Deployed to Vercel via git push — Vercel builds and deploys automatically on push to `main`.
 
 Seed the `dishes` table using the `json5` npm package to parse `food_db.json5` — do not rename it to `.json`. It is intentionally JSON5 so the business owner can hand-edit it with comments and trailing commas.
+
+### `lib/supabase/schema.sql` is the migration mechanism
+
+There is no migrations directory. That one file is the whole schema *and* the upgrade
+path: it is idempotent, every table is `create table if not exists` and every later
+column is `add column if not exists`, so running it against a live database is safe and
+running it against an empty one builds the site from scratch. Add to it; never rewrite a
+line already applied in production.
+
+**A schema change must reach the database before the deploy that needs it**, and the
+gap is not theoretical. `POST /api/orders` writes every column it knows about, so
+pushing code that writes a column the database does not have yet makes PostgREST reject
+the insert (`PGRST204`), the route returns a 500, and every customer sees "Could not
+save your request" until the migration lands. Order of operations: run the SQL, confirm
+the column exists, *then* push.
+
+Confirm it on the path the application actually uses, not just in the SQL editor.
+PostgREST caches the schema separately, so a column can exist in Postgres and still be
+invisible to the client that writes it:
+
+```
+curl -s "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/orders?select=id,notes&limit=1" \
+  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY"
+```
+
+The `supabase` Claude Code plugin (`/plugin`) can apply a migration and run these checks
+directly; without it, the Supabase SQL editor does the same job by hand.
 
 ## Architecture
 
@@ -232,6 +259,28 @@ still server-rendered.
 Storage is cleared on successful submit, and a draft older than 24 hours is discarded
 rather than restored — it would carry an event date the server now rejects as past.
 
+### Catalogue reads — the file fallback and the cache
+
+**The site builds and renders with no environment variables at all.** `lib/dishes.ts` reads
+the catalogue from Supabase and falls back to reading `food_db.json5` off disk when Supabase
+is unconfigured or unreachable, so a fresh clone shows all 229 dishes and a preview deploy
+never renders an empty menu because a variable was missed. Submitting an order needs a real
+database and mail credentials; browsing does not.
+
+**`fromFile()` and `hydrate()` must default every field identically.** They are the two
+paths to the same dish, and they once disagreed: one defaulted a missing boolean `true` and
+the other `false`, so a dish appeared under a filter while the file was being read and
+vanished from it the moment the database answered. Change a default in one and change it in
+the other in the same edit.
+
+**The Supabase read is cached in module scope for an hour, and `export const revalidate`
+does nothing here.** The root layout renders `<Nav />`, which reads the session via
+`cookies()`, and that opts every page in the tree into dynamic rendering — so the catalogue
+was being refetched, all 229 rows, on every single page view. Module scope survives between
+warm invocations of a serverless instance and is dropped on deploy, which is exactly the
+invalidation a table that only changes on `npm run seed` needs. Do not "fix" this by adding
+`revalidate` back.
+
 ### Dish catalogue
 
 - Fuse.js weighted fuzzy search across name, alt_names, cuisine, tags, ingredients, description
@@ -275,7 +324,7 @@ The name, event title and venue are typed into a public form by anyone on the in
 
 ### Shared modules — check these before writing a helper
 
-Six small modules exist specifically because the same logic had been copied into three or
+Eight small modules exist specifically because the same logic had been copied into three or
 four places and then drifted apart. Reach for them rather than reimplementing:
 
 - **`lib/format.ts`** — `formatDate`, `formatTime`, `formatDateTime`, `orderRef`. Pinned to
@@ -295,13 +344,64 @@ four places and then drifted apart. Reach for them rather than reimplementing:
 - **`lib/rate-limit.ts`** — `checkRateLimit`, `clientKey`. Guards both public POST routes;
   see **Abuse protection** above. Takes `now` as an argument so the window is testable.
 - **`lib/order-draft-storage.ts`** — mirrors the in-progress draft into sessionStorage so
-  opening a dish page does not destroy it. See **Draft survival** below.
+  opening a dish page does not destroy it. See **Draft survival** above.
+- **`lib/dishes.ts`** — the *browsable* catalogue: the sort into `BROWSE_ORDER`, the
+  hour-long cache and the `food_db.json5` fallback. See **Catalogue reads** above. Anything
+  rendering a list of dishes to a customer goes through here. The order paths
+  (`lib/orders.ts`, `POST /api/orders`, `scripts/seed.ts`) do query the table directly, and
+  should: they look up specific ids by primary key, they want no browse sort, and the file
+  fallback would be actively wrong for them — an order has to reflect what is really stored,
+  and if Supabase is unreachable those paths have already failed for other reasons.
+- **`lib/seo.ts`** — `SITE_URL`, `absoluteUrl()` and every JSON-LD builder. One origin for
+  every canonical, OpenGraph URL and sitemap entry: `metadataBase` was once pinned to a
+  domain with no DNS record at all, which told Google every page was a copy of somewhere
+  unfetchable. The structured-data builders read `lib/business.ts` rather than retyping the
+  name, address and phone, because local search matches those against the Google Business
+  Profile character for character.
+
+### Supabase clients, and `proxy.ts`
+
+**Session refresh runs in `proxy.ts`, not `middleware.ts`.** Next 16 renamed the convention —
+`middleware.ts` / `export function middleware` became `proxy.ts` / `export function proxy`.
+The old name still builds, with only a deprecation warning, so a snippet pasted from
+anywhere older creates a second file that silently never runs.
+
+`proxy.ts` refreshes the Supabase session cookie on every request, so the nav can read the
+signed-in user during render rather than round-tripping for it after paint. It returns
+early when Supabase is unconfigured — this runs on every request, and throwing here used
+to 500 the entire site, including the menu and the home page, neither of which needs auth
+at all.
+
+`lib/supabase/server.ts` exports **four** clients. Picking the wrong one is not a style
+question:
+
+- **`createServiceClient()`** — bypasses RLS entirely. Order writes and the seed script.
+  Never import it into anything that reaches the browser.
+- **`createAnonClient()`** — public reads with no cookie context. The catalogue, and
+  `getOrderWithMeals`.
+- **`createCookieClient()`** — server components and route handlers that need auth context.
+- **`createReadOnlyRequestClient(request)`** — route handlers that need to know *who* is
+  calling and nothing else. `autoRefreshToken: false` and a no-op `setAll`, both load-bearing.
+  The obvious version — a normal cookie-writing client handed a `new Headers()` the caller
+  discards — refreshed an expired token, Supabase rotated the refresh token, and the new pair
+  was written into headers nobody attached to a response. The browser kept a refresh token
+  that had just been consumed server-side, so **a customer could be signed out by the act of
+  submitting an order**. Nothing is lost by refusing to refresh here: `proxy.ts` already did
+  it, and if it somehow did not, the caller reads null and treats the request as a guest,
+  which is the normal case anyway.
 
 ### Row level security
 
-Reads are public; **writes have no policy at all**, because every write goes through the
-service-role client, which bypasses RLS. Do not add an insert policy to "make writes work" —
-that grants insert to `anon`, the key shipped in the client bundle.
+Reads are public; **writes have no policy at all** on `orders`, `meals`, `meal_dishes` and
+`dishes`, because every write goes through the service-role client, which bypasses RLS. Do
+not add an insert policy to "make writes work" — that grants insert to `anon`, the key
+shipped in the client bundle.
+
+The one exception is **`keepalive`**, which carries `Public read` *and* `Anon update`.
+`.github/workflows/keep-supabase-alive.yml` PATCHes a single row there twice a week with the
+anon key, so a free-tier project is never paused for inactivity. It is a dedicated table for
+exactly that reason — the ping must never touch real data, and the anon write grant must
+never extend beyond it.
 
 Public SELECT on `orders` is deliberate: `/order/[id]` is a capability URL, and the uuid is
 the secret that makes the emailed link work without a login. Never surface order ids anywhere
@@ -338,8 +438,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=      # secret — bypasses RLS, used by seed + order writes
 GMAIL_USER=
 GMAIL_APP_PASSWORD=             # Google App Password, not the account password
-NEXT_PUBLIC_SITE_URL=           # absolute base for order links in emails and PDF
+NEXT_PUBLIC_SITE_URL=           # absolute base for order links, canonicals and the sitemap
 ```
+
+**None of these are required to run the site.** The catalogue falls back to
+`food_db.json5` (see **Catalogue reads**), `proxy.ts` serves signed-out when Supabase is
+unconfigured, and `lib/seo.ts` falls back to the live Vercel origin rather than to
+localhost — so an unset `NEXT_PUBLIC_SITE_URL` in production still produces a working
+canonical rather than one pointing at a developer's laptop. Submitting an order is the
+one flow that genuinely needs a database and mail credentials.
 
 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is listed in the original brief but nothing
 reads it — Places autocomplete is still deferred. Add it when that gets built.

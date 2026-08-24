@@ -69,6 +69,14 @@ Run `lib/supabase/schema.sql` in the Supabase SQL editor, then `npm run seed`.
 The schema is idempotent and safe to re-run — it is also how migrations are
 applied, since every added column uses `add column if not exists`.
 
+**A schema change has to reach the database before the deploy that needs it.**
+`POST /api/orders` writes every column it knows about, so pushing code that
+writes a column the database does not have makes PostgREST reject the insert,
+the route returns a 500, and every customer sees "Could not save your request"
+until the migration lands. Run the SQL, confirm the column is visible over the
+REST API — PostgREST caches the schema separately from Postgres — and only then
+push.
+
 ---
 
 ## Repository layout
