@@ -268,6 +268,20 @@ values as literals from `lib/business.ts`. If you change a token in
 - **`.github/workflows/keep-supabase-alive.yml`** writes to a dedicated
   `keepalive` table twice a week, so a free-tier project is never paused for
   inactivity and never has its real data touched by the ping.
+- **Rate limiting is two layers, on purpose.** `lib/rate-limit.ts` allows 5
+  submissions an hour per IP and counts in one serverless instance's memory; a
+  Vercel WAF rule allows 5 per 600s and counts at the edge, rejecting before a
+  function is invoked. Neither replaces the other. The WAF counting window maxes
+  out at 10 minutes on Hobby *and* Pro, so "5 an hour" can only be expressed in
+  the application — and the application's counter resets on deploy and scales
+  with warm instances, so only the edge rule makes a flood actually cost
+  nothing. Hobby allows one rate-limit rule per project, which is why it guards
+  `POST /api/orders` — rows written, two emails sent — rather than `draft-pdf`,
+  which only burns CPU and is still covered in-app. The rule's action is left at
+  **Too Many Requests (429)**, not Deny (403): 429 is the honest answer and it
+  matches what the in-app limiter returns. You can tell which layer answered by
+  the body — the edge returns Vercel's own `{"error":{"code":"429",…}}` shape,
+  the application returns its own copy about ringing the business.
 
 ---
 
@@ -299,47 +313,6 @@ quantities, allergen tracking, service-style fields, popularity flags.
 - Migrating email off Gmail SMTP to a proper provider once a custom domain is
   bought, for deliverability and an `orders@` from-address. That also clears the
   last outstanding advisory in the production tree, which needs nodemailer 9.x
-- **A Vercel WAF rate-limit rule on `/api/orders`.** `lib/rate-limit.ts` counts
-  in one serverless instance's memory, so the real ceiling is the limit times
-  however many instances are warm, and a deploy resets every counter. It stops
-  the casual case — a bored person with `curl`, a form-spam bot walking the web —
-  and not a deliberate one. A WAF rule counts at the edge and rejects before a
-  function is invoked, so a flood costs no compute. **Available on the Hobby
-  plan** (1 rule per project, IP key, fixed window, 1M allowed requests/month
-  included). Set it up in the dashboard under Firewall → Configure → New Rule:
-
-  ```
-  If    request path   equals  /api/orders
-        request method equals  POST
-  Then  Rate Limit — Fixed Window
-        Window 600s · Limit 5 · Key: IP · Action: Default (429)
-  ```
-
-  **Action: Default, not Deny.** Deny answers 403, which says "you may not do
-  this" — wrong, and it tells a bot nothing useful. The default rate-limit
-  action answers 429 with the retry semantics a client should actually see, and
-  it is what the in-app limiter already returns, so the two layers agree.
-
-  600s because 10 minutes is the maximum counting window on Hobby *and* Pro
-  (Enterprise gets an hour), so the app-level 5-per-hour cannot be expressed at
-  the edge at all — the two layers do different jobs and both stay.
-
-  Hobby allows **one rate-limit rule per project** (out of three custom firewall
-  rules total), which is why the one rule goes on the endpoint that does the
-  damage — rows written, two emails sent — rather than `draft-pdf`, which only
-  burns CPU and is still covered in-app. On Pro that cap rises to 40 rules; add
-  a second there for `/api/orders/draft-pdf` at 10 per 600s.
-
-  Note WAF counters are per-region, so a globally distributed flood can still
-  exceed the number by roughly the region count. Vercel does not bill for
-  requests the WAF rejects, which is the entire point of pushing this to the
-  edge.
-
-  Worth doing because the consequence is out of proportion to the effort: every
-  accepted submission sends two emails from the business's own Gmail account,
-  which caps in the low hundreds a day, so someone could quietly stop real
-  enquiries arriving — and with no admin dashboard, clearing the junk means
-  hand-written SQL
 - Saving a draft request to return to later
 - Real photography for the dishes still on a placeholder tile
 - A Recoleta webfont licence — see `app/fonts.ts`

@@ -145,13 +145,21 @@ does not just fill the orders table — it drains the quota and real enquiries s
 with no admin dashboard to clear the junk from.
 
 The limiter's state is in one serverless instance's memory, so the true ceiling is the limit
-times the number of warm instances, and a deploy resets it. It is deliberately the cheap
-half of the answer; the durable control is a Vercel WAF rate-limit rule, which runs before a
-function is invoked. Do not raise these numbers as a substitute for that.
+times the number of warm instances, and a deploy resets it. It is deliberately the cheap half
+of the answer. Do not raise these numbers as a substitute for the edge rule.
 
-The two are complements, not alternatives. A WAF window maxes out at 10 minutes on the Hobby
-plan, so "5 submissions an hour" can only be enforced in the application; the edge rule is
-what makes a flood cost nothing. Keep both.
+**The other half is live: a Vercel WAF rate-limit rule** on `POST /api/orders` — fixed
+window, 600s, 5 requests, keyed by IP, answering 429. It counts at the edge and rejects
+before a function is invoked, so a flood costs no compute and Vercel does not bill for what
+it blocks. Verified in production: requests 1–5 reach the route, 6 onward come back with
+Vercel's own 429 shape (`{"error":{"code":"429",…,"id":"sfo1::…"}}`) rather than this
+application's, which is how you tell which layer answered.
+
+The two are complements, not alternatives. A WAF counting window maxes out at 10 minutes on
+Hobby *and* Pro, so "5 submissions an hour" can only be enforced in the application; the edge
+rule is what makes a flood cost nothing. Keep both. Hobby allows exactly one rate-limit rule
+per project, which is why it guards the endpoint that writes rows and sends mail rather than
+`draft-pdf`.
 
 A honeypot trip returns an actionable 400 rather than the conventional fake success. If it
 ever fires on a real customer, a fake 201 would send them to a confirmation page for an
@@ -530,16 +538,6 @@ calculate against.
 - **Real photography** — `npm run fetch:images` covers what Commons has. The dishes still showing
   a placeholder tile are the shortlist worth photographing properly; the tile is a deliberate
   design, not a missing asset
-- **Durable rate limiting** — `lib/rate-limit.ts` counts in one serverless instance's memory,
-  so the real ceiling is the limit times the number of warm instances and a deploy resets it.
-  Add a Vercel WAF rate-limit rule, which counts at the edge and rejects before a function is
-  invoked. It *is* available on Hobby: one rate-limit rule per project (of three custom
-  firewall rules), IP key, fixed window, counting window capped at 10 minutes, 1M allowed
-  requests a month included. Spec and rationale are in the README backlog — note the action
-  must be left at the **default 429**, not set to Deny, which answers 403. The edge rule does
-  not replace the in-app one: a 10-minute maximum window cannot express "5 an hour", so the
-  two layers stay. See **Abuse protection** above for why this matters more than the traffic
-  suggests.
 - **Recoleta licence** — see `app/fonts.ts`
 
 <!-- BEGIN:nextjs-agent-rules -->
