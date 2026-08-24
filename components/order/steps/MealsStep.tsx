@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useOrder } from '../OrderContext'
+import { useToast } from '../Toast'
 import { FormField } from '../FormField'
 import { todayInIndia } from '@/lib/format'
 import type { MealDraft } from '@/types'
@@ -167,9 +168,29 @@ function MealCard({
 }
 
 export function MealsStep({ onNext, onBack }: Props) {
-  const { draft, addMeal, removeMeal } = useOrder()
+  const { draft, addMeal, removeMeal, restoreMeal } = useOrder()
+  const { pushToast } = useToast()
   const [mealErrors, setMealErrors] = useState<Record<string, FieldErrors>>({})
   const [topError, setTopError] = useState('')
+
+  /**
+   * Removing a meal used to be silent and irreversible — it takes every dish
+   * selected against it with it, with no confirm and no way back. An undo
+   * toast protects the rare mistake without taxing every correct removal the
+   * way a confirm dialog would. The meal, its index and the active meal at
+   * the moment of removal are captured here, before REMOVE_MEAL runs and
+   * possibly reassigns active_meal_id — restoreMeal puts all three back.
+   */
+  function handleRemoveMeal(meal: MealDraft, index: number) {
+    const activeMealId = draft.active_meal_id
+    removeMeal(meal.id)
+    const dishCount = meal.dish_ids.length
+    pushToast(
+      `${meal.name.trim() || 'Meal'} removed` +
+        (dishCount ? ` — ${dishCount} dish${dishCount !== 1 ? 'es' : ''}` : ''),
+      { label: 'Undo', onClick: () => restoreMeal(meal, index, activeMealId) }
+    )
+  }
 
   /** Clears one field's error as soon as the customer edits it. */
   function clearError(mealId: string, field: string) {
@@ -240,7 +261,7 @@ export function MealsStep({ onNext, onBack }: Props) {
             meal={meal}
             index={i}
             errors={mealErrors[meal.id] ?? {}}
-            onRemove={() => removeMeal(meal.id)}
+            onRemove={() => handleRemoveMeal(meal, i)}
             onClearError={field => clearError(meal.id, field)}
           />
         ))}

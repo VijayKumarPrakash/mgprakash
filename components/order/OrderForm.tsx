@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { OrderProvider, useOrder } from './OrderContext'
+import { ToastProvider } from './Toast'
 import { ContactStep } from './steps/ContactStep'
 import { EventStep } from './steps/EventStep'
 import { MealsStep } from './steps/MealsStep'
@@ -231,7 +232,9 @@ export function OrderForm({
 }) {
   return (
     <OrderProvider initialContact={{ name: initialName, email: initialEmail }}>
-      <OrderFormInner dishes={dishes} />
+      <ToastProvider>
+        <OrderFormInner dishes={dishes} />
+      </ToastProvider>
     </OrderProvider>
   )
 }

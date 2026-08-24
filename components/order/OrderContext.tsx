@@ -13,6 +13,7 @@ type Action =
   | { type: 'ADD_MEAL' }
   | { type: 'UPDATE_MEAL'; id: string; payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>> }
   | { type: 'REMOVE_MEAL'; id: string }
+  | { type: 'RESTORE_MEAL'; meal: MealDraft; index: number; activeMealId: string | null }
   | { type: 'SET_ACTIVE_MEAL'; id: string }
   | { type: 'ADD_DISH_TO_MEAL'; mealId: string; dishId: string }
   | { type: 'REMOVE_DISH_FROM_MEAL'; mealId: string; dishId: string }
@@ -99,6 +100,17 @@ function reducer(state: OrderDraft, action: Action): OrderDraft {
           : state.active_meal_id
       return { ...state, meals, active_meal_id: active }
     }
+    // The undo side of REMOVE_MEAL. Carries the whole removed MealDraft back
+    // in rather than reconstructing it, so its dish_ids and dish_notes come
+    // back exactly as they were — undo has to be a true undo, not "add a new
+    // empty meal with the old name". Restored at its original index rather
+    // than appended, and active_meal_id is set back explicitly because
+    // REMOVE_MEAL may have already reassigned it to a different meal.
+    case 'RESTORE_MEAL': {
+      const meals = [...state.meals]
+      meals.splice(Math.min(action.index, meals.length), 0, action.meal)
+      return { ...state, meals, active_meal_id: action.activeMealId }
+    }
     case 'SET_ACTIVE_MEAL':
       return { ...state, active_meal_id: action.id }
     case 'ADD_DISH_TO_MEAL':
@@ -156,6 +168,8 @@ interface OrderContextValue {
   addMeal: () => void
   updateMeal: (id: string, payload: Partial<Omit<MealDraft, 'id' | 'dish_ids' | 'dish_notes'>>) => void
   removeMeal: (id: string) => void
+  /** Undoes a REMOVE_MEAL — see the toast in MealsStep. */
+  restoreMeal: (meal: MealDraft, index: number, activeMealId: string | null) => void
   setActiveMeal: (id: string) => void
   addDishToMeal: (mealId: string, dishId: string) => void
   removeDishFromMeal: (mealId: string, dishId: string) => void
@@ -245,6 +259,11 @@ export function OrderProvider({
     (id: string) => dispatch({ type: 'REMOVE_MEAL', id }),
     []
   )
+  const restoreMeal = useCallback(
+    (meal: MealDraft, index: number, activeMealId: string | null) =>
+      dispatch({ type: 'RESTORE_MEAL', meal, index, activeMealId }),
+    []
+  )
   const setActiveMeal = useCallback(
     (id: string) => dispatch({ type: 'SET_ACTIVE_MEAL', id }),
     []
@@ -279,6 +298,7 @@ export function OrderProvider({
         addMeal,
         updateMeal,
         removeMeal,
+        restoreMeal,
         setActiveMeal,
         addDishToMeal,
         removeDishFromMeal,
