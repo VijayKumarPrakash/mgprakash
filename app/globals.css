@@ -47,6 +47,28 @@
   --nonveg:   #A32020;
   --egg:      #B07A12;
 
+  /* --- status ------------------------------------------------------------
+     Danger and success, for the funnel's error and confirmation states —
+     neither existed before this, so the form was reaching for raw Tailwind
+     red-50/red-700 and green-50/green-700, cool-toned against every warm
+     token in the rest of the palette.
+
+     Danger deliberately isn't a third saturated red: --accent (copper,
+     19° hue) and --nonveg (pure red, 0°) already occupy that space, and
+     a bright red error box would out-shout the copper CTA sitting a few
+     pixels away. It sits at 350° — pushed toward maroon and darker than
+     --nonveg — and is meant to read through placement and weight (a soft
+     well, a rule) rather than as a loud fill. 9.9:1 against --surface.
+
+     Success reuses --veg outright rather than inventing a second green;
+     "vegetarian" and "this worked" are not different colours here. */
+  --danger:      #7A2432;
+  --danger-soft: #F7E6E3;
+  --danger-line: #E8C7C0;
+  --success:      var(--veg);
+  --success-soft: #EAF1E2;
+  --success-line: #CFE0BE;
+
   /* --- shape ------------------------------------------------------------ */
   --r-sm:  10px;
   --r-md:  14px;
@@ -91,6 +113,12 @@
   --color-accent-lift: var(--accent-lift);
   --color-veg: var(--veg);
   --color-nonveg: var(--nonveg);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-line: var(--danger-line);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-line: var(--success-line);
 
   --radius-sm: var(--r-sm);
   --radius-md: var(--r-md);
