@@ -33,6 +33,47 @@ npm run seed             # Validate, then upsert dishes into Supabase
 npm run fetch:images     # Source dish photos from Wikimedia Commons (needs network + sharp)
 ```
 
+`npm test` runs in a plain Node environment (`vitest.config.mts`, no jsdom) against the pure
+`lib/` modules only — there is no component or DOM-level test suite. Verify UI changes by
+running the dev server, not by reaching for React Testing Library.
+
+`npm run lint` includes `eslint-plugin-react-hooks`'s `set-state-in-effect` rule: an effect
+must never call `setState` unconditionally in its body. Where a value has to change in
+response to a prop (route changing, a step being restored), derive it during render instead —
+compare the incoming value against a `useState` mirror of the previous one and call `setState`
+directly in the render body when they differ. `OrderForm.tsx`'s `highestReached` and
+`NavClient.tsx`'s `lastPathname` are the two examples already in the codebase; copy the
+pattern rather than reaching for a `useEffect`.
+
+## Repository layout
+
+```
+app/
+  page.tsx, menu/, services/, areas/    Marketing + catalogue pages (server-rendered)
+  order/new/                            The five-step quote form (client-only, ssr:false)
+  order/[id]/                           Confirmation page — public via capability URL
+  account/orders/                       A signed-in customer's past requests
+  auth/                                 Google sign-in + OAuth callback
+  api/orders/                           POST a request · GET its PDF · POST a draft preview
+  globals.css                           Every design token — see Design system below
+
+components/
+  catalogue/     Search, chip filters, card grid, dish modal — CatalogueClient is the hub
+  order/         OrderContext (the reducer + sessionStorage sync) and the five step components
+  layout/        Nav (server) + NavClient, Footer
+  useDialog.ts   Shared focus-trap/scroll-lock/restore-focus hook — see Shared modules
+
+lib/           Server-safe logic; see "Shared modules" below for what each file owns
+scripts/       validate-dishes.ts, seed.ts, fetch-images.ts, check-email.ts
+food_db.json5  The 229-dish source of truth — JSON5, never rename to .json
+proxy.ts       Session-cookie refresh on every request (Next 16's middleware.ts rename)
+```
+
+`components/order/` is the one directory where reading a single file rarely tells the whole
+story: `OrderContext.tsx` owns the reducer and the sessionStorage round-trip, every step reads
+and writes through `useOrder()`, and `OrderForm.tsx` is what actually renders whichever step
+is current. Start there before editing any individual step.
+
 ## Deployment
 
 Deployed to Vercel via git push — Vercel builds and deploys automatically on push to `main`.
@@ -332,7 +373,7 @@ The name, event title and venue are typed into a public form by anyone on the in
 
 ### Shared modules — check these before writing a helper
 
-Eight small modules exist specifically because the same logic had been copied into three or
+Nine small modules exist specifically because the same logic had been copied into three or
 four places and then drifted apart. Reach for them rather than reimplementing:
 
 - **`lib/format.ts`** — `formatDate`, `formatTime`, `formatDateTime`, `orderRef`. Pinned to
@@ -366,6 +407,11 @@ four places and then drifted apart. Reach for them rather than reimplementing:
   unfetchable. The structured-data builders read `lib/business.ts` rather than retyping the
   name, address and phone, because local search matches those against the Google Business
   Profile character for character.
+- **`components/useDialog.ts`** — the one entry here outside `lib/`. Focus trap, Escape-to-close,
+  scrollbar-compensated body lock, and restore-focus-on-close, shared by `DishModal` and the
+  dish-selection step's selection tray. Call it only from a component that is itself
+  conditionally mounted — the effect runs for the dialog's whole lifetime, so an always-mounted
+  caller locks page scroll permanently.
 
 ### Supabase clients, and `proxy.ts`
 
@@ -533,7 +579,7 @@ calculate against.
 
 - **Google Maps Places autocomplete** on meal location field — use plain text input for now
 - **Logo** — use text placeholder "M G Prakash Catering" in PDF header and site nav; real logo to be imported from Figma later
-- **Email provider migration** — currently using Gmail SMTP via Nodemailer, which is fine for low order volumes. Once a custom domain is purchased, migrate to Resend (or similar) for better deliverability, higher send limits, and a professional "from" address (e.g. `orders@mgprakashcatering.com`)
+- **Email provider migration** — currently using Gmail SMTP via Nodemailer, which is fine for low order volumes. Once a custom domain is purchased, migrate to Resend (or similar) for better deliverability, higher send limits, and a professional "from" address (e.g. `orders@mgprakashcatering.com`). Nodemailer itself carries a `high`-severity advisory in the installed range (`<=9.0.0`, an SSRF/file-read bypass via the message-level `raw` option — fixed at `9.0.5`). `lib/email/emails.ts` never sets `raw`, so the vector isn't reachable as the app is written today; `npm audit fix --force` pulls a breaking major/minor bump, so weigh that against just migrating providers instead of patching in place
 - **Save draft order requests** — allow users to save their in-progress quote request and return to it later (e.g. via a magic link or account-linked draft)
 - **Real photography** — `npm run fetch:images` covers what Commons has. The dishes still showing
   a placeholder tile are the shortlist worth photographing properly; the tile is a deliberate
