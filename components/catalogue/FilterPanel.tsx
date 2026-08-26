@@ -15,7 +15,10 @@ interface Props {
   occasions: readonly Occasion[]
 }
 
-const DIET_OPTIONS = [
+// Exported so the active-filter pills in CatalogueClient show the same label
+// as the chip that set them ("Non-veg", not the raw "non-vegetarian" value)
+// without a second copy of this list drifting from this one.
+export const DIET_OPTIONS = [
   { value: 'vegetarian', label: 'Vegetarian' },
   { value: 'non-vegetarian', label: 'Non-veg' },
   { value: 'vegan', label: 'Vegan' },
@@ -121,7 +124,16 @@ export function FilterPanel({
           onClick={() => setShowAll(v => !v)}
           className="text-[13px] font-medium text-[var(--ink-2)] hover:text-[var(--ink)] transition-colors inline-flex items-center gap-1.5"
         >
-          {showAll ? 'Fewer filters' : 'Occasion'}
+          {/* "Occasion" read as a filter chip in its own right rather than the
+              toggle that reveals one — a customer scanning the row for
+              something to tap read it as a fourth facet next to Course,
+              Cuisine and Diet, not as "there's more here". */}
+          {showAll ? 'Fewer filters' : 'More filters'}
+          {!showAll && filters.occasion.length > 0 && (
+            <span className="text-[10px] font-bold tabular-nums rounded-full w-[17px] h-[17px] grid place-items-center bg-[var(--accent)] text-white">
+              {filters.occasion.length}
+            </span>
+          )}
           <svg
             width="11" height="7" viewBox="0 0 11 7" fill="none"
             className="transition-transform duration-200"
