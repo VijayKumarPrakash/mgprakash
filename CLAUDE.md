@@ -65,6 +65,7 @@ components/
 
 lib/           Server-safe logic; see "Shared modules" below for what each file owns
 scripts/       validate-dishes.ts, seed.ts, fetch-images.ts, check-email.ts
+types/index.ts Canonical types — Dish, Order, Meal, MealDish, SelectedDish, OrderDraft, EventType
 food_db.json5  The 229-dish source of truth — JSON5, never rename to .json
 proxy.ts       Session-cookie refresh on every request (Next 16's middleware.ts rename)
 ```
