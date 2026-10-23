@@ -6,11 +6,19 @@ on:
     - cron: '0 0 * * 1,4'
   workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
 
+# Lets this workflow commit the timestamp file back to the repo so GitHub
+# keeps counting the repo as active and never auto-disables this schedule.
+permissions:
+  contents: write
+
 jobs:
   ping-db:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
       - name: Ping Supabase REST API and log response
         run: |
           echo "Sending keepalive write to Supabase..."
@@ -33,3 +41,12 @@ jobs:
             echo "⚠️ Warning: Received unexpected status code $STATUS_CODE. Check your credentials or RLS policy."
             exit 1
           fi
+
+      - name: Commit keepalive timestamp to keep the repo active
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/LAST_KEEPALIVE
+          git add .github/LAST_KEEPALIVE
+          git commit -m "chore: keepalive timestamp"
+          git push
